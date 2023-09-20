@@ -16,19 +16,19 @@ public class Group {
     private User host;
     private String description;
     private Date timeCreate;
-    @ManyToOne
-    @JoinColumn(name="categoryId")
-    private Category category;
+//    @ManyToOne
+//    @JoinColumn(name="categoryId")
+//    private Category category;
+//
+//    @OneToMany(mappedBy = "group")
+//    private List<Post> posts;
+//    @OneToMany(mappedBy = "group")
+//    private List<Tag> tags;
 
-    @OneToMany(mappedBy = "group")
-    private List<Post> posts;
-    @OneToMany(mappedBy = "group")
-    private List<Tag> tags;
-
-    @OneToMany(mappedBy = "group")
-    private  List<JoinManagement> joins;
-
-    @OneToMany(mappedBy = "group")
-    private  List<Document> documents;
+//    @OneToMany(mappedBy = "group")
+//    private  List<JoinManagement> joins;
+//
+//    @OneToMany(mappedBy = "group")
+//    private  List<Document> documents;
 
 }
