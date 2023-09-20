@@ -36,7 +36,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
           if(userRepo.findByEmail(username).isEmpty()) {
         	  User user = new User();
         	  user.setEmail(username);
-        	  user.setName(userDetails.getAttribute("email") !=null?userDetails.getAttribute("name"):userDetails.getAttribute("login"));
+        	  user.setUserName(userDetails.getAttribute("email") !=null?userDetails.getAttribute("name"):userDetails.getAttribute("login"));
         	  user.setPassword("Dummy");
         	  userService.addUser(user);
           }

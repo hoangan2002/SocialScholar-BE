@@ -24,7 +24,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        Optional<User> userDetail = repository.findByName(username);
+        Optional<User> userDetail = repository.findByUserName(username);
 
         // Converting userDetail to UserDetails
         return userDetail.map(UserInfoDetails::new)
@@ -33,11 +33,11 @@ public class UserService implements UserDetailsService {
 
     public User addUser(User request) {
         var user = User.builder()
-                .name(request.getName())
+                .userName(request.getUserName())
                 .phone(request.getPhone())
                 .email(request.getEmail())
                 .password(encoder.encode(request.getPassword()))
-                .roles(String.valueOf(Role.ROLE_USER))
+                .role(String.valueOf(Role.ROLE_USER))
                 .build();
         System.out.println(user);
         repository.save(user);
@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
 
     public Boolean isExits(User user)
     {
-        return  repository.findByName(user.getName()).isPresent() || repository.findByEmail(user.getEmail()).isPresent();
+        return  repository.findByUserName(user.getUserName()).isPresent() || repository.findByEmail(user.getEmail()).isPresent();
     }
 
 

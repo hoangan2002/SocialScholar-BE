@@ -29,7 +29,7 @@ public class DashboardController {
 				User user = (User) securityContext.getAuthentication().getPrincipal();
 				Optional<com.social.app.model.User> userOptional = userRepo.findByEmail(user.getUsername());
 				com.social.app.model.User users = userOptional.orElse(null);
-			model.addAttribute("userDetails", users.getName());
+			model.addAttribute("userDetails", users.getUserName());
 		}
         return "dashboard";
     }

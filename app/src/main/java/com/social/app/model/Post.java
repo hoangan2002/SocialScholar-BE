@@ -23,14 +23,14 @@ public class Post {
     @JoinColumn(name="groupId")
     private Group group;
 
-    @OneToMany(mappedBy = "post")
-    private List<Comment> comments;
-
-    @OneToMany(mappedBy = "post")
-    private List<PostReport> reports;
-
-    @OneToMany(mappedBy = "post")
-    private List<PostLike> likes;
+//    @OneToMany(mappedBy = "post")
+//    private List<Comment> comments;
+//
+//    @OneToMany(mappedBy = "post")
+//    private List<PostReport> reports;
+//
+//    @OneToMany(mappedBy = "post")
+//    private List<PostLike> likes;
 
 
 
