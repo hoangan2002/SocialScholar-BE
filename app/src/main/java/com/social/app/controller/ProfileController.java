@@ -14,5 +14,10 @@ public class ProfileController {
     @Autowired
     private UserService theUserService;
 
+    @GetMapping("/{userId}")
+    public User getUserProfile(@PathVariable int userId) {
+        return theUserService.findById(userId);
+    }
+
 
 }
