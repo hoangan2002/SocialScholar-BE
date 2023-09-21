@@ -59,6 +59,11 @@ public class UserService implements UserDetailsService {
         else throw new RuntimeException("Did not find employee id - " + theId);
         return theUser;
     }
+
+    public Boolean existUserName(String theName){
+        Optional<User> result = repository.findByUserName(theName);
+        return result.isPresent();
+    }
     @Transactional
     public User save(User theUser){
         return repository.save(theUser);
