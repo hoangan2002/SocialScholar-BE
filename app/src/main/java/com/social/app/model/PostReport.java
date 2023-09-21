@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "Post_Report")
 public class PostReport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -13,10 +15,10 @@ public class PostReport {
     private Date time;
 
     @ManyToOne
-    @JoinColumn(name="userId")
+    @JoinColumn(name="user_Id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name="postId")
+    @JoinColumn(name="post_Id")
     private Post post;
 }

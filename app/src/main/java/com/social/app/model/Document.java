@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "Document")
 public class Document {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,11 +20,11 @@ public class Document {
 
     @ManyToOne
     @JoinColumn(name="groupId")
-    private Group group;
+    private Groups group;
 
     @ManyToOne
-    @JoinColumn(name="userId")
-    private User author;
+    @JoinColumn(name="user_Id")
+    private User user;
 
     @OneToMany(mappedBy = "document")
     private List<Bill> bills;

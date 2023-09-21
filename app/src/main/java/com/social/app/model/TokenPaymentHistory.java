@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "Token_Payment_History")
 public class TokenPaymentHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
