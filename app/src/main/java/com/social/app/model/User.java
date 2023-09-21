@@ -27,28 +27,40 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
+
     @OneToMany(mappedBy = "user")
     List<Document> documents;
+
     @OneToMany(mappedBy = "user")
     List<Bill> bills;
+
     @OneToMany(mappedBy = "user")
     List<Rating> ratings;
+
     @OneToMany(mappedBy = "user")
     List<CommentLike> commentLikes;
+
     @OneToMany(mappedBy = "user")
     List<PostLike> postLikes;
+
     @OneToMany(mappedBy = "user")
     List<CommentReport> commentReports;
+
     @OneToMany(mappedBy = "user")
     List<PostReport> postReports;
+
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
+
     @OneToMany(mappedBy = "user")
     List<Post> posts;
-    @OneToMany(mappedBy = "user")
-    List<Group> myGroups;
+
+    @OneToMany(mappedBy = "hosts")
+    List<Groups> groups;
+
     @OneToMany(mappedBy = "user")
     List<TokenPaymentHistory> tokenPaymentHistories;
+//
     @OneToMany(mappedBy = "user")
     List<LoginHistory> loginHistories;
 }

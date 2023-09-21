@@ -1,0 +1,19 @@
+<changelist name="Uncommitted_changes_before_Checkout_at_21_09_2023,_07_491" date="1695257394569" recycled="true" deleted="true">
+  <option name="PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_09_2023,_07_491/shelved.patch" />
+  <option name="DESCRIPTION" value="Uncommitted changes before Checkout at 21/09/2023, 07:49" />
+  <binary>
+    <option name="BEFORE_PATH" value="app/target/classes/com/social/app/model/User.class" />
+    <option name="AFTER_PATH" value="app/target/classes/com/social/app/model/User.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_09_2023,_07_491/User.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="app/target/classes/com/social/app/model/User$UserBuilder.class" />
+    <option name="AFTER_PATH" value="app/target/classes/com/social/app/model/User$UserBuilder.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_09_2023,_07_491/User$UserBuilder.class" />
+  </binary>
+  <binary>
+    <option name="BEFORE_PATH" value="app/target/classes/com/social/app/model/Post.class" />
+    <option name="AFTER_PATH" value="app/target/classes/com/social/app/model/Post.class" />
+    <option name="SHELVED_PATH" value="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_09_2023,_07_491/Post.class" />
+  </binary>
+</changelist>

@@ -1,0 +1,253 @@
+CREATE TABLE `Bill` (
+  `billId` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `document_Id` bigint DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  PRIMARY KEY (`billId`),
+  KEY `FK5lo6s1p2r2mycypbkj7s2wfqo` (`document_Id`),
+  KEY `FKk9lcuilrxttxuxik8w4hamrpm` (`user_Id`),
+  CONSTRAINT `FK5lo6s1p2r2mycypbkj7s2wfqo` FOREIGN KEY (`document_Id`) REFERENCES `Document` (`documentId`),
+  CONSTRAINT `FKk9lcuilrxttxuxik8w4hamrpm` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Bill_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Category` (
+  `categoryId` bigint NOT NULL,
+  `categoryName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`categoryId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Category_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment` (
+  `commentId` bigint NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `post_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`commentId`),
+  KEY `FKpv1qq37rxkdbmvphkba2q6h1g` (`user_Id`),
+  KEY `FKhnrpw8kk4w6cmq5vnpho3i028` (`post_Id`),
+  CONSTRAINT `FKhnrpw8kk4w6cmq5vnpho3i028` FOREIGN KEY (`post_Id`) REFERENCES `Post` (`postId`),
+  CONSTRAINT `FKpv1qq37rxkdbmvphkba2q6h1g` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment_Like` (
+  `likeId` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `comment_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`likeId`),
+  KEY `FKmkfi0omu8bdlbmttocht7j2t1` (`user_Id`),
+  KEY `FKcm0qsjvx4gjphpgjejjn8p4iv` (`comment_Id`),
+  CONSTRAINT `FKcm0qsjvx4gjphpgjejjn8p4iv` FOREIGN KEY (`comment_Id`) REFERENCES `Comment` (`commentId`),
+  CONSTRAINT `FKmkfi0omu8bdlbmttocht7j2t1` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment_Like_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment_Report` (
+  `reportId` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `commentId` bigint DEFAULT NULL,
+  PRIMARY KEY (`reportId`),
+  KEY `FKmlvt2cm4kblebuqc2pbr9xqfs` (`user_Id`),
+  KEY `FKg4p3wue7w5d41bgopdw6ne235` (`commentId`),
+  CONSTRAINT `FKg4p3wue7w5d41bgopdw6ne235` FOREIGN KEY (`commentId`) REFERENCES `Comment` (`commentId`),
+  CONSTRAINT `FKmlvt2cm4kblebuqc2pbr9xqfs` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment_Report_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Comment_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Document` (
+  `documentId` bigint NOT NULL,
+  `cost` int NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `documentName` varchar(255) DEFAULT NULL,
+  `isApproved` bit(1) NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `groupId` bigint DEFAULT NULL,
+  PRIMARY KEY (`documentId`),
+  KEY `FKo4jgablbj1xac475ph73d1m7t` (`user_Id`),
+  KEY `FKeyjjgfraks7w58t00nb5a4mo6` (`groupId`),
+  CONSTRAINT `FKeyjjgfraks7w58t00nb5a4mo6` FOREIGN KEY (`groupId`) REFERENCES `Groups_` (`Groups_ID`),
+  CONSTRAINT `FKo4jgablbj1xac475ph73d1m7t` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Document_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Groups_` (
+  `Groups_ID` bigint NOT NULL AUTO_INCREMENT,
+  `Descriptions` varchar(255) DEFAULT NULL,
+  `Groups_Name` varchar(255) DEFAULT NULL,
+  `Create_Time` datetime(6) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `category_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`Groups_ID`),
+  KEY `FKqasdj5kxjggynu3d9j7koe75u` (`user_Id`),
+  KEY `FK7mlfa5rde8410yvgy0tbmbsy` (`category_Id`),
+  CONSTRAINT `FK7mlfa5rde8410yvgy0tbmbsy` FOREIGN KEY (`category_Id`) REFERENCES `Category` (`categoryId`),
+  CONSTRAINT `FKqasdj5kxjggynu3d9j7koe75u` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Join_Management` (
+  `joinId` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `userId` int DEFAULT NULL,
+  `groupId` bigint DEFAULT NULL,
+  PRIMARY KEY (`joinId`),
+  KEY `FK6g0hchufqlc158jx5kfhrm9qj` (`userId`),
+  KEY `FK34571rxln9ut5f4jhtwwoslek` (`groupId`),
+  CONSTRAINT `FK34571rxln9ut5f4jhtwwoslek` FOREIGN KEY (`groupId`) REFERENCES `Groups_` (`Groups_ID`),
+  CONSTRAINT `FK6g0hchufqlc158jx5kfhrm9qj` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Join_Management_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Login_History` (
+  `loHistoryId` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `userId` int DEFAULT NULL,
+  PRIMARY KEY (`loHistoryId`),
+  KEY `FK4f3svwfgfjqiap1tt8syiihnn` (`userId`),
+  CONSTRAINT `FK4f3svwfgfjqiap1tt8syiihnn` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Login_History_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post` (
+  `postId` bigint NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
+  `imageURL` varchar(255) DEFAULT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `group_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`postId`),
+  KEY `FKcqhlh798saajar6x13e3pwdn5` (`user_Id`),
+  KEY `FKdnlorfr7f1phg3u3aaatvkwah` (`group_Id`),
+  CONSTRAINT `FKcqhlh798saajar6x13e3pwdn5` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`),
+  CONSTRAINT `FKdnlorfr7f1phg3u3aaatvkwah` FOREIGN KEY (`group_Id`) REFERENCES `Groups_` (`Groups_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post_Like` (
+  `likeId` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `userId` int DEFAULT NULL,
+  `postId` bigint DEFAULT NULL,
+  PRIMARY KEY (`likeId`),
+  KEY `FKmskoggty2h4bii5rmv94dl9ij` (`userId`),
+  KEY `FKat9s2y032e7trolsc4ngg6neh` (`postId`),
+  CONSTRAINT `FKat9s2y032e7trolsc4ngg6neh` FOREIGN KEY (`postId`) REFERENCES `Post` (`postId`),
+  CONSTRAINT `FKmskoggty2h4bii5rmv94dl9ij` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post_Like_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post_Report` (
+  `reportId` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `type` varchar(255) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `post_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`reportId`),
+  KEY `FK2mr5jgmodfrpmcdrygag1jj8n` (`user_Id`),
+  KEY `FK5s11iap5uaylfm0ahbi1q12b8` (`post_Id`),
+  CONSTRAINT `FK2mr5jgmodfrpmcdrygag1jj8n` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`),
+  CONSTRAINT `FK5s11iap5uaylfm0ahbi1q12b8` FOREIGN KEY (`post_Id`) REFERENCES `Post` (`postId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post_Report_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Post_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Rating` (
+  `ratingId` bigint NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `stars` tinyint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `user_Id` int DEFAULT NULL,
+  `document_Id` bigint DEFAULT NULL,
+  PRIMARY KEY (`ratingId`),
+  KEY `FKn21s9hovwesyktlfwn4bk39ep` (`user_Id`),
+  KEY `FKbd0im1wxoijiet6sjkpmxsofk` (`document_Id`),
+  CONSTRAINT `FKbd0im1wxoijiet6sjkpmxsofk` FOREIGN KEY (`document_Id`) REFERENCES `Document` (`documentId`),
+  CONSTRAINT `FKn21s9hovwesyktlfwn4bk39ep` FOREIGN KEY (`user_Id`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Rating_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Tags` (
+  `tagId` bigint NOT NULL,
+  `tagName` varchar(255) DEFAULT NULL,
+  `groupId` bigint DEFAULT NULL,
+  PRIMARY KEY (`tagId`),
+  KEY `FKt6qgou1r90bxdm1c2s6os9prf` (`groupId`),
+  CONSTRAINT `FKt6qgou1r90bxdm1c2s6os9prf` FOREIGN KEY (`groupId`) REFERENCES `Groups_` (`Groups_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Tags_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Token_Payment_History` (
+  `toHistoryId` bigint NOT NULL,
+  `amountToken` bigint NOT NULL,
+  `time` datetime(6) DEFAULT NULL,
+  `userId` int DEFAULT NULL,
+  PRIMARY KEY (`toHistoryId`),
+  KEY `FK3me925cu30idojf9v2sdrbtxj` (`userId`),
+  CONSTRAINT `FK3me925cu30idojf9v2sdrbtxj` FOREIGN KEY (`userId`) REFERENCES `User` (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `Token_Payment_History_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `User` (
+  `userId` int NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `token` bigint NOT NULL,
+  `userName` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`userId`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `User_SEQ` (
+  `next_val` bigint DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+SELECT * FROM SWP2.Bill;

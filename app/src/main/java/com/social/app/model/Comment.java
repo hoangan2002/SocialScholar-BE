@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+@Entity
+@Table(name = "Comment")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -13,17 +15,17 @@ public class Comment {
     private Date time;
 
     @ManyToOne
-    @JoinColumn(name="postId")
+    @JoinColumn(name="post_Id")
     private Post post;
 
     @ManyToOne
-    @JoinColumn(name="userId")
+    @JoinColumn(name="user_Id")
     private  User user;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "commentReport")
     private List<CommentReport> reports;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "commentLike")
     private List<CommentLike> likes;
 
 }
