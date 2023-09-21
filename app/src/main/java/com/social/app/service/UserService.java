@@ -59,7 +59,6 @@ public class UserService implements UserDetailsService {
         else throw new RuntimeException("Did not find employee id - " + theId);
         return theUser;
     }
-
     @Transactional
     public User save(User theUser){
         return repository.save(theUser);
