@@ -49,6 +49,14 @@ public class UserService implements UserDetailsService {
         return  repository.findByUserName(user.getUserName()).isPresent() || repository.findByEmail(user.getEmail()).isPresent();
     }
 
-
+    public User findById(int theId){
+        Optional<User> result = repository.findById(theId);
+        User theUser = null;
+        if (result.isPresent()){
+            theUser = result.get();
+        }
+        else throw new RuntimeException("Did not find employee id - " + theId);
+        return theUser;
+    }
 
 }

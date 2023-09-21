@@ -39,10 +39,10 @@ public class UserController {
        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Register success", "OK",service.addUser(userInfo)));
     }
 
-    @GetMapping("/user/userProfile")
+    @GetMapping("/users/{userId}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    public String userProfile() {
-        return "Welcome to User Profile";
+    public User getUserProfile(@PathVariable int userId) {
+        return service.findById(userId);
     }
 
     @GetMapping("/admin/adminProfile")
