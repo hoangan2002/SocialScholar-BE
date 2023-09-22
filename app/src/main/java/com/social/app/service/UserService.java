@@ -49,6 +49,10 @@ public class UserService implements UserDetailsService {
         return  repository.findByUserName(user.getUserName()).isPresent() || repository.findByEmail(user.getEmail()).isPresent();
     }
 
+    public Optional<User> findUser(String userName)
+    {
+        return repository.findByUserName(userName);
+    }
 
 
 }

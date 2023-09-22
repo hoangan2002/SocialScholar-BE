@@ -20,10 +20,10 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
 
 	@Autowired
 	UserRepository userRepo;
-	
+
 	@Autowired
 	UserService userService;
-		
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws IOException, ServletException {
@@ -40,7 +40,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
         	  user.setPassword("Dummy");
         	  userService.addUser(user);
           }
-		}  redirectUrl = "/dashboard";
+		}  redirectUrl = "/auth/sign-in";
 		new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}
 
