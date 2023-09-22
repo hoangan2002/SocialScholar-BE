@@ -16,19 +16,22 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
     private String userName;
     private String phone;
     private String password;
     private String email;
+    private String avatarURL;
+    private String level;
     private String role;
-    private long token;
+    private long coin;
+    private int activityPoint;
 
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "author")
     List<Document> documents;
 
     @OneToMany(mappedBy = "user")

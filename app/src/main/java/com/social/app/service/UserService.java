@@ -50,6 +50,7 @@ public class UserService implements UserDetailsService {
         return  repository.findByUserName(user.getUserName()).isPresent() || repository.findByEmail(user.getEmail()).isPresent();
     }
 
+
     public User findById(int theId){
         Optional<User> result = repository.findById(theId);
         User theUser = null;
@@ -60,11 +61,16 @@ public class UserService implements UserDetailsService {
         return theUser;
     }
 
+    public Optional<User> findUser(String userName)
+    {
+        return repository.findByUserName(userName);
+    }
+
     public Boolean existUserName(String theName){
         Optional<User> result = repository.findByUserName(theName);
         return result.isPresent();
     }
-    @Transactional
+
     public User save(User theUser){
         return repository.save(theUser);
     }
