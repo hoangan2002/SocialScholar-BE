@@ -24,7 +24,7 @@ public class Document {
 
     @ManyToOne
     @JoinColumn(name="user_Id")
-    private User user;
+    private User author;
 
     @OneToMany(mappedBy = "document")
     private List<Bill> bills;
