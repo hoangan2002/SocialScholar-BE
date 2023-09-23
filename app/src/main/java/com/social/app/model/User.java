@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int userId;
     private String userName;
     private String phone;
@@ -66,4 +66,6 @@ public class User {
 //
     @OneToMany(mappedBy = "user")
     List<LoginHistory> loginHistories;
+
+
 }

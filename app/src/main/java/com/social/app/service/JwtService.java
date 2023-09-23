@@ -1,4 +1,5 @@
 package com.social.app.service;
+import com.social.app.model.PasswordReset;
 import com.social.app.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -19,17 +20,19 @@ import java.util.function.Function;
 public class JwtService {
 
     public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
+
     public String generateToken(Optional<User> userOptional) {
         Map<String, Object> claims = new HashMap<>();
         User user = userOptional.get();
-        claims.put("userName",user.getUserName());
-        claims.put("phone",user.getPhone());
-        claims.put("email",user.getEmail());
-        claims.put("coin",user.getCoin());
-        claims.put("role",user.getRole());
+        claims.put("userName", user.getUserName());
+        claims.put("phone", user.getPhone());
+        claims.put("email", user.getEmail());
+        claims.put("coin", user.getCoin());
+        claims.put("role", user.getRole());
         return createToken(claims, user.getUserName());
     }
 
+    //email
     private String createToken(Map<String, Object> claims, String userName) {
         return Jwts.builder()
                 .setClaims(claims)
@@ -39,8 +42,27 @@ public class JwtService {
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 
+    public String generateTokenOTP(PasswordReset passwordReset) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("email", passwordReset.getEmail());
+
+
+        return createToken(claims, passwordReset.getEmail());
+    }
+
+    //email
+    private String createTokenOTP(Map<String, Object> claims, String email) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5))
+                .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
+    }
+
     private Key getSignKey() {
-        byte[] keyBytes= Decoders.BASE64.decode(SECRET);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -75,5 +97,15 @@ public class JwtService {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
+    public Map<String, Object> validateTokenOtp(String token) {
 
+        Map<String, Object> claims = Jwts.parser()
+                .setSigningKey(SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims;
+
+
+    }
 }
