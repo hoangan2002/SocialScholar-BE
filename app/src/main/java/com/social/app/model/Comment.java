@@ -2,6 +2,7 @@ package com.social.app.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -12,7 +13,7 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long commentId;
     private String content;
-    private Date time;
+    private Timestamp time;
 
     @ManyToOne
     @JoinColumn(name="post_Id")

@@ -2,6 +2,7 @@ package com.social.app.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class Post {
     private long postId;
 
     private String content;
-    private Date time;
+    private Timestamp time;
     private String imageURL;
     @ManyToOne
     @JoinColumn(name="user_Id")
