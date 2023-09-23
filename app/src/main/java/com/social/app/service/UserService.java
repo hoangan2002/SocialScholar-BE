@@ -70,8 +70,24 @@ public class UserService implements UserDetailsService {
         Optional<User> result = repository.findByUserName(theName);
         return result.isPresent();
     }
+    public  Optional<User>  findByEmail(String email ){
+        return   repository.findByEmail(email);
+    }
 
     public User save(User theUser){
         return repository.save(theUser);
+    }
+    public User updatePassword(String email, String password){
+        User user = repository.findByEmail(email).orElse(null);
+        if (user != null) {
+
+            user.setPassword(password);
+
+            repository.save(user);
+            return user;
+        } else {
+            return null;
+        }
+
     }
 }

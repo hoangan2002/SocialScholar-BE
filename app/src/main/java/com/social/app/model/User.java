@@ -66,4 +66,6 @@ public class User {
 //
     @OneToMany(mappedBy = "user")
     List<LoginHistory> loginHistories;
+
+
 }
