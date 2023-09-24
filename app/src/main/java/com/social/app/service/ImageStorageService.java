@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -113,5 +114,12 @@ public class ImageStorageService implements IStorageService{
     @Override
     public void deleteAllFiles() {
 
+    }
+
+    public boolean deleteFile(String path){
+        File file = new File(path);
+        if(file.exists())
+            return file.delete();
+        return false;
     }
 }

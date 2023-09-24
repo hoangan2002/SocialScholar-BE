@@ -70,5 +70,14 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<LoginHistory> loginHistories;
 
+    public void setActivityPoint(int activityPoint) {
+        this.activityPoint = activityPoint;
+        if (activityPoint<500)
+            this.setLevel(String.valueOf(MemberType.BEGINNER));
+        else if (activityPoint<2000)
+            this.setLevel(String.valueOf(MemberType.ACTIVE));
+        else
+            this.setLevel(String.valueOf(MemberType.EXPERT));
+    }
 
 }
