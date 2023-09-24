@@ -45,7 +45,7 @@ public class AuthenticationController {
        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Register success", "OK",service.addUser(userInfo)));
     }
     @GetMapping("/profile")
-    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     public String userProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
