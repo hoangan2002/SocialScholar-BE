@@ -1,3 +1,4 @@
+//
 //package com.social.app.config;
 //
 //import org.springframework.context.annotation.Bean;
@@ -11,3 +12,4 @@
 //        return (web) -> web.ignoring().requestMatchers("/**");
 //    }
 //}
+//

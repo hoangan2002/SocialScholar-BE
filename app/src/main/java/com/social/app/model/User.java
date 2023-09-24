@@ -1,5 +1,6 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -56,6 +57,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
 
+    @JsonManagedReference(value = "post_user")
     @OneToMany(mappedBy = "user")
     List<Post> posts;
 
