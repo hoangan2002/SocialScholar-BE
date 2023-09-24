@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -31,6 +32,13 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
+    public User loadUserById(int id) throws UsernameNotFoundException {
+        User user = repository.findById(id);
+        if(user!=null)
+        return user;
+        else throw new RuntimeException("Not valid user");
+    }
+
     public User addUser(User request) {
         var user = User.builder()
                 .userName(request.getUserName())
@@ -50,5 +58,6 @@ public class UserService implements UserDetailsService {
     }
 
 
+//    public Optional<User> findByEmail(String email) { return repository.findByEmail(email); }
 
 }

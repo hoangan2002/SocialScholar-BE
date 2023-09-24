@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "Login_History")
 public class LoginHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

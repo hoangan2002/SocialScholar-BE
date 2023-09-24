@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "Post_Like")
 public class PostLike {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -5,6 +5,8 @@ import org.springframework.data.web.JsonPath;
 
 import java.util.Date;
 
+@Entity
+@Table(name = "Comment_Report")
 public class CommentReport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -14,11 +16,11 @@ public class CommentReport {
     private Date time;
 
     @ManyToOne
-    @JoinColumn(name="userId")
+    @JoinColumn(name="user_Id")
     private User user;
 
     @ManyToOne
     @JoinColumn(name="commentId")
-    private Comment comment;
+    private Comment commentReport;
 
 }
