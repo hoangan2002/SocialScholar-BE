@@ -1,5 +1,6 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,7 @@ public class User {
     private String role;
     private long coin;
     private int activityPoint;
+    private boolean isLocked;
 
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
@@ -55,6 +57,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
 
+    @JsonManagedReference(value = "post_user")
     @OneToMany(mappedBy = "user")
     List<Post> posts;
 

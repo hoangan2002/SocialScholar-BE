@@ -90,4 +90,13 @@ public class UserService implements UserDetailsService {
         }
 
     }
+    public User loadUserById(int id) throws UsernameNotFoundException {
+        Optional<User> result = repository.findById(id);
+        User theUser = null;
+        if (result.isPresent()) {
+            theUser = result.get();
+        } else throw new RuntimeException("Did not find employee id - " + id);
+        return theUser;
+    }
+
 }
