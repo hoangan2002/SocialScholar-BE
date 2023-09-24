@@ -1,2 +1,3 @@
 .idea
 app/src/main/resources/application.properties
+app/target/classes/application.properties
