@@ -28,6 +28,7 @@ public class User {
     private String role;
     private long coin;
     private int activityPoint;
+    private boolean isLocked;
 
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
@@ -59,7 +60,6 @@ public class User {
     @JsonManagedReference(value = "post_user")
     @OneToMany(mappedBy = "user")
     List<Post> posts;
-
 
     @OneToMany(mappedBy = "hosts")
     List<Groups> groups;

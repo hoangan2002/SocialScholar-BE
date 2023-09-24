@@ -43,7 +43,7 @@ public class Post {
 
     @OneToMany(mappedBy = "post")
     private List<PostReport> reports;
-//
+
     @OneToMany(mappedBy = "post")
     private List<PostLike> likes;
 

@@ -1,5 +1,4 @@
 package com.social.app.model;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,14 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import jakarta.persistence.*;
+
+
 import java.util.Date;
 import java.util.List;
 
 @Entity
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+
 @Table(name = "Groups_")
 public class Groups {
     @Id
@@ -40,7 +44,8 @@ public class Groups {
     @ManyToOne
     @JoinColumn(name="category_Id")
     private Category category;
-//
+
+
     @JsonManagedReference(value = "post_groups")
     @OneToMany(mappedBy = "group")
     private List<Post> posts;
