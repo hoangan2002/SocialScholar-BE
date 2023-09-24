@@ -27,6 +27,7 @@ public class User {
     private String role;
     private long coin;
     private int activityPoint;
+    private boolean isLocked;
 
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
