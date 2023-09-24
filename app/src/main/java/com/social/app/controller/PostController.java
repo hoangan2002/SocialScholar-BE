@@ -1,7 +1,7 @@
 package com.social.app.controller;
 
+import com.social.app.entity.ResponseObject;
 import com.social.app.model.Post;
-import com.social.app.model.ResponseObject;
 import com.social.app.model.User;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.GroupServices;
@@ -46,8 +46,10 @@ public class PostController {
             if (userService.loadUserById(userid) != null) {
                 body.setUser(userService.loadUserById(userid));
                 if (groupServices.loadGroupById(groupid) != null) {
+
                     body.setGroup(groupServices.loadGroupById(groupid));
-                    if (file[0] != null && !file[0].isEmpty()) {
+
+                    if (file != null && !file[0].isEmpty()) {
                         String imagePath="";
                         for(int i=0; i<file.length;i++) {
                             String fileName = imageStorageService.storeFile(file[i]);

@@ -2,6 +2,7 @@ package com.social.app.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class Document {
     private String url;
     private int cost;
     private boolean isApproved;
-    private Date time;
+    private Timestamp time;
 
     @ManyToOne
     @JoinColumn(name="groupId")
@@ -24,7 +25,7 @@ public class Document {
 
     @ManyToOne
     @JoinColumn(name="user_Id")
-    private User user;
+    private User author;
 
     @OneToMany(mappedBy = "document")
     private List<Bill> bills;

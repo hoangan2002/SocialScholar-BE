@@ -2,16 +2,20 @@ package com.social.app.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Setter
 @Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "Post")
 public class Post {
 
@@ -19,11 +23,8 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long postId;
 
-    @Column(columnDefinition="NTEXT")
     private String content;
-    private Date time;
-
-    @Column(columnDefinition="NTEXT")
+    private Timestamp time;
     private String imageURL;
 
     //quy tắc đặt tên cho JSReference "classBack_classRef"
@@ -31,7 +32,6 @@ public class Post {
     @ManyToOne
     @JoinColumn(name="user_Id")
     private User user;
-
 
     @JsonBackReference(value = "post_groups")
     @ManyToOne

@@ -13,11 +13,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-public class UserController {
+public class AuthenticationController {
 
     @Autowired
     private UserService service;
@@ -35,32 +40,38 @@ public class UserController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<ResponseObject> register(@RequestBody User userInfo) {
+        System.out.println(userInfo);
        if(service.isExits(userInfo)) return  ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User had been exits", "ERROR",null));
        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Register success", "OK",service.addUser(userInfo)));
     }
-
-    @GetMapping("/user/userProfile")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @GetMapping("/profile")
+    @PreAuthorize("hasAuthority('ROLE_USER') or hasAuthority('ROLE_ADMIN')")
     public String userProfile() {
-        return "Welcome to User Profile";
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            if (((Collection<?>) authorities).stream().anyMatch(authority -> authority.toString().equals("ROLE_USER"))) {
+                return "Welcome to User Profile";
+            } else if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
+                return "Welcome to Admin Profile";
+            }
+        }
+        return "Access Denied";
     }
 
-    @GetMapping("/admin/adminProfile")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public String adminProfile() {
-        return "Welcome to Admin Profile";
-    }
 
-    @PostMapping("/generateToken")
+    @PostMapping("/sign-in")
     public ResponseEntity<ResponseObject> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
+            Optional<User> user = service.findUser(authRequest.getUserName());
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","OK", AuthenticationResponse.builder()
-                    .token(jwtService.generateToken(authRequest.getUserName()))
+                    .token(jwtService.generateToken(user))
                     .build()));
         } else {
            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseObject("Login error", "Error",""));
         }
     }
+
 
 }

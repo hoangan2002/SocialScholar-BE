@@ -2,6 +2,7 @@ package com.social.app.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -11,7 +12,7 @@ public class TokenPaymentHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long toHistoryId;
     private long amountToken;
-    private Date time;
+    private Timestamp time;
 
     @ManyToOne
     @JoinColumn(name="userId")

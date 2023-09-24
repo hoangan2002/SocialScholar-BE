@@ -1,6 +1,4 @@
 package com.social.app.model;
-
-import com.social.app.controller.DashboardController;
 import jakarta.persistence.*;
 
 import java.util.Date;

@@ -1,7 +1,7 @@
 package com.social.app.controller;
 
 
-import com.social.app.model.ResponseObject;
+import com.social.app.entity.ResponseObject;
 import com.social.app.service.IStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

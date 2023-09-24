@@ -32,13 +32,6 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found " + username));
     }
 
-    public User loadUserById(int id) throws UsernameNotFoundException {
-        User user = repository.findById(id);
-        if(user!=null)
-        return user;
-        else throw new RuntimeException("Not valid user");
-    }
-
     public User addUser(User request) {
         var user = User.builder()
                 .userName(request.getUserName())
@@ -58,6 +51,54 @@ public class UserService implements UserDetailsService {
     }
 
 
-//    public Optional<User> findByEmail(String email) { return repository.findByEmail(email); }
+    public User findById(int theId){
+        Optional<User> result = repository.findById(theId);
+        User theUser = null;
+        if (result.isPresent()){
+            theUser = result.get();
+        }
+        else throw new RuntimeException("Did not find employee id - " + theId);
+        return theUser;
+    }
+
+    public Optional<User> findUser(String userName)
+    {
+        return repository.findByUserName(userName);
+    }
+
+    public Boolean existUserName(String theName){
+        Optional<User> result = repository.findByUserName(theName);
+        return result.isPresent();
+    }
+    public  Optional<User>  findByEmail(String email ){
+        return   repository.findByEmail(email);
+    }
+
+    public User save(User theUser){
+        return repository.save(theUser);
+    }
+    public User updatePassword(String email, String password){
+        User user = repository.findByEmail(email).orElse(null);
+        if (user != null) {
+
+            user.setPassword(password);
+
+            repository.save(user);
+            return user;
+        } else {
+            return null;
+        }
+
+    }
+    public User loadUserById(int id) throws UsernameNotFoundException {
+        Optional<User> result = repository.findById(id);
+        User theUser = null;
+        if (result.isPresent()){
+            theUser = result.get();
+        }
+        else throw new RuntimeException("Did not find employee id - " + id);
+        return theUser;
+    }
+
 
 }

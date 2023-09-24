@@ -2,6 +2,7 @@ package com.social.app.model;
 
 import jakarta.persistence.*;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -10,7 +11,7 @@ public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long billId;
-    private Date time;
+    private Timestamp time;
     @ManyToOne
     @JoinColumn(name="document_Id")
     private Document document;
