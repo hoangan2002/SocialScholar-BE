@@ -99,7 +99,7 @@ public class ProfileController {
                     String filename = imageStorageService.storeFile(file);
                     String imagePath = FOLDER_PATH + filename;
                     theUser.setAvatarURL(imagePath);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",null));
                 }
             }
         }
