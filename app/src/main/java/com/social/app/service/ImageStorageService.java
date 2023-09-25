@@ -1,6 +1,7 @@
 package com.social.app.service;
 
 import com.social.app.repository.PostRepository;
+import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 @Service
 public class ImageStorageService implements IStorageService{
+    @Getter
     private final Path storageFolder = Paths.get("uploads");
     //constructor
 

@@ -65,24 +65,24 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
 
-    @PostMapping("/add-avatar")
-    public ResponseEntity<ResponseObject> addAvatar(@RequestParam("id") int id, @RequestParam(value = "file") MultipartFile file){
-        try{
-            User theUser = service.findById(id);
-            if(theUser!=null){
-                if(file!=null&&!file.isEmpty()){
-                    String filename = imageStorageService.storeFile(file);
-                    String imagePath = FOLDER_PATH + filename;
-                    theUser.setAvatarURL(imagePath);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
-                }
-            }
-        }catch (RuntimeException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject(e.getMessage(), "failed", ""));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("Fail", "OK",null));
-    }
+//    @PostMapping("/add-avatar")
+//    public ResponseEntity<ResponseObject> addAvatar(@RequestParam("id") int id, @RequestParam(value = "file") MultipartFile file){
+//        try{
+//            User theUser = service.findById(id);
+//            if(theUser!=null){
+//                if(file!=null&&!file.isEmpty()){
+//                    String filename = imageStorageService.storeFile(file);
+//                    String imagePath = FOLDER_PATH + filename;
+//                    theUser.setAvatarURL(imagePath);
+//                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
+//                }
+//            }
+//        }catch (RuntimeException e){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//                    new ResponseObject(e.getMessage(), "failed", ""));
+//        }
+//        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("Fail", "OK",null));
+//    }
 
     @PutMapping("/edit-avatar")
     public ResponseEntity<ResponseObject> editAvatar(@RequestParam("id") int id, @RequestParam(value = "file") MultipartFile file){
@@ -90,9 +90,12 @@ public class ProfileController {
             User theUser = service.findById(id);
             if(theUser!=null){
                 if(file!=null&&!file.isEmpty()){
-                    // xoa avatar cu trong uploads
-                    imageStorageService.deleteFile(theUser.getAvatarURL());
-                    // add lai avatar
+                    if (theUser.getAvatarURL()!=null || !theUser.getAvatarURL().isEmpty())
+                    {
+                        // xoa avatar cu neu co trong uploads
+                        imageStorageService.deleteFile(theUser.getAvatarURL());
+                    }
+                    // add avatar
                     String filename = imageStorageService.storeFile(file);
                     String imagePath = FOLDER_PATH + filename;
                     theUser.setAvatarURL(imagePath);
