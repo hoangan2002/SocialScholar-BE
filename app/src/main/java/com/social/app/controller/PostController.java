@@ -3,6 +3,7 @@ package com.social.app.controller;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Post;
 import com.social.app.model.User;
+import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.GroupServices;
 import com.social.app.service.ImageStorageService;
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,12 +35,14 @@ public class PostController {
 
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     ImageStorageService imageStorageService;
 
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
     public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
                                                      @RequestParam(value = "file", required = false) MultipartFile[] file,
@@ -71,6 +77,7 @@ public class PostController {
 
     }
     //______________________________________Edit_post____________________________________________________//
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PutMapping("/editpost")
     public ResponseEntity<ResponseObject>  updateUser(@RequestPart Post postData,
                                                       @RequestParam("userid") int userid,
@@ -140,12 +147,14 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPost")
     public ArrayList<Post> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return result;
     }
     //______________________________________Delete_post____________________________________________________//
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
         if(postServices.loadPostById(postId)!=null){
@@ -158,4 +167,18 @@ public class PostController {
                 new ResponseObject("Failed","Can't find post to delete","")
         );
     }
+    //______________________________________Get_Hot_Post____________________________________________________//
+    @GetMapping("/hotpost")
+    public ArrayList<Post> getallhotpost() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            if (((Collection<?>) authorities).stream().anyMatch(authority -> authority.toString().equals("ROLE_USER"))) {
+                return postServices.printHotPost(true);
+            }
+        }
+        return postServices.printHotPost(false);
+    }
+
+
 }
