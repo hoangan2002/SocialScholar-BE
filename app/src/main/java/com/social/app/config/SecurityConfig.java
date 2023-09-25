@@ -40,9 +40,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**").permitAll()
+                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/postservices/hotpost/**").permitAll()
                 .and()
-                .authorizeHttpRequests().requestMatchers("/auth/profile/**").authenticated()
+                .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**").authenticated()
                 .and()
 //                .formLogin().loginPage("/auth/login").successHandler(successHandler)
 ////                .and().csrf().disable()

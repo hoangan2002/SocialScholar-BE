@@ -45,6 +45,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<CommentLike> commentLikes;
 
+    @JsonManagedReference(value = "like_user")
     @OneToMany(mappedBy = "user")
     List<PostLike> postLikes;
 
@@ -54,6 +55,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<PostReport> postReports;
 
+    @JsonManagedReference(value = "comment_user")
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
 
