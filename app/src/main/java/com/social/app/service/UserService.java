@@ -105,7 +105,7 @@ public class UserService implements UserDetailsService {
         return result.isPresent();
     }
 
-    // Cong diem cho user, goi ham moi khi thuc hien hanh dong
+    // Cong diem cho user, goi ham moi khi thuc hien hanh dong, NHAP vao User
     public User addPoints(User user, Enum<MemberActivity> activity){
         int activityPoint = user.getActivityPoint();
         String originLevel = user.getLevel();
@@ -144,5 +144,42 @@ public class UserService implements UserDetailsService {
                     userDb.setLevel(updateLevel);
                     return repository.save(userDb);
                 } ).orElseThrow(()-> new RuntimeException("Fail!"));
+    }
+
+    // Cong diem cho user, goi ham moi khi thuc hien hanh dong, NHAP vao ID cua user
+    public User addPoints(int userId, Enum<MemberActivity> activity){
+        User user = findById(userId);
+        if (user==null) throw new RuntimeException("Did not find employee id - " + userId);
+        int activityPoint = user.getActivityPoint();
+        String originLevel = user.getLevel();
+        // set point
+        if(activity.equals(MemberActivity.COMMENT_VOTED))
+            user.setActivityPoint(activityPoint+2);
+        else if (activity.equals(MemberActivity.DONATE)||activity.equals(MemberActivity.VOTE)||activity.equals(MemberActivity.BUY_DOCUMENT)||activity.equals(MemberActivity.POST_VOTED))
+            user.setActivityPoint(activityPoint+5);
+        else if (activity.equals(MemberActivity.REPORT))
+            user.setActivityPoint(activityPoint+10);
+        else if (activity.equals(MemberActivity.POST))
+            user.setActivityPoint(activityPoint+20);
+        else throw new RuntimeException("Invalid activity");
+
+        // activity point sau khi set
+        activityPoint = user.getActivityPoint();
+
+        // setLevel
+        if (activityPoint<500)
+            user.setLevel(String.valueOf(MemberType.BEGINNER));
+        else if (activityPoint<2000)
+            user.setLevel(String.valueOf(MemberType.ACTIVE));
+        else
+            user.setLevel(String.valueOf(MemberType.EXPERT));
+
+        // so sanh level trc sau va hien thbao
+        String updateLevel = user.getLevel();
+        if (!originLevel.equals(updateLevel)){
+            System.out.println("CONGRATULATION, YOUR LEVEL IS UPGRADED TO: "+ updateLevel);
+        }
+        // save
+        return repository.save(user);
     }
 }
