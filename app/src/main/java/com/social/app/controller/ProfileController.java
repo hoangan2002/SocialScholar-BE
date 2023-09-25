@@ -60,8 +60,7 @@ public class ProfileController {
         // chưa validate password
         User theUser = service.findById(id);
         if(theUser!=null) {
-            theUser.setPassword(pass);
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.updatePassword(theUser.getEmail(), theUser.getPassword())));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }

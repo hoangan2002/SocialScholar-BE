@@ -82,7 +82,7 @@ public class UserService implements UserDetailsService {
         User user = repository.findByEmail(email).orElse(null);
         if (user != null) {
 
-            user.setPassword(password);
+            user.setPassword(encoder.encode(password));
 
             repository.save(user);
             return user;
