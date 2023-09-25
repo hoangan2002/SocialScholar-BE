@@ -1,6 +1,7 @@
 package com.social.app.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +39,7 @@ public class Post {
     @JoinColumn(name="group_Id")
     private Groups group;
 
+    @JsonManagedReference(value = "post_comment")
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 

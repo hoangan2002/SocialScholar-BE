@@ -11,6 +11,7 @@ public class PostLike {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long likeId;
 
+    private byte status;
     private Date time;
 
     @ManyToOne

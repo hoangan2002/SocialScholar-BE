@@ -54,6 +54,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<PostReport> postReports;
 
+    @JsonManagedReference(value = "comment_user")
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
 
