@@ -62,8 +62,8 @@ public class CommentController {
         try {
             // Get comment from commentId
             Comment comment = commentService.getCommentByID(commentID);
-            // Check if user is not in group, user can not delete
-            if(!userService.isGroupMember(userid, comment.getPost().getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            // Check if user don't create comment, user can not delete
+            if(!userService.isCommemtCreator(userid, commentID))  throw new RuntimeException("Must be group member");
             // Call delete method
             this.commentService.deleteComment(commentID);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Success", "Delete comment successfully", ""));
@@ -87,8 +87,8 @@ public class CommentController {
         try {
             // Get comment from commentId
             Comment comment = commentService.getCommentByID(commentID);
-            // Check if user is not in group, user can not edit
-            if(!userService.isGroupMember(userid, comment.getPost().getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            // Check if user don't create comment, user can not edit
+            if(!userService.isCommemtCreator(userid, commentID)) throw new RuntimeException("Must be group member");
             // Call edit method
             Comment editedComment = this.commentService.editComment(newComment, commentID);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Success", "Edit comment successfully", editedComment));
