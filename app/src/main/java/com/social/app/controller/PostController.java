@@ -171,32 +171,69 @@ public class PostController {
 
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
-        if(postServices.loadPostById(postId)!=null){
-            Post post = postServices.loadPostById(postId);
-            User user = userService.loadUserById(userId);
-            PostLike postLike = likeService.createPostLike(post, user, (byte)-1);
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post succesfully",postLike)
+                    new ResponseObject("OK","Like post successfully","")
             );
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("Failed","Can't find post","")
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
         );
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userId")int userId){
-        if(postServices.loadPostById(postId)!=null){
-            Post post = postServices.loadPostById(postId);
-            User user = userService.loadUserById(userId);
-            PostLike postLike = likeService.createPostLike(post, user, (byte)1);
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not like post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post succesfully",postLike)
+                    new ResponseObject("OK","Like post successfully","")
             );
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("Failed","Can't find post","")
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
         );
+    }
+
+    @GetMapping("/getLike/{postId}")
+    public int getPostLike(@PathVariable long postId){
+        return likeService.getTotalPostLike(postId);
     }
 
     //______________________________________Get_Hot_Post____________________________________________________//

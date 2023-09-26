@@ -40,6 +40,7 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Comment> comments;
 
+    @JsonManagedReference(value = "post_report")
     @OneToMany(mappedBy = "post")
     private List<PostReport> reports;
 

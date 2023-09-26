@@ -8,6 +8,7 @@ import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.PostRepository;
 import com.social.app.service.CommentService;
+import com.social.app.service.LikeService;
 import com.social.app.service.PostServices;
 import com.social.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class CommentController {
     private UserService userService;
     @Autowired
     private CommentService commentService;
+
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private PostServices postServices;
@@ -100,8 +104,93 @@ public class CommentController {
     }
 
 
+    @PostMapping("/dislike/{commentId}")
+    public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId, @RequestParam("userid")int userId){
+        // check if comment is not found, return
+        if (commentService.getCommentByID(commentId)== null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find comment","")
+            );
 
+        Comment comment = commentService.getCommentByID(commentId);
+        // Check if user is not in group, user can not dislike comment
+        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
 
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete commentlike
+        if(likeService.getCommentLike(commentId,userId)!=null){
+            // call delete function
+            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like comment successfully","")
+            );
+        }
 
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Dislike comment successfully",likeService.createCommentLike(comment, user, (byte)-1))
+        );
+    }
+
+    @PostMapping("/like/{commentId}")
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId, @RequestParam("userid")int userId){
+        // check if comment is not found, return
+        if (commentService.getCommentByID(commentId)== null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find comment","")
+            );
+
+        Comment comment = commentService.getCommentByID(commentId);
+        // Check if user is not in group, user can not like comment
+        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete commentlike
+        if(likeService.getCommentLike(commentId,userId)!=null){
+            // call delete function
+            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like comment successfully","")
+            );
+        }
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Like comment successfully",likeService.createCommentLike(comment, user, (byte)1))
+        );
+    }
+
+    @GetMapping("/getLike/{commentId}")
+    public int getCommentLike(@PathVariable long commentId){
+        return likeService.getTotalCommentLike(commentId);
+    }
+
+    @PostMapping("/{commentParentId}/reply-comments")
+    ResponseEntity<ResponseObject> replyComment(@RequestPart Comment commentReply,
+                                                 @RequestParam("userid") int userid,
+                                                 @PathVariable long commentParentId){
+        try {
+            // Get commentParent from commentParentId
+            Comment commentParent = commentService.getCommentByID(commentParentId);
+            // Check if user is not in group, user can not create comment
+            if(!userService.isGroupMember(userid, commentParent.getPost().getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            // set user for comment
+            commentReply.setUser(userService.loadUserById(userid));
+            // create comment
+            Comment newComment = this.commentService.createCommentReply(commentReply, commentParentId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("Success", "Create new comment successfully", newComment));
+        }
+        catch (RuntimeException runtimeException){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Failed", "There are problem..", ""));
+        }
+    }
 
 }
