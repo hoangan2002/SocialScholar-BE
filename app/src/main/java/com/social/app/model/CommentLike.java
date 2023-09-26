@@ -19,9 +19,6 @@ public class CommentLike {
 
     private Date time;
 
-
-    private byte status;
-
     @ManyToOne
     @JoinColumn(name="user_Id")
     private User user;
