@@ -2,13 +2,11 @@ package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Post;
+import com.social.app.model.PostLike;
 import com.social.app.model.User;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
-import com.social.app.service.GroupServices;
-import com.social.app.service.ImageStorageService;
-import com.social.app.service.PostServices;
-import com.social.app.service.UserService;
+import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +36,9 @@ public class PostController {
 
     @Autowired
     ImageStorageService imageStorageService;
+
+    @Autowired
+    LikeService likeService;
 
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
@@ -167,6 +168,37 @@ public class PostController {
                 new ResponseObject("Failed","Can't find post to delete","")
         );
     }
+
+    @PostMapping("/dislike/{postId}")
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+        if(postServices.loadPostById(postId)!=null){
+            Post post = postServices.loadPostById(postId);
+            User user = userService.loadUserById(userId);
+            PostLike postLike = likeService.createPostLike(post, user, (byte)-1);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like post succesfully",postLike)
+            );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find post","")
+        );
+    }
+
+    @PostMapping("/like/{postId}")
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userId")int userId){
+        if(postServices.loadPostById(postId)!=null){
+            Post post = postServices.loadPostById(postId);
+            User user = userService.loadUserById(userId);
+            PostLike postLike = likeService.createPostLike(post, user, (byte)1);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like post succesfully",postLike)
+            );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find post","")
+        );
+    }
+
     //______________________________________Get_Hot_Post____________________________________________________//
     @GetMapping("/hotpost")
     public ArrayList<Post> getallhotpost() {

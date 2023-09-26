@@ -30,6 +30,7 @@ public class User {
     private int activityPoint;
     private boolean isLocked;
 
+    @JsonManagedReference(value = "join_user")
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
 
