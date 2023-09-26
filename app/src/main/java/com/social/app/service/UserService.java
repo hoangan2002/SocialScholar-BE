@@ -99,4 +99,13 @@ public class UserService implements UserDetailsService {
         return theUser;
     }
 
+
+    public void setRoleHost(User user) {
+        String role = user.getRole();
+        if(role.contains("ROLE_HOST")){
+            return;
+        }
+        user.setRole(role +  ",ROLE_HOST");
+        repository.save(user);
+    }
 }
