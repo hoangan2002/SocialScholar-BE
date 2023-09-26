@@ -1,10 +1,14 @@
 package com.social.app.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "Comment_Like")
 public class CommentLike {
     @Id

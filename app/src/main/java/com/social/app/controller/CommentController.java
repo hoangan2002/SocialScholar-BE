@@ -60,12 +60,14 @@ public class CommentController {
     }
 
     @GetMapping("/{postID}/all-comments")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     ArrayList<Comment> getAllComments(@PathVariable long postID){
         ArrayList<Comment> allComments = this.commentService.getAllComments(postID);
         return allComments;
     }
 
     @PutMapping("/edit/{commentID}")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> editComment(@PathVariable long commentID, @RequestBody Comment newComment){
         try {
             Comment editedComment = this.commentService.editComment(newComment, commentID);
@@ -76,6 +78,8 @@ public class CommentController {
                     new ResponseObject("Failed", "There are problem..", ""));
         }
     }
+
+
 
 
 }
