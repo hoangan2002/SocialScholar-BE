@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
+import com.social.app.model.Groups;
 import com.social.app.model.User;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.EditProfileService;
@@ -12,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/myProfile")

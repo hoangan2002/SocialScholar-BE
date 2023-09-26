@@ -1,8 +1,7 @@
 package com.social.app.service;
-import com.social.app.model.MemberActivity;
-import com.social.app.model.MemberType;
-import com.social.app.model.Role;
-import com.social.app.model.User;
+import com.social.app.model.*;
+import com.social.app.repository.GroupRepository;
+import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,15 +10,18 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
-
     @Autowired
     private UserRepository repository;
 
+    @Autowired
+    private JoinRepository joinRepository;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -182,4 +184,20 @@ public class UserService implements UserDetailsService {
         // save
         return repository.save(user);
     }
+
+    public boolean isGroupMember(int userId, long groupId){
+        // Get user by userId
+        User user = loadUserById(userId);
+        // Get list joinmanagement by user
+        ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
+        for (JoinManagement join:joins) {
+            // Check if user joined in group, return true, else return false
+            if (join.getGroup().getGroupId() == groupId) return true;
+        }
+        return  false;
+    }
+
+    /*public boolean isCommemtCreator(int userId, long commentId) {
+
+    }*/
 }
