@@ -141,5 +141,19 @@ public class PostServices {
         return valueList;
     }
 
+    public boolean isPostByUser(int userid,long postid){
+        if(postRepository.findByPostId(postid).getUser().getUserId()==userid) return true;
+        else return false;
+    }
+
+    public ArrayList<Post> retrivePostFromDBByGroup(long groupid){
+        ArrayList<Post> result = postRepository.findAll();
+        for(Post p: result){
+            if(p.getGroup().getGroupId() != groupid){
+                result.remove(p);
+            }
+        }
+        return result;
+    }
 
 }

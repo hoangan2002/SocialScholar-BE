@@ -52,7 +52,7 @@ public class PostController {
         try {
             if (userService.loadUserById(userid) != null) {
                 body.setUser(userService.loadUserById(userid));
-                if (groupServices.loadGroupById(groupid) != null) {
+                if (groupServices.loadGroupById(groupid) != null && userService.isGroupMember(userid,groupid)==true) {
 
                     body.setGroup(groupServices.loadGroupById(groupid));
 
@@ -63,7 +63,7 @@ public class PostController {
                             imagePath=imagePath + FOLDER_PATH + fileName+" ";
                         }
                         body.setImageURL(imagePath.trim());
-                    }
+                    }else body.setImageURL("");
                     postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
                             new ResponseObject("ok", "Post successfully", body));
@@ -89,48 +89,45 @@ public class PostController {
                                                       @RequestParam(value = "file", required = false) MultipartFile[] file){
         try {
             boolean check = false;
-
+            String newImageList = "";
             if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
                 postData.setPostId(postid);
-
-                String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
-
-
-
-                ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
-
-                String newImageList="";
-
-                if(imageRemove!= null){
-                    for(int index:imageRemove){
-                        if(index>=arr.length)
-                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                                    new ResponseObject("failed", "We have "+arr.length+" Images, can't find the remove index", ""));
+                if(postServices.loadPostById(postid).getImageURL()!=null) {
+                    String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
+                    ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
+                    if (imageRemove != null) {
+                        for (int index : imageRemove) {
+                            if (index >= arr.length)
+                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                                        new ResponseObject("failed", "We have " + arr.length + " Images, can't find the remove index", ""));
+                        }
+                        for (int i = 0; i < imageRemove.length; i++) {
+                            imagesArraylist.set(imageRemove[i], "");
+                        }
+                        for (int i = 0; i < imagesArraylist.size(); i++) {
+                            newImageList = newImageList + imagesArraylist.get(i) + " ";
+                        }
+                        postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
+                        check = true;
                     }
-
-                    for(int i=0; i<imageRemove.length;i++){
-                        imagesArraylist.set(imageRemove[i],"");
-                    }
-
-                    for(int i=0; i<imagesArraylist.size();i++){
-                        newImageList= newImageList + imagesArraylist.get(i)+" ";
-                    }
-                    postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
-                    check=true;
                 }
+
 
                 if (file != null) {
                     String  imagePathUploadEdit="";
-
-                    if(check) newImageList=postData.getImageURL()+" ";
-                    else  newImageList=postServices.loadPostById(postid).getImageURL().trim();
-
+                    String temp;
+                    if(postData.getImageURL() ==null) temp="";
+                    else temp = postData.getImageURL();
+                    if(check ) newImageList=temp+" ";
+                    else  newImageList=postServices.loadPostById(postid).getImageURL();
                     for(int i=0; i<file.length;i++) {
                         String fileName = imageStorageService.storeFile(file[i]);
                         imagePathUploadEdit= imagePathUploadEdit + FOLDER_PATH + fileName+" ";
 
                     }
                     postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
+                }else if(imageRemove==null){
+                    postData.setImageURL(postServices.loadPostById(postid).getImageURL());
                 }
 
 
@@ -154,11 +151,20 @@ public class PostController {
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return result;
     }
+
+    //______________________________________Get_post_by_group__________________________________________________//
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPost/{groupid}")
+    public ArrayList<Post> retrieveAllPostByGroup(@PathVariable("groupid") long groupid){
+        ArrayList<Post> result = postServices.retrivePostFromDBByGroup(groupid);
+        return result;
+    }
     //______________________________________Delete_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
-    public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
-        if(postServices.loadPostById(postId)!=null){
+    public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId,@RequestParam("userid")int userid){
+        if(postServices.loadPostById(postId)!=null && postServices.isPostByUser(userid,postId)==true){
             postServices.deletePostDB(postId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Delete Succesfully","")
@@ -171,13 +177,18 @@ public class PostController {
 
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
-        if(postServices.loadPostById(postId)!=null){
-            Post post = postServices.loadPostById(postId);
-            User user = userService.loadUserById(userId);
-            PostLike postLike = likeService.createPostLike(post, user, (byte)-1);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post succesfully",postLike)
-            );
+        try {
+            if (postServices.loadPostById(postId) != null) {
+                Post post = postServices.loadPostById(postId);
+                User user = userService.loadUserById(userId);
+                PostLike postLike = likeService.createPostLike(post, user, (byte) -1);
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("OK", "Like post succesfully", postLike)
+                );
+            }
+        }catch (Exception e){
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","You don't have permission to delete this post ! ",""));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 new ResponseObject("Failed","Can't find post","")
