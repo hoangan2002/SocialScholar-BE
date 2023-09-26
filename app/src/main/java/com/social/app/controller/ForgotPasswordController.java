@@ -50,7 +50,7 @@ public class ForgotPasswordController {
         passwordResetDAO.save(new PasswordReset(email,emailSenderService.code));
          return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Email had been send", "OK",null));
     }
-    @GetMapping("/verifykey")
+    @GetMapping("/verify-key")
     public ResponseEntity<ResponseObject> verifykey(@RequestParam("otp") int otp, @RequestParam("email") String email ){
         if(passwordResetDAO.findByEmail(email). getCode() == otp)
         {return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OTP is correct", "OK",jwtService.generateTokenOTP(passwordResetDAO.findByEmail(email))));}
