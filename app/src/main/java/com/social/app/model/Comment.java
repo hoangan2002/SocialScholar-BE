@@ -1,22 +1,33 @@
 package com.social.app.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import jakarta.persistence.*;
 import lombok.Data;
+
 
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
 @Entity
+@Getter
+@Setter
 @Data
 @Table(name = "Comment")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long commentId;
+
     private String content;
     private Timestamp time;
+    private long commentParentId;
 
     @JsonBackReference(value = "post_comment")
     @ManyToOne
@@ -26,13 +37,14 @@ public class Comment {
     @JsonBackReference(value = "comment_user")
     @ManyToOne
     @JoinColumn(name="user_Id")
-    private  User user;
+    private User user;
 
-
-    @OneToMany(mappedBy = "commentReport")
+    @JsonManagedReference(value = "comment_report")
+    @OneToMany(mappedBy = "comment")
     private List<CommentReport> reports;
 
-    @OneToMany(mappedBy = "commentLike")
+    @JsonManagedReference(value = "comment_like")
+    @OneToMany(mappedBy = "comment")
     private List<CommentLike> likes;
 
 }

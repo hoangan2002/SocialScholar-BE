@@ -1,5 +1,7 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -14,10 +16,12 @@ public class PostReport {
     private String description;
     private Date time;
 
+    @JsonBackReference(value = "postReport_user")
     @ManyToOne
     @JoinColumn(name="user_Id")
     private User user;
 
+    @JsonBackReference(value = "post_report")
     @ManyToOne
     @JoinColumn(name="post_Id")
     private Post post;

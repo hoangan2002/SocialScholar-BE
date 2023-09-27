@@ -2,13 +2,11 @@ package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Post;
+import com.social.app.model.PostLike;
 import com.social.app.model.User;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
-import com.social.app.service.GroupServices;
-import com.social.app.service.ImageStorageService;
-import com.social.app.service.PostServices;
-import com.social.app.service.UserService;
+import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +36,9 @@ public class PostController {
 
     @Autowired
     ImageStorageService imageStorageService;
+
+    @Autowired
+    LikeService likeService;
 
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
@@ -147,7 +148,7 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPost")
     public ArrayList<Post> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
@@ -167,6 +168,74 @@ public class PostController {
                 new ResponseObject("Failed","Can't find post to delete","")
         );
     }
+
+    @PostMapping("/dislike/{postId}")
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like post successfully","")
+            );
+        }
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
+        );
+    }
+
+    @PostMapping("/like/{postId}")
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not like post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like post successfully","")
+            );
+        }
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
+        );
+    }
+
+    @GetMapping("/getLike/{postId}")
+    public int getPostLike(@PathVariable long postId){
+        return likeService.getTotalPostLike(postId);
+    }
+
     //______________________________________Get_Hot_Post____________________________________________________//
     @GetMapping("/hotpost")
     public ArrayList<Post> getallhotpost() {

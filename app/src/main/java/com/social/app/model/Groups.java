@@ -1,4 +1,5 @@
 package com.social.app.model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,7 +37,7 @@ public class Groups {
 
     @Column(name="Create_Time")
     private Date timeCreate;
-
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="user_Id")
     private User hosts;
@@ -53,6 +54,7 @@ public class Groups {
     @OneToMany(mappedBy = "group")
     private List<Tag> tags;
 
+    @JsonManagedReference(value = "join_groups")
     @OneToMany(mappedBy = "group")
     private  List<JoinManagement> joins;
 
