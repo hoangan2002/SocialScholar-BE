@@ -1,11 +1,9 @@
 package com.social.app.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -29,26 +27,34 @@ public class Post {
 
     //quy tắc đặt tên cho JSReference "classBack_classRef"
     @JsonBackReference(value = "post_user")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_Id")
     private User user;
 
     @JsonBackReference(value = "post_groups")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_Id")
     private Groups group;
 
     @OneToMany(mappedBy = "post")
+    @JsonManagedReference(value = "post_comment")
     private List<Comment> comments;
 
     @OneToMany(mappedBy = "post")
     private List<PostReport> reports;
 
+
     @OneToMany(mappedBy = "post")
+    @JsonManagedReference(value = "post_like")
     private List<PostLike> likes;
 
-
-
-
+    public int countLike(){
+        int like = 0;
+        for(PostLike pl : this.getLikes()){
+            if(pl.getStatus()==1) like=like+1;
+            else like=like-1;
+        }
+        return like;
+    }
 
 }

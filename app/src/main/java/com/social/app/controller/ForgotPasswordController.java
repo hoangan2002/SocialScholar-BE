@@ -41,18 +41,21 @@ public class ForgotPasswordController {
         if(!service.isExits(user)){
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Email not exists", "ERROR",null));
         }
-        //Kiểm tra email đã có mã otp,
-        if(passwordResetDAO.findByEmail(email) != null){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("OTP had been send, Please come back after 5 minutes", "ERROR",null));
-        }
+//        //Kiểm tra email đã có mã otp,
+//        if(passwordResetDAO.findByEmail(email) != null){
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseObject("OTP had been send, Please come back after 5 minutes", "ERROR",null));
+//        }
 
         emailSenderService.sendEmail(email);
         passwordResetDAO.save(new PasswordReset(email,emailSenderService.code));
          return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Email had been send", "OK",null));
     }
     @GetMapping("/verify-key")
-    public ResponseEntity<ResponseObject> verifykey(@RequestParam("otp") int otp, @RequestParam("email") String email ){
-        if(passwordResetDAO.findByEmail(email). getCode() == otp)
+    public ResponseEntity<ResponseObject> verifykey(@RequestParam("otp") String otp, @RequestParam("email") String email ){
+        System.out.println(otp);
+        System.out.println(email);
+        int numOTP = Integer.parseInt(otp.trim());
+        if(passwordResetDAO.findByEmail(email).getCode() == numOTP)
         {return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OTP is correct", "OK",jwtService.generateTokenOTP(passwordResetDAO.findByEmail(email))));}
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("OTP is incorrect", "ERROR",null));
     }

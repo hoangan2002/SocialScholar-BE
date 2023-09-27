@@ -40,12 +40,15 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/oauth2/authorization/google","/forgot/**").permitAll()
+                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/postservices/hotpost/**").permitAll()
                 .and()
-                .authorizeHttpRequests().requestMatchers("/auth/profile/**").authenticated()
+                .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**").authenticated()
+                .and()
+//                .formLogin().loginPage("/auth/login").successHandler(successHandler)
+////                .and().csrf().disable()
+////                .logout().logoutUrl("/logout").logoutSuccessUrl("/login")
+////                .oauth2Login().loginPage("/login").successHandler(successHandler)
 //                .and()
-//                .oauth2Login().successHandler(successHandler)
-                .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -59,7 +62,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();

@@ -53,6 +53,7 @@ public class Groups {
     @OneToMany(mappedBy = "group")
     private List<Tag> tags;
 
+    @JsonManagedReference(value = "join_groups")
     @OneToMany(mappedBy = "group")
     private  List<JoinManagement> joins;
 
