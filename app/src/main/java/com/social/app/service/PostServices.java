@@ -73,7 +73,7 @@ public class PostServices {
         Post post = postRepository.findByPostId(postId);
         if(post!=null)
             return post;
-        else throw new RuntimeException("Not valid user");
+        else throw new RuntimeException("Can't find post");
     }
 
 

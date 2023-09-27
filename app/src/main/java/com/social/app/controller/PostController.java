@@ -1,9 +1,7 @@
 package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
-import com.social.app.model.Post;
-import com.social.app.model.PostLike;
-import com.social.app.model.User;
+import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.*;
@@ -40,6 +38,9 @@ public class PostController {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    ReportService reportService;
+
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
@@ -49,6 +50,11 @@ public class PostController {
                                                      @RequestParam(value = "file", required = false) MultipartFile[] file,
                                                      @RequestParam("userid") int userid,
                                                      @RequestParam("groupid") int groupid){
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember(userid, groupid))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
         try {
             if (userService.loadUserById(userid) != null) {
                 body.setUser(userService.loadUserById(userid));
@@ -249,5 +255,43 @@ public class PostController {
         return postServices.printHotPost(false);
     }
 
+    @PostMapping("/report/{postId}")
+    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long postId, @RequestParam("userid")int userId,
+                                                      @RequestParam("typeid") int typeId, @RequestParam("description") String description){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not report post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        // set description to report
+        PostReport postReport = new PostReport();
+        postReport.setDescription(description);
+
+        // Create user
+        User user = userService.loadUserById(userId);
+
+        // create postreport
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Report post successfully",reportService.createPostReport(post, user, postReport, typeId))
+        );
+    }
+
+    @GetMapping("/all-reports/{postId}")
+    public ArrayList<PostReport> getAllPostReports(@PathVariable long postId){
+        return reportService.getAllPostReports(postId);
+    }
+
+    @GetMapping("/all-report-types")
+    public ArrayList<PostReportType> getAllReportTypes(){
+        return reportService.getAllPostReportTypes();
+    }
 
 }

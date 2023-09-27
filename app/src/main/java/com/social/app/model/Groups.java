@@ -38,7 +38,7 @@ public class Groups {
     private Date timeCreate;
 
     @ManyToOne
-    @JoinColumn(name="user_Id")
+    @JoinColumn(name="host_Id")
     private User hosts;
 
     @ManyToOne
