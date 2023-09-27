@@ -19,6 +19,7 @@ public class GroupServices {
             return groups;
         else throw new RuntimeException("Not valid group");
     }
+<<<<<<< HEAD
     public Groups createGroup(Groups groups){
        return groupRepository.save(groups);
     }
@@ -39,4 +40,8 @@ public class GroupServices {
 
 
     }
+=======
+
+
+>>>>>>> 7c8b39897e45eda3f00291baec564136743e1e85
 }

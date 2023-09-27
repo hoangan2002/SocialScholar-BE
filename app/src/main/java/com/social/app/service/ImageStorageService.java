@@ -1,6 +1,7 @@
 package com.social.app.service;
 
 import com.social.app.repository.PostRepository;
+import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -21,6 +23,7 @@ import java.util.stream.Stream;
 
 @Service
 public class ImageStorageService implements IStorageService{
+    @Getter
     private final Path storageFolder = Paths.get("uploads");
     //constructor
 
@@ -113,5 +116,12 @@ public class ImageStorageService implements IStorageService{
     @Override
     public void deleteAllFiles() {
 
+    }
+
+    public boolean deleteFile(String path){
+        File file = new File(path);
+        if(file.exists())
+            return file.delete();
+        return false;
     }
 }

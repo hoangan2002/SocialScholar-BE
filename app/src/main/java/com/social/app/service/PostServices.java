@@ -1,7 +1,9 @@
 package com.social.app.service;
 
 import com.social.app.model.Post;
+import com.social.app.model.PostLike;
 import com.social.app.model.User;
+import com.social.app.repository.PostLikeRepository;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +11,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.UUID;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 
 @Service
 public class PostServices {
@@ -25,6 +31,9 @@ public class PostServices {
 
     @Autowired
     ImageStorageService imageStorageService;
+
+    @Autowired
+    PostLikeRepository postLikeRepository;
     public Post submitPostToDB(Post postData){
 
         Date date = new Date();
@@ -68,6 +77,69 @@ public class PostServices {
     }
 
 
+
+    public long findDifference(String start_date,String end_date)
+    {
+        long difference_In_Hours=0;
+        int hours=0;
+        SimpleDateFormat sdf
+                = new SimpleDateFormat(
+                "yyyy-MM-dd HH:mm:ss");
+        try {
+
+            Date d1 = sdf.parse(start_date);
+            Date d2 = sdf.parse(end_date);
+
+            long difference_In_Time
+                    = d2.getTime() - d1.getTime();
+
+            int seconds = (int) difference_In_Time / 1000;
+            hours = seconds / 3600;
+        }
+        catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return hours;
+    }
+
+    public ArrayList<Post> printHotPost(boolean authentication) {
+        ArrayList<Post> allPost = retrivePostFromDB();
+        Map<Post, Double> hotPost = new HashMap<>();
+        Date date = new Date();
+        long time = date.getTime();
+        Timestamp datetime = new Timestamp(time);
+        String timeNow = datetime.toString();
+        Map<Post, Double> sorted = null;
+        for (Post p : allPost) {
+            int like = 0;
+            //calculate scores
+            int likeComment = p.getComments().size() + p.countLike();
+            long diffTime = findDifference(p.getTime().toString(), timeNow);
+            Double scores = (likeComment - 1) / Math.pow(diffTime + 2, 1.8);
+            hotPost.put(p, scores);
+        }
+        sorted = hotPost
+                .entrySet()
+                .stream()
+                .sorted(comparingByValue())
+                .collect(
+                        toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e2,
+                                LinkedHashMap::new));
+        sorted = hotPost
+                .entrySet()
+                .stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .collect(
+                        toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2,
+                                LinkedHashMap::new));
+        ArrayList<Post> valueList = new ArrayList<Post>(sorted.keySet());
+        if (authentication == false) {
+            for (Post p : valueList) {
+                p.setComments(null);
+            }
+        }
+        return valueList;
+    }
 
 
 }

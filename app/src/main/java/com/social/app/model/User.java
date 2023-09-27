@@ -31,6 +31,7 @@ public class User {
     private int activityPoint;
     private boolean isLocked;
 
+    @JsonManagedReference(value = "join_user")
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
 
@@ -46,6 +47,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<CommentLike> commentLikes;
 
+    @JsonManagedReference(value = "like_user")
     @OneToMany(mappedBy = "user")
     List<PostLike> postLikes;
 
@@ -55,6 +57,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<PostReport> postReports;
 
+    @JsonManagedReference(value = "comment_user")
     @OneToMany(mappedBy = "user")
     List<Comment> comments;
 
