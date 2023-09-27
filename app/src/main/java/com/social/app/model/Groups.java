@@ -35,6 +35,11 @@ public class Groups {
     @Column(name="Descriptions")
     private String description;
 
+    @Column(name="ImageUrlGAvatar")
+    private String imageURLGAvatar;
+    @Column(name="ImageUrlGCover")
+    private String imageUrlGCover;
+
     @Column(name="Create_Time")
     private Date timeCreate;
     @JsonIgnore
