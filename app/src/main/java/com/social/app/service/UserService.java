@@ -101,7 +101,7 @@ public class UserService implements UserDetailsService {
         return theUser;
     }
     public Boolean existPhone(String phone){
-        Optional<User> result = repository.findByUserName(phone);
+        Optional<User> result = repository.findByPhone(phone);
         return result.isPresent();
     }
 

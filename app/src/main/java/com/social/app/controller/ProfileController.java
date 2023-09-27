@@ -6,12 +6,19 @@ import com.social.app.repository.UserRepository;
 import com.social.app.service.EditProfileService;
 import com.social.app.service.ImageStorageService;
 import com.social.app.service.UserService;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 @RestController
 @RequestMapping("/myProfile")
@@ -22,7 +29,7 @@ public class ProfileController {
 
     @Autowired
     ImageStorageService imageStorageService;
-    private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
+
     @GetMapping("{userId}")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable int userId) {
         User theUser = service.findById(userId);
@@ -93,13 +100,15 @@ public class ProfileController {
                     if (theUser.getAvatarURL()!=null || !theUser.getAvatarURL().isEmpty())
                     {
                         // xoa avatar cu neu co trong uploads
-                        imageStorageService.deleteFile(theUser.getAvatarURL());
+                        imageStorageService.deleteFile(imageStorageService.getUploadsPath()+theUser.getAvatarURL());
                     }
                     // add avatar
+;
                     String filename = imageStorageService.storeFile(file);
-                    String imagePath = FOLDER_PATH + filename;
-                    theUser.setAvatarURL(imagePath);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",null));
+
+                    theUser.setAvatarURL(filename);
+                    service.save(theUser);
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getAvatarURL()));
                 }
             }
         }
@@ -108,5 +117,13 @@ public class ProfileController {
                     new ResponseObject(e.getMessage(), "failed", ""));
         }
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("Fail", "OK",null));
+    }
+
+    @GetMapping("get-avatar")
+    public ResponseEntity<ResponseObject> getAvatar(@RequestParam("id") int id){
+        User theUser = service.findById(id);
+        File file = new File(imageStorageService.getUploadsPath() + theUser.getAvatarURL());
+        String encodstring = imageStorageService.encodeFileToBase64Binary(file);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
     }
 }

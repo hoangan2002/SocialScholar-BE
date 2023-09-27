@@ -59,7 +59,7 @@ public class PostController {
                         String imagePath="";
                         for(int i=0; i<file.length;i++) {
                             String fileName = imageStorageService.storeFile(file[i]);
-                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+                            imagePath=fileName+" ";
                         }
                         body.setImageURL(imagePath.trim());
                     }
@@ -126,7 +126,7 @@ public class PostController {
 
                     for(int i=0; i<file.length;i++) {
                         String fileName = imageStorageService.storeFile(file[i]);
-                        imagePathUploadEdit= imagePathUploadEdit + FOLDER_PATH + fileName+" ";
+                        imagePathUploadEdit= imagePathUploadEdit + fileName+" ";
 
                     }
                     postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());

@@ -3,6 +3,7 @@ package com.social.app.service;
 import com.social.app.repository.PostRepository;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -10,9 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -120,8 +119,31 @@ public class ImageStorageService implements IStorageService{
 
     public boolean deleteFile(String path){
         File file = new File(path);
+        System.out.println(getUploadsPath());
         if(file.exists())
             return file.delete();
         return false;
+    }
+
+    public String getUploadsPath(){
+        return String.valueOf(Paths.get("uploads").toAbsolutePath()+File.separator);
+    }
+
+    public String encodeFileToBase64Binary(File file){
+        String encodedfile = null;
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int)file.length()];
+            fileInputStreamReader.read(bytes);
+            encodedfile = Base64.encodeBase64URLSafeString(bytes).toString();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return encodedfile;
     }
 }
