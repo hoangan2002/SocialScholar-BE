@@ -111,6 +111,17 @@ public class UserService implements UserDetailsService {
         return result.isPresent();
     }
 
+<<<<<<< HEAD
+
+    public void setRoleHost(User user) {
+        String role = user.getRole();
+        if(role.contains("ROLE_HOST")){
+            return;
+        }
+        user.setRole(role +  ",ROLE_HOST");
+        repository.save(user);
+    }
+=======
     // Cong diem cho user, goi ham moi khi thuc hien hanh dong, NHAP vao User
     public User addPoints(User user, Enum<MemberActivity> activity){
         int activityPoint = user.getActivityPoint();
@@ -201,9 +212,16 @@ public class UserService implements UserDetailsService {
         return  false;
     }
 
+<<<<<<< HEAD
+    /*public boolean isCommemtCreator(int userId, long commentId) {
+
+    }*/
+>>>>>>> 7c8b39897e45eda3f00291baec564136743e1e85
+=======
     public boolean isCommemtCreator(int userId, long commentId) {
         Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new RuntimeException("Not found comment"));
         if (userId == comment.getUser().getUserId()) return true;
         return false;
     }
+>>>>>>> ebff8639326f5dac6b1e033b76899704647b462c
 }
