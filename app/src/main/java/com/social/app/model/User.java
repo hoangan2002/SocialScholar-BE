@@ -1,5 +1,6 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,16 +45,19 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<Rating> ratings;
 
+    @JsonManagedReference(value = "commentLike_user")
     @OneToMany(mappedBy = "user")
     List<CommentLike> commentLikes;
 
-    @JsonManagedReference(value = "like_user")
+    @JsonManagedReference(value = "postLike_user")
     @OneToMany(mappedBy = "user")
     List<PostLike> postLikes;
 
+    @JsonManagedReference(value = "commentReport_user")
     @OneToMany(mappedBy = "user")
     List<CommentReport> commentReports;
 
+    @JsonManagedReference(value = "postReport_user")
     @OneToMany(mappedBy = "user")
     List<PostReport> postReports;
 

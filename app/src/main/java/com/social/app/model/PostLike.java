@@ -25,7 +25,7 @@ public class PostLike {
     private byte status;
     private Date time;
 
-    @JsonBackReference(value = "like_user")
+    @JsonBackReference(value = "postLike_user")
     @ManyToOne
     @JoinColumn(name="userId")
     private User user;

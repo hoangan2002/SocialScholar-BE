@@ -1,5 +1,6 @@
 package com.social.app.service;
 import com.social.app.model.*;
+import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
@@ -19,6 +20,9 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private JoinRepository joinRepository;
@@ -208,8 +212,16 @@ public class UserService implements UserDetailsService {
         return  false;
     }
 
+<<<<<<< HEAD
     /*public boolean isCommemtCreator(int userId, long commentId) {
 
     }*/
 >>>>>>> 7c8b39897e45eda3f00291baec564136743e1e85
+=======
+    public boolean isCommemtCreator(int userId, long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new RuntimeException("Not found comment"));
+        if (userId == comment.getUser().getUserId()) return true;
+        return false;
+    }
+>>>>>>> ebff8639326f5dac6b1e033b76899704647b462c
 }
