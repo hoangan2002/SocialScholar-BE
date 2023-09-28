@@ -2,19 +2,15 @@ package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
-import com.social.app.repository.GroupRepository;
-import com.social.app.repository.JoinRepository;
-import com.social.app.repository.PostRepository;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(path="/api/comment-services")
@@ -31,7 +27,7 @@ public class CommentController {
     @Autowired
     private PostServices postServices;
     @Autowired
-    ReportService reportService;
+    private ReportService reportService;
     @PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> createComment(@RequestPart Comment comment,
