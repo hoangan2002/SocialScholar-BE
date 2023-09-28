@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
@@ -40,6 +41,10 @@ public class PostController {
 
     @Autowired
     ReportService reportService;
+
+    @Autowired
+    ResponseConvertService responseConvertService;
+
 
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
@@ -154,11 +159,11 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPost")
-    public ArrayList<Post> retrieveAllPost(){
+    public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
-        return result;
+        return responseConvertService.postResponseArrayList(result);
     }
     //______________________________________Delete_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")

@@ -29,6 +29,8 @@ public class JwtService {
         claims.put("email", user.getEmail());
         claims.put("coin", user.getCoin());
         claims.put("role", user.getRole());
+        claims.put("level",user.getLevel());
+        claims.put("activityPoint",user.getActivityPoint());
         return createToken(claims, user.getUserName());
     }
 
@@ -38,7 +40,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30*30))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 

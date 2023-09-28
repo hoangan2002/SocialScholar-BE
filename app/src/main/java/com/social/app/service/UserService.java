@@ -111,6 +111,16 @@ public class UserService implements UserDetailsService {
         return result.isPresent();
     }
 
+
+    public void setRoleHost(User user) {
+        String role = user.getRole();
+        if(role.contains("ROLE_HOST")){
+            return;
+        }
+        user.setRole(role +  ",ROLE_HOST");
+        repository.save(user);
+    }
+
     // Cong diem cho user, goi ham moi khi thuc hien hanh dong, NHAP vao User
     public User addPoints(User user, Enum<MemberActivity> activity){
         int activityPoint = user.getActivityPoint();

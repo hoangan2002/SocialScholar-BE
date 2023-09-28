@@ -40,7 +40,8 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler{
         	  user.setPassword("Dummy");
         	  userService.addUser(user);
           }
-		}  redirectUrl = "/auth/sign-in";
+		}  redirectUrl = "/home";
+		System.out.println("login oke");
 		new DefaultRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}
 
