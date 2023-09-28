@@ -1,25 +1,16 @@
 package com.social.app.controller;
 
 import com.social.app.entity.ResponseObject;
-import com.social.app.model.Comment;
-import com.social.app.model.Post;
-import com.social.app.model.User;
-import com.social.app.repository.GroupRepository;
-import com.social.app.repository.JoinRepository;
-import com.social.app.repository.PostRepository;
-import com.social.app.service.CommentService;
-import com.social.app.service.LikeService;
-import com.social.app.service.PostServices;
-import com.social.app.service.UserService;
+import com.social.app.model.*;
+import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(path="/api/comment-services")
@@ -36,7 +27,7 @@ public class CommentController {
     @Autowired
     private PostServices postServices;
     @Autowired
-    private PostRepository postRepository;
+    private ReportService reportService;
     @PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> createComment(@RequestPart Comment comment,
@@ -78,7 +69,7 @@ public class CommentController {
         }
     }
 
-    @GetMapping("/{postID}/all-comments")
+    @GetMapping("/all-comments/{postID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ArrayList<Comment> getAllComments(@PathVariable long postID){
         ArrayList<Comment> allComments = this.commentService.getAllComments(postID);
@@ -171,7 +162,7 @@ public class CommentController {
         return likeService.getTotalCommentLike(commentId);
     }
 
-    @PostMapping("/{commentParentId}/reply-comments")
+    @PostMapping("/reply-comments/{commentParentId}")
     ResponseEntity<ResponseObject> replyComment(@RequestPart Comment commentReply,
                                                  @RequestParam("userid") int userid,
                                                  @PathVariable long commentParentId){
@@ -193,4 +184,42 @@ public class CommentController {
         }
     }
 
+    @PostMapping("/report/{commentId}")
+    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long commentId, @RequestParam("userid")int userId,
+                                                      @RequestParam("typeid") int typeId, @RequestParam("description") String description){
+        // check if comment is not found, return
+        if (commentService.getCommentByID(commentId)== null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find comment","")
+            );
+
+        Comment comment = commentService.getCommentByID(commentId);
+        // Check if user is not in group, user can not report comment
+        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        // set description to report
+        CommentReport commentReport = new CommentReport();
+        commentReport.setDescription(description);
+
+        // Create user
+        User user = userService.loadUserById(userId);
+
+        // create postreport
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Report comment successfully",reportService.createCommentReport (comment, user, commentReport, typeId))
+        );
+    }
+
+    @GetMapping("/all-reports/{commentId}")
+    public ArrayList<CommentReport> getAllPostReports(@PathVariable long commentId){
+        return reportService.getAllCommentReports(commentId);
+    }
+
+    @GetMapping("/all-report-types")
+    public ArrayList<CommentReportType> getAllReportTypes(){
+        return reportService.getAllCommentReportTypes();
+    }
 }
