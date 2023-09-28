@@ -3,19 +3,27 @@ package com.social.app.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.web.JsonPath;
 
 import java.util.Date;
 
 @Entity
+@Getter
+@Setter
 @Table(name = "Comment_Report")
 public class CommentReport {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long reportId;
-    private String type;
     private String description;
     private Date time;
+
+    @JsonBackReference(value = "commentReport_type")
+    @ManyToOne
+    @JoinColumn(name="type_Id")
+    private CommentReportType commentReportType;
 
     @JsonBackReference(value = "commentReport_user")
     @ManyToOne
