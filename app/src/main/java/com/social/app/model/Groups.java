@@ -31,9 +31,15 @@ public class Groups {
     @Column(name="Groups_Name")
     private String groupName;
 
+    private String tags;
 
     @Column(name="Descriptions")
     private String description;
+
+    @Column(name="ImageUrlGAvatar")
+    private String imageURLGAvatar;
+    @Column(name="ImageUrlGCover")
+    private String imageUrlGCover;
 
     @Column(name="Create_Time")
     private Date timeCreate;
@@ -50,9 +56,6 @@ public class Groups {
     @JsonManagedReference(value = "post_groups")
     @OneToMany(mappedBy = "group")
     private List<Post> posts;
-
-    @OneToMany(mappedBy = "group")
-    private List<Tag> tags;
 
     @JsonManagedReference(value = "join_groups")
     @OneToMany(mappedBy = "group")

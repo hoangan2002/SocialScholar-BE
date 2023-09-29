@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.dto.CommentDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.service.*;
@@ -28,9 +29,9 @@ public class CommentController {
     private PostServices postServices;
     @Autowired
     private ReportService reportService;
-    @PostMapping("/{postID}/comments")
+    /*@PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> createComment(@RequestPart Comment comment,
+    ResponseEntity<ResponseObject> createComment(@RequestPart CommentDTO comment,
                                                  @RequestParam("userid") int userid,
                                                  @PathVariable long postID){
         try {
@@ -38,16 +39,33 @@ public class CommentController {
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
             if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
-            // set user for comment
-            comment.setUser(userService.loadUserById(userid));
             // create comment
-            Comment newComment = this.commentService.createComment(comment, postID);
+            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("Success", "Create new comment successfully", newComment));
         }
         catch (RuntimeException runtimeException){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Failed", "There are problem..", ""));
+        }
+    }*/
+    @PostMapping("/{postID}/comments")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    CommentDTO createComment(@RequestPart CommentDTO comment,
+                                                 @RequestParam("userid") int userid,
+                                                 @PathVariable long postID){
+        try {
+            // Get post from postId
+            Post post = postServices.loadPostById(postID);
+            // Check if user is not in group, user can not create comment
+            if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            // create comment
+            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
+            return newComment;
+        }
+        catch (RuntimeException runtimeException){
+            runtimeException.printStackTrace();
+            return null;
         }
     }
 

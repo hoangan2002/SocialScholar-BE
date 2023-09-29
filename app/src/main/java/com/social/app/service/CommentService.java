@@ -1,9 +1,11 @@
 package com.social.app.service;
 
+import com.social.app.dto.CommentDTO;
 import com.social.app.model.Comment;
 import com.social.app.model.Post;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -22,16 +24,24 @@ public class CommentService {
 
     @Autowired
     PostRepository postRepository;
-    public Comment createComment(Comment comment, long postID){
+
+    @Autowired
+    ModelMapper modelMapper;
+    @Autowired
+    UserService userService;
+    public CommentDTO createComment(CommentDTO commentDTO, long postID, int userId){
         Post post = this.postRepository.findById(postID).orElseThrow(()-> new RuntimeException());
+        Comment comment = modelMapper.map(commentDTO, Comment.class);
+
         // set post to comment
         comment.setPost(post);
-
+        // set user for comment
+        comment.setUser(userService.loadUserById(userId));
         // set current time to comment
         Date date = new Date();
         Timestamp datetime = new Timestamp(date.getTime());
         comment.setTime(datetime);
-        return this.commentRepository.save(comment);
+        return modelMapper.map(this.commentRepository.save(comment), CommentDTO.class) ;
     }
     public void deleteComment(long commentID){
         Comment com = this.commentRepository.findById(commentID).orElseThrow(()->new RuntimeException("Post not exits !"));
