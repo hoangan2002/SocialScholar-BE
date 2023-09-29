@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.entity.GroupDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 import com.social.app.model.User;
@@ -117,19 +118,21 @@ public class GroupController {
             }
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
-    @GetMapping("/read/{groupId}")
-    @PreAuthorize("hasRole('ROLE_HOST')")
+    @GetMapping("/{groupId}")
+//    @PreAuthorize("hasRole('ROLE_HOST')")
     public  ResponseEntity<ResponseObject> readGroup(@PathVariable Long groupId){
-        if(groupServices.isGroupHost(groupId)){
-            Groups group = groupServices.loadGroupById(groupId);
-            if (group != null) {
-
-                return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Read Group Success", "OK",group));
-            }
-
-        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
-
+//        if(groupServices.isGroupHost(groupId)){
+//
+//        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
+        Groups group = groupServices.loadGroupById(groupId);
+        if (group != null) {
+            GroupDTO groupDTO = new GroupDTO(group);
+            return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Read Group Success", "OK",groupDTO));
+        }
+        else return   ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("Read Group Fail", "ERROR",null));
     }
+
+
 
 
 }
