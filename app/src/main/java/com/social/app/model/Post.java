@@ -1,7 +1,6 @@
 package com.social.app.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,7 +30,6 @@ public class Post {
     @JoinColumn(name="user_Id")
     private User user;
 
-    @JsonBackReference(value = "post_groups")
     @ManyToOne
     @JoinColumn(name="group_Id")
     private Groups group;
