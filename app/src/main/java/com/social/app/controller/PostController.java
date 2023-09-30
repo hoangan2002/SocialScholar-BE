@@ -1,9 +1,8 @@
 package com.social.app.controller;
 
+import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
-import com.social.app.model.Post;
-import com.social.app.model.PostLike;
-import com.social.app.model.User;
+import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.*;
@@ -40,6 +39,13 @@ public class PostController {
     @Autowired
     LikeService likeService;
 
+    @Autowired
+    ReportService reportService;
+
+    @Autowired
+    ResponseConvertService responseConvertService;
+
+
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
@@ -49,10 +55,15 @@ public class PostController {
                                                      @RequestParam(value = "file", required = false) MultipartFile[] file,
                                                      @RequestParam("userid") int userid,
                                                      @RequestParam("groupid") int groupid){
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember(userid, groupid))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
         try {
             if (userService.loadUserById(userid) != null) {
                 body.setUser(userService.loadUserById(userid));
-                if (groupServices.loadGroupById(groupid) != null && userService.isGroupMember(userid,groupid)==true) {
+                if (groupServices.loadGroupById(groupid) != null) {
 
                     body.setGroup(groupServices.loadGroupById(groupid));
 
@@ -63,7 +74,7 @@ public class PostController {
                             imagePath=imagePath + FOLDER_PATH + fileName+" ";
                         }
                         body.setImageURL(imagePath.trim());
-                    }else body.setImageURL("");
+                    }
                     postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
                             new ResponseObject("ok", "Post successfully", body));
@@ -89,45 +100,48 @@ public class PostController {
                                                       @RequestParam(value = "file", required = false) MultipartFile[] file){
         try {
             boolean check = false;
-            String newImageList = "";
+
             if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
                 postData.setPostId(postid);
-                if(postServices.loadPostById(postid).getImageURL()!=null) {
-                    String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
-                    ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
-                    if (imageRemove != null) {
-                        for (int index : imageRemove) {
-                            if (index >= arr.length)
-                                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                                        new ResponseObject("failed", "We have " + arr.length + " Images, can't find the remove index", ""));
-                        }
-                        for (int i = 0; i < imageRemove.length; i++) {
-                            imagesArraylist.set(imageRemove[i], "");
-                        }
-                        for (int i = 0; i < imagesArraylist.size(); i++) {
-                            newImageList = newImageList + imagesArraylist.get(i) + " ";
-                        }
-                        postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
-                        check = true;
-                    }
-                }
 
+                String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
+
+
+
+                ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
+
+                String newImageList="";
+
+                if(imageRemove!= null){
+                    for(int index:imageRemove){
+                        if(index>=arr.length)
+                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                                    new ResponseObject("failed", "We have "+arr.length+" Images, can't find the remove index", ""));
+                    }
+
+                    for(int i=0; i<imageRemove.length;i++){
+                        imagesArraylist.set(imageRemove[i],"");
+                    }
+
+                    for(int i=0; i<imagesArraylist.size();i++){
+                        newImageList= newImageList + imagesArraylist.get(i)+" ";
+                    }
+                    postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
+                    check=true;
+                }
 
                 if (file != null) {
                     String  imagePathUploadEdit="";
-                    String temp;
-                    if(postData.getImageURL() ==null) temp="";
-                    else temp = postData.getImageURL();
-                    if(check ) newImageList=temp+" ";
-                    else  newImageList=postServices.loadPostById(postid).getImageURL();
+
+                    if(check) newImageList=postData.getImageURL()+" ";
+                    else  newImageList=postServices.loadPostById(postid).getImageURL().trim();
+
                     for(int i=0; i<file.length;i++) {
                         String fileName = imageStorageService.storeFile(file[i]);
                         imagePathUploadEdit= imagePathUploadEdit + FOLDER_PATH + fileName+" ";
 
                     }
                     postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
-                }else if(imageRemove==null){
-                    postData.setImageURL(postServices.loadPostById(postid).getImageURL());
                 }
 
 
@@ -145,26 +159,17 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPost")
-    public ArrayList<Post> retrieveAllPost(){
+    public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
-        return result;
-    }
-
-    //______________________________________Get_post_by_group__________________________________________________//
-
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @GetMapping("/getPost/{groupid}")
-    public ArrayList<Post> retrieveAllPostByGroup(@PathVariable("groupid") long groupid){
-        ArrayList<Post> result = postServices.retrivePostFromDBByGroup(groupid);
-        return result;
+        return responseConvertService.postResponseArrayList(result);
     }
     //______________________________________Delete_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
-    public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId,@RequestParam("userid")int userid){
-        if(postServices.loadPostById(postId)!=null && postServices.isPostByUser(userid,postId)==true){
+    public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
+        if(postServices.loadPostById(postId)!=null){
             postServices.deletePostDB(postId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Delete Succesfully","")
@@ -177,37 +182,69 @@ public class PostController {
 
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
-        try {
-            if (postServices.loadPostById(postId) != null) {
-                Post post = postServices.loadPostById(postId);
-                User user = userService.loadUserById(userId);
-                PostLike postLike = likeService.createPostLike(post, user, (byte) -1);
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("OK", "Like post succesfully", postLike)
-                );
-            }
-        }catch (Exception e){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("Failed","You don't have permission to delete this post ! ",""));
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Like post successfully","")
+            );
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("Failed","Can't find post","")
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
         );
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userId")int userId){
-        if(postServices.loadPostById(postId)!=null){
-            Post post = postServices.loadPostById(postId);
-            User user = userService.loadUserById(userId);
-            PostLike postLike = likeService.createPostLike(post, user, (byte)1);
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not like post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        User user = userService.loadUserById(userId);
+        // check if user already dislike, delete postlike
+        if(likeService.getPostLike(postId,userId)!=null){
+            // call delete function
+            likeService.deletePostLike(likeService.getPostLike(postId,userId));
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post succesfully",postLike)
+                    new ResponseObject("OK","Like post successfully","")
             );
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("Failed","Can't find post","")
+
+        // else create postlike
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
         );
+    }
+
+    @GetMapping("/getLike/{postId}")
+    public int getPostLike(@PathVariable long postId){
+        return likeService.getTotalPostLike(postId);
     }
 
     //______________________________________Get_Hot_Post____________________________________________________//
@@ -223,5 +260,43 @@ public class PostController {
         return postServices.printHotPost(false);
     }
 
+    @PostMapping("/report/{postId}")
+    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long postId, @RequestParam("userid")int userId,
+                                                      @RequestParam("typeid") int typeId, @RequestParam("description") String description){
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not report post
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+
+        // set description to report
+        PostReport postReport = new PostReport();
+        postReport.setDescription(description);
+
+        // Create user
+        User user = userService.loadUserById(userId);
+
+        // create postreport
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Report post successfully",reportService.createPostReport(post, user, postReport, typeId))
+        );
+    }
+
+    @GetMapping("/all-reports/{postId}")
+    public ArrayList<PostReport> getAllPostReports(@PathVariable long postId){
+        return reportService.getAllPostReports(postId);
+    }
+
+    @GetMapping("/all-report-types")
+    public ArrayList<PostReportType> getAllReportTypes(){
+        return reportService.getAllPostReportTypes();
+    }
 
 }

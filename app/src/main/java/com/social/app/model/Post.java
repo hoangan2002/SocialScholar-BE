@@ -1,6 +1,7 @@
 package com.social.app.model;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,18 +27,20 @@ public class Post {
 
     //quy tắc đặt tên cho JSReference "classBack_classRef"
     @JsonBackReference(value = "post_user")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_Id")
     private User user;
 
-    @ManyToOne
+    @JsonBackReference(value = "post_groups")
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="group_Id")
     private Groups group;
 
-    @JsonManagedReference(value = "post_comment")
     @OneToMany(mappedBy = "post")
+    @JsonManagedReference(value = "post_comment")
     private List<Comment> comments;
 
+    @JsonManagedReference(value = "post_report")
     @OneToMany(mappedBy = "post")
     private List<PostReport> reports;
 

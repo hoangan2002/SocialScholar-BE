@@ -1,5 +1,6 @@
 package com.social.app.service;
 import com.social.app.model.*;
+import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
@@ -19,6 +20,9 @@ import java.util.Optional;
 public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private JoinRepository joinRepository;
@@ -105,6 +109,16 @@ public class UserService implements UserDetailsService {
     public Boolean existPhone(String phone){
         Optional<User> result = repository.findByUserName(phone);
         return result.isPresent();
+    }
+
+
+    public void setRoleHost(User user) {
+        String role = user.getRole();
+        if(role.contains("ROLE_HOST")){
+            return;
+        }
+        user.setRole(role +  ",ROLE_HOST");
+        repository.save(user);
     }
 
     // Cong diem cho user, goi ham moi khi thuc hien hanh dong, NHAP vao User
@@ -197,7 +211,9 @@ public class UserService implements UserDetailsService {
         return  false;
     }
 
-    /*public boolean isCommemtCreator(int userId, long commentId) {
-
-    }*/
+    public boolean isCommemtCreator(int userId, long commentId) {
+        Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new RuntimeException("Not found comment"));
+        if (userId == comment.getUser().getUserId()) return true;
+        return false;
+    }
 }

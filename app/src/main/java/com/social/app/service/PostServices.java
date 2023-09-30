@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -73,7 +74,7 @@ public class PostServices {
         Post post = postRepository.findByPostId(postId);
         if(post!=null)
             return post;
-        else throw new RuntimeException("Not valid user");
+        else throw new RuntimeException("Can't find post");
     }
 
 
@@ -141,19 +142,5 @@ public class PostServices {
         return valueList;
     }
 
-    public boolean isPostByUser(int userid,long postid){
-        if(postRepository.findByPostId(postid).getUser().getUserId()==userid) return true;
-        else return false;
-    }
-
-    public ArrayList<Post> retrivePostFromDBByGroup(long groupid){
-        ArrayList<Post> result = postRepository.findAll();
-        for(Post p: result){
-            if(p.getGroup().getGroupId() != groupid){
-                result.remove(p);
-            }
-        }
-        return result;
-    }
 
 }

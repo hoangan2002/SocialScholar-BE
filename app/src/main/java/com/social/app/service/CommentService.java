@@ -27,7 +27,7 @@ public class CommentService {
         // set post to comment
         comment.setPost(post);
 
-        // se current time to comment
+        // set current time to comment
         Date date = new Date();
         Timestamp datetime = new Timestamp(date.getTime());
         comment.setTime(datetime);
@@ -44,7 +44,7 @@ public class CommentService {
     }
 
     public Comment getCommentByID(long commentID){
-        Comment comment = this.commentRepository.findById(commentID).orElseThrow(()-> new RuntimeException("Post not exits !"));
+        Comment comment = this.commentRepository.findById(commentID).orElseThrow(()-> new RuntimeException("Comment not exits !"));
         return comment;
     }
 
@@ -58,4 +58,16 @@ public class CommentService {
         ).orElseThrow(()-> new RuntimeException("Comment not exits !"));
     }
 
+    public Comment createCommentReply(Comment commentReply, long commentParentId){
+        Comment commentParent = this.commentRepository.findById(commentParentId).orElseThrow(()-> new RuntimeException());
+        // set info to comment
+        commentReply.setPost(commentParent.getPost());
+        commentReply.setCommentParentId(commentParentId);
+
+        // set current time to comment
+        Date date = new Date();
+        Timestamp datetime = new Timestamp(date.getTime());
+        commentReply.setTime(datetime);
+        return this.commentRepository.save(commentReply);
+    }
 }

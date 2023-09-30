@@ -32,7 +32,6 @@ public class ForgotPasswordController {
     public String forgot() { return "forgot"; }
 
     @GetMapping("/a")
-
     public ResponseEntity<ResponseObject> reset(@RequestParam("email") String email){
         System.out.println(email);
         User user = new User();
@@ -48,11 +47,14 @@ public class ForgotPasswordController {
 
         emailSenderService.sendEmail(email);
         passwordResetDAO.save(new PasswordReset(email,emailSenderService.code));
-         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Email had been send", "OK",null));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Email had been send", "OK",null));
     }
-    @GetMapping("/verifykey")
-    public ResponseEntity<ResponseObject> verifykey(@RequestParam("otp") int otp, @RequestParam("email") String email ){
-        if(passwordResetDAO.findByEmail(email). getCode() == otp)
+    @GetMapping("/verify-key")
+    public ResponseEntity<ResponseObject> verifykey(@RequestParam("otp") String otp, @RequestParam("email") String email ){
+        System.out.println(otp);
+        System.out.println(email);
+        int numOTP = Integer.parseInt(otp.trim());
+        if(passwordResetDAO.findByEmail(email).getCode() == numOTP)
         {return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OTP is correct", "OK",jwtService.generateTokenOTP(passwordResetDAO.findByEmail(email))));}
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("OTP is incorrect", "ERROR",null));
     }
@@ -70,9 +72,5 @@ public class ForgotPasswordController {
                 return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Reset Successfull", "OK",null));
             }
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Reset Fail", "OK",null));
-
-
-
-
-    }
+ }
 }
