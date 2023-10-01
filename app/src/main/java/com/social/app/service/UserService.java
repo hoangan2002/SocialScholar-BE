@@ -216,4 +216,8 @@ public class UserService implements UserDetailsService {
         if (userId == comment.getUser().getUserId()) return true;
         return false;
     }
+
+    public User findUserByUsername(String username){
+        return repository.findUserByUserName(username);
+    }
 }
