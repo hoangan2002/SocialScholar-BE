@@ -299,4 +299,22 @@ public class PostController {
         return reportService.getAllPostReportTypes();
     }
 
+    @GetMapping("/find-post")
+    public ArrayList<PostResponse> findPost(@RequestParam("findContent") String findContent){
+        ArrayList<Post> allPost = postServices.retrivePostFromDB();
+        ArrayList<Post> findResult = new ArrayList<>();
+        if(findContent!= null && findContent != "\s") {
+            for (Post p : allPost) {
+                if (p.getTitles()!= null && p.getTitles().toLowerCase().contains(findContent.toLowerCase().trim())) {
+                    findResult.add(p);
+                }
+            }
+        }else {
+            return null;
+        }
+        return responseConvertService.postResponseArrayList(findResult);
+    }
+
+
+
 }

@@ -24,6 +24,7 @@ public class Post {
     private String content;
     private Timestamp time;
     private String imageURL;
+    private String titles;
 
     //quy tắc đặt tên cho JSReference "classBack_classRef"
     @JsonBackReference(value = "post_user")
