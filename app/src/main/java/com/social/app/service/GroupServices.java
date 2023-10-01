@@ -5,6 +5,8 @@ import com.social.app.model.User;
 import com.social.app.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 public class GroupServices {
     @Autowired
     GroupRepository groupRepository;
+    @Autowired
+    UserService userService;
 
     public Groups loadGroupById(long gid) throws RuntimeException {
         Groups groups = groupRepository.findByGroupId(gid);
@@ -28,13 +32,14 @@ public class GroupServices {
     public void deleteGroup(Long id){
          groupRepository.deleteById(id);
     }
-    public boolean isGroupHost(Authentication authentication, Long groupId) {
+    public boolean isGroupHost( Long groupId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        User user = (User) authentication.getPrincipal();
-       Groups groups= groupRepository.findByGroupId(groupId);
-       if(groups.getHosts().equals(user)){
+        UserDetails user =userService.loadUserByUsername(authentication.getName());
+        Groups groups= groupRepository.findByGroupId(groupId);
+        if(groups.getHosts().getUserName().equals(user.getUsername())){
             return true;
-       }
+        }
         return false;
 
 
