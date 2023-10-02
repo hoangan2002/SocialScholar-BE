@@ -1,5 +1,6 @@
 package com.social.app.repository;
 
+import com.social.app.model.Comment;
 import com.social.app.model.Post;
 import com.social.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,6 +13,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Post save(Post post);
     void deleteById(long id);
     Post findByPostId(long postId);
-
-
 }
