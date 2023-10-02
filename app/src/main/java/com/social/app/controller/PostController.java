@@ -53,9 +53,11 @@ public class PostController {
     @PostMapping("/posting")
     public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
                                                      @RequestParam(value = "file", required = false) MultipartFile[] file,
-                                                     @RequestParam("userid") int userid,
+//                                                     @RequestParam("userid") int userid,
                                                      @RequestParam("groupid") int groupid){
         // Check if user is not in group, user can not dislike post
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         if(!userService.isGroupMember(userid, groupid))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
@@ -74,6 +76,8 @@ public class PostController {
                             imagePath=imagePath + FOLDER_PATH + fileName+" ";
                         }
                         body.setImageURL(imagePath.trim());
+                    }else {
+                        body.setImageURL("");
                     }
                     postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
@@ -92,26 +96,22 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PutMapping("/editpost")
     public ResponseEntity<ResponseObject>  updateUser(@RequestPart Post postData,
-                                                      @RequestParam("userid") int userid,
+//                                                      @RequestParam("userid") int userid,
                                                       @RequestParam("postid") long postid,
                                                       //nhap vao vi tri anh can xoa. Example: anh thu 1 va 2 => imageRemove[1,2]
                                                       @RequestParam(value="imageRemove",required = false)int[] imageRemove,
                                                       //thêm ảnh nếu cần
                                                       @RequestParam(value = "file", required = false) MultipartFile[] file){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         try {
             boolean check = false;
 
             if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
                 postData.setPostId(postid);
-
                 String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
-
-
-
                 ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
-
                 String newImageList="";
-
                 if(imageRemove!= null){
                     for(int index:imageRemove){
                         if(index>=arr.length)
@@ -169,7 +169,9 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
-        if(postServices.loadPostById(postId)!=null){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        if(postServices.loadPostById(postId)!=null && postServices.loadPostById(postId).getUser().getUserName().matches(authentication.getName())){
             postServices.deletePostDB(postId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Delete Succesfully","")
