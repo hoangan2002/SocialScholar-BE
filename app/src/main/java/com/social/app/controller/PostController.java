@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.dto.PostReportDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
@@ -292,8 +293,13 @@ public class PostController {
     }
 
     @GetMapping("/all-reports/{postId}")
-    public ArrayList<PostReport> getAllPostReports(@PathVariable long postId){
-        return reportService.getAllPostReports(postId);
+    public ArrayList<PostReport> getAllReportsByPostId(@PathVariable long postId){
+        return reportService.getAllPostReportsByPostId(postId);
+    }
+
+    @GetMapping("/all-reports")
+    public ArrayList<PostReportDTO> getAllReports(){
+        return reportService.getAllPostReports();
     }
 
     @GetMapping("/all-report-types")
