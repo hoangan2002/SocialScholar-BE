@@ -14,6 +14,7 @@ public class PostResponse {
     private long postId;
     private String content;
     private Timestamp time;
+    private String titles;
     private String imageURL;
     private String author;
     private String groupName;

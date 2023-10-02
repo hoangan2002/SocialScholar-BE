@@ -1,7 +1,9 @@
 package com.social.app.controller;
 
+import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
+import com.social.app.model.Post;
 import com.social.app.model.User;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.GroupServices;
@@ -129,6 +131,22 @@ public class GroupController {
 
         }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
 
+    }
+
+    @GetMapping("/find-group")
+    public ArrayList<Groups> findPost(@RequestParam("findContent") String findContent){
+        ArrayList<Groups> allGroup = groupServices.retriveGroupFromDB();
+        ArrayList<Groups> findResult = new ArrayList<>();
+        if(findContent!= null && findContent != "\s") {
+            for (Groups p : allGroup) {
+                if (p.getGroupName() != null && p.getGroupName().toLowerCase().contains(findContent.toLowerCase().trim())) {
+                    findResult.add(p);
+                }
+            }
+        }else {
+            return null;
+        }
+        return findResult;
     }
 
 
