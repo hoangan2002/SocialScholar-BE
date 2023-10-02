@@ -26,13 +26,22 @@ public class ProfileController {
     @Autowired
     ImageStorageService imageStorageService;
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
-    @GetMapping("{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable int userId) {
         User theUser = service.findById(userId);
         return theUser!=null?
         ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
         :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<ResponseObject> getUserProfileByName(@PathVariable String name) {
+        User theUser = service.findById(userId);
+        return theUser!=null?
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+                :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+    }
+
 
     @PutMapping("/edit-username")
     public ResponseEntity<ResponseObject> editUsername(@RequestParam("id") int id, @RequestParam("name") String name){

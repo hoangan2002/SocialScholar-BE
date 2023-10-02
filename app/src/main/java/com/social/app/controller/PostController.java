@@ -5,6 +5,7 @@ import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
+import com.social.app.request.PostDTO;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/postservices")
+@RequestMapping("/api/poster")
 public class PostController {
     @Autowired
     PostServices postServices;
@@ -49,32 +50,35 @@ public class PostController {
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
-    public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
-                                                     @RequestParam(value = "file", required = false) MultipartFile[] file,
-                                                     @RequestParam("userid") int userid,
-                                                     @RequestParam("groupid") int groupid){
+    public ResponseEntity<ResponseObject> submitPost(@RequestBody PostDTO postDTO
+
+                                                     ){
+        System.out.println(postDTO.getUserId());
+        System.out.println(postDTO.getGroupId());
+        Post body = new Post(); //@RequestParam(value = "file", required = false) MultipartFile[] file
         // Check if user is not in group, user can not dislike post
-        if(!userService.isGroupMember(userid, groupid))
+        if(!userService.isGroupMember(postDTO.getUserId(), postDTO.getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
         try {
-            if (userService.loadUserById(userid) != null) {
-                body.setUser(userService.loadUserById(userid));
-                if (groupServices.loadGroupById(groupid) != null) {
+            if (userService.loadUserById(postDTO.getUserId()) != null) {
+                body.setUser(userService.loadUserById(postDTO.getUserId()));
+                if (groupServices.loadGroupById(postDTO.getGroupId()) != null) {
 
-                    body.setGroup(groupServices.loadGroupById(groupid));
+                    body.setGroup(groupServices.loadGroupById(postDTO.getGroupId()));
 
-                    if (file != null && !file[0].isEmpty()) {
-                        String imagePath="";
-                        for(int i=0; i<file.length;i++) {
-                            String fileName = imageStorageService.storeFile(file[i]);
-                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
-                        }
-                        body.setImageURL(imagePath.trim());
-                    }
+//                    if (file != null && !file[0].isEmpty()) {
+//                        String imagePath="";
+//                        for(int i=0; i<file.length;i++) {
+//                            String fileName = imageStorageService.storeFile(file[i]);
+//                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+//                        }
+//                        body.setImageURL(imagePath.trim());
+//                    }
+                    body.setContent(postDTO.getTitle()+postDTO.getContent());
                     postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
                             new ResponseObject("ok", "Post successfully", body));

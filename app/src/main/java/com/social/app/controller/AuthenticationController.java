@@ -48,13 +48,16 @@ public class AuthenticationController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String userProfile() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         if (authentication != null && authentication.isAuthenticated()) {
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
             if (((Collection<?>) authorities).stream().anyMatch(authority -> authority.toString().equals("ROLE_USER"))) {
                 return "Welcome to User Profile";
             } else if (authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"))) {
                 return "Welcome to Admin Profile";
             }
+
         }
         return "Access Denied";
     }
