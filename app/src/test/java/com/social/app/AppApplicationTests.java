@@ -1,5 +1,6 @@
 package com.social.app;
 
+import com.social.app.model.Category;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
