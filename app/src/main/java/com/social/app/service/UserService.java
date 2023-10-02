@@ -106,6 +106,11 @@ public class UserService implements UserDetailsService {
         } else throw new RuntimeException("Did not find employee id - " + id);
         return theUser;
     }
+
+    public User loadUserByUserName(String userName){
+        User user = repository.findByUserName(userName).orElseThrow(()-> new RuntimeException("User does not exist!"));
+        return user;
+    }
     public Boolean existPhone(String phone){
         Optional<User> result = repository.findByPhone(phone);
         return result.isPresent();
@@ -215,5 +220,9 @@ public class UserService implements UserDetailsService {
         Comment comment = commentRepository.findById(commentId).orElseThrow(()-> new RuntimeException("Not found comment"));
         if (userId == comment.getUser().getUserId()) return true;
         return false;
+    }
+
+    public User findUserByUsername(String username){
+        return repository.findUserByUserName(username);
     }
 }

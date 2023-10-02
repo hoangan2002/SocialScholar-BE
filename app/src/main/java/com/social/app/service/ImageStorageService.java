@@ -41,6 +41,13 @@ public class ImageStorageService implements IStorageService{
         return Arrays.asList(new String[] {"png","jpg","jpeg", "bmp"})
                 .contains(fileExtension.trim().toLowerCase());
     }
+// kiểm tra có phải là document hay không.
+    private boolean isDocumentFile(MultipartFile file) {
+        //Let install FileNameUtils
+        String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+        return Arrays.asList(new String[] {"doc","pdf","docx", "txt"})
+                .contains(fileExtension.trim().toLowerCase());
+    }
     @Override
     public String storeFile(MultipartFile file) {
         try {

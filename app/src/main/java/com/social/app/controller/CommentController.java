@@ -1,5 +1,7 @@
 package com.social.app.controller;
 
+import com.social.app.dto.CommentDTO;
+import com.social.app.dto.CommentReportDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.service.*;
@@ -28,9 +30,9 @@ public class CommentController {
     private PostServices postServices;
     @Autowired
     private ReportService reportService;
-    @PostMapping("/{postID}/comments")
+    /*@PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> createComment(@RequestPart Comment comment,
+    ResponseEntity<ResponseObject> createComment(@RequestPart CommentDTO comment,
                                                  @RequestParam("userid") int userid,
                                                  @PathVariable long postID){
         try {
@@ -38,14 +40,33 @@ public class CommentController {
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
             if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
-            // set user for comment
-            comment.setUser(userService.loadUserById(userid));
             // create comment
-            Comment newComment = this.commentService.createComment(comment, postID);
+            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("Success", "Create new comment successfully", newComment));
         }
         catch (RuntimeException runtimeException){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("Failed", "There are problem..", ""));
+        }
+    }*/
+    @PostMapping("/{postID}/comments")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    ResponseEntity<ResponseObject> createComment(@RequestPart CommentDTO comment,
+                                                 @RequestParam("userid") int userid,
+                                                 @PathVariable long postID){
+        try {
+            // Get post from postId
+            Post post = postServices.loadPostById(postID);
+            // Check if user is not in group, user can not create comment
+            if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            // create comment
+            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    new ResponseObject("Successfully", "Create comment successfully", newComment));
+        }
+        catch (RuntimeException runtimeException){
+            runtimeException.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Failed", "There are problem..", ""));
         }
@@ -56,7 +77,7 @@ public class CommentController {
     ResponseEntity<ResponseObject> deleteComment(@PathVariable long commentID, @RequestParam("userid") int userid){
         try {
             // Get comment from commentId
-            Comment comment = commentService.getCommentByID(commentID);
+            CommentDTO comment = commentService.getCommentByID(commentID);
             // Check if user don't create comment, user can not delete
             if(!userService.isCommemtCreator(userid, commentID))  throw new RuntimeException("Must be group member");
             // Call delete method
@@ -71,8 +92,8 @@ public class CommentController {
 
     @GetMapping("/all-comments/{postID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ArrayList<Comment> getAllComments(@PathVariable long postID){
-        ArrayList<Comment> allComments = this.commentService.getAllComments(postID);
+    ArrayList<CommentDTO> getAllComments(@PathVariable long postID){
+        ArrayList<CommentDTO> allComments = this.commentService.getAllComments(postID);
         return allComments;
     }
 
@@ -81,11 +102,11 @@ public class CommentController {
     ResponseEntity<ResponseObject> editComment(@PathVariable long commentID, @RequestPart Comment newComment, @RequestParam("userid") int userid){
         try {
             // Get comment from commentId
-            Comment comment = commentService.getCommentByID(commentID);
+            CommentDTO comment = commentService.getCommentByID(commentID);
             // Check if user don't create comment, user can not edit
             if(!userService.isCommemtCreator(userid, commentID)) throw new RuntimeException("Must be group member");
             // Call edit method
-            Comment editedComment = this.commentService.editComment(newComment, commentID);
+            CommentDTO editedComment = this.commentService.editComment(newComment, commentID);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Success", "Edit comment successfully", editedComment));
         }
         catch (RuntimeException runtimeException){
@@ -103,12 +124,13 @@ public class CommentController {
                     new ResponseObject("Failed","Can't find comment","")
             );
 
-        Comment comment = commentService.getCommentByID(commentId);
+        CommentDTO comment = commentService.getCommentByID(commentId);
+        // Map commentDTO to comment
+
+
         // Check if user is not in group, user can not dislike comment
-        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                    new ResponseObject("Failed","User must be in group","")
-            );
+        Post post = commentService.getPostByCommentId(commentId);
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
         User user = userService.loadUserById(userId);
         // check if user already dislike, delete commentlike
@@ -134,12 +156,10 @@ public class CommentController {
                     new ResponseObject("Failed","Can't find comment","")
             );
 
-        Comment comment = commentService.getCommentByID(commentId);
+        CommentDTO comment = commentService.getCommentByID(commentId);
         // Check if user is not in group, user can not like comment
-        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                    new ResponseObject("Failed","User must be in group","")
-            );
+        Post post = commentService.getPostByCommentId(commentId);
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
         User user = userService.loadUserById(userId);
         // check if user already dislike, delete commentlike
@@ -168,17 +188,19 @@ public class CommentController {
                                                  @PathVariable long commentParentId){
         try {
             // Get commentParent from commentParentId
-            Comment commentParent = commentService.getCommentByID(commentParentId);
+            CommentDTO commentParent = commentService.getCommentByID(commentParentId);
             // Check if user is not in group, user can not create comment
-            if(!userService.isGroupMember(userid, commentParent.getPost().getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            Post post = commentService.getPostByCommentId(commentParentId);
+            if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // set user for comment
             commentReply.setUser(userService.loadUserById(userid));
             // create comment
-            Comment newComment = this.commentService.createCommentReply(commentReply, commentParentId);
+            CommentDTO newComment = this.commentService.createCommentReply(commentReply, commentParentId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("Success", "Create new comment successfully", newComment));
         }
         catch (RuntimeException runtimeException){
+            runtimeException.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("Failed", "There are problem..", ""));
         }
@@ -193,9 +215,10 @@ public class CommentController {
                     new ResponseObject("Failed","Can't find comment","")
             );
 
-        Comment comment = commentService.getCommentByID(commentId);
+        CommentDTO comment = commentService.getCommentByID(commentId);
         // Check if user is not in group, user can not report comment
-        if(!userService.isGroupMember(userId, comment.getPost().getGroup().getGroupId()))
+        Post post = commentService.getPostByCommentId(commentId);
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -214,8 +237,13 @@ public class CommentController {
     }
 
     @GetMapping("/all-reports/{commentId}")
-    public ArrayList<CommentReport> getAllPostReports(@PathVariable long commentId){
-        return reportService.getAllCommentReports(commentId);
+    public ArrayList<CommentReportDTO> getAllReportsByCommentId(@PathVariable long commentId){
+        return reportService.getAllCommentReportsByCommentId(commentId);
+    }
+
+    @GetMapping("/all-reports")
+    public  ArrayList<CommentReportDTO> getAllReports(){
+        return reportService.getAllCommentReports();
     }
 
     @GetMapping("/all-report-types")

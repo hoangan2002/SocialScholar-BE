@@ -12,6 +12,7 @@ public class TokenPaymentHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long toHistoryId;
     private long amountToken;
+    private double amountMoney;
     private Timestamp time;
 
     @ManyToOne
