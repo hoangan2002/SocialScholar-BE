@@ -5,7 +5,6 @@ import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
-import com.social.app.request.PostDTO;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +20,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/poster")
+@RequestMapping("/api/postservices")
 public class PostController {
     @Autowired
     PostServices postServices;
@@ -50,35 +49,36 @@ public class PostController {
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
-//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
-    public ResponseEntity<ResponseObject> submitPost(@RequestBody PostDTO postDTO
-
-                                                     ){
-        System.out.println(postDTO.getUserId());
-        System.out.println(postDTO.getGroupId());
-        Post body = new Post(); //@RequestParam(value = "file", required = false) MultipartFile[] file
+    public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
+                                                     @RequestParam(value = "file", required = false) MultipartFile[] file,
+//                                                     @RequestParam("userid") int userid,
+                                                     @RequestParam("groupid") int groupid){
         // Check if user is not in group, user can not dislike post
-        if(!userService.isGroupMember(postDTO.getUserId(), postDTO.getGroupId()))
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        if(!userService.isGroupMember(userid, groupid))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
         try {
-            if (userService.loadUserById(postDTO.getUserId()) != null) {
-                body.setUser(userService.loadUserById(postDTO.getUserId()));
-                if (groupServices.loadGroupById(postDTO.getGroupId()) != null) {
+            if (userService.loadUserById(userid) != null) {
+                body.setUser(userService.loadUserById(userid));
+                if (groupServices.loadGroupById(groupid) != null) {
 
-                    body.setGroup(groupServices.loadGroupById(postDTO.getGroupId()));
+                    body.setGroup(groupServices.loadGroupById(groupid));
 
-//                    if (file != null && !file[0].isEmpty()) {
-//                        String imagePath="";
-//                        for(int i=0; i<file.length;i++) {
-//                            String fileName = imageStorageService.storeFile(file[i]);
-//                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
-//                        }
-//                        body.setImageURL(imagePath.trim());
-//                    }
-                    body.setContent(postDTO.getTitle()+postDTO.getContent());
+                    if (file != null && !file[0].isEmpty()) {
+                        String imagePath="";
+                        for(int i=0; i<file.length;i++) {
+                            String fileName = imageStorageService.storeFile(file[i]);
+                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+                        }
+                        body.setImageURL(imagePath.trim());
+                    }else {
+                        body.setImageURL("");
+                    }
                     postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
                             new ResponseObject("ok", "Post successfully", body));
@@ -96,26 +96,22 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PutMapping("/editpost")
     public ResponseEntity<ResponseObject>  updateUser(@RequestPart Post postData,
-                                                      @RequestParam("userid") int userid,
+//                                                      @RequestParam("userid") int userid,
                                                       @RequestParam("postid") long postid,
                                                       //nhap vao vi tri anh can xoa. Example: anh thu 1 va 2 => imageRemove[1,2]
                                                       @RequestParam(value="imageRemove",required = false)int[] imageRemove,
                                                       //thêm ảnh nếu cần
                                                       @RequestParam(value = "file", required = false) MultipartFile[] file){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         try {
             boolean check = false;
 
             if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
                 postData.setPostId(postid);
-
                 String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
-
-
-
                 ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
-
                 String newImageList="";
-
                 if(imageRemove!= null){
                     for(int index:imageRemove){
                         if(index>=arr.length)
@@ -163,7 +159,7 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
-//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPost")
     public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
@@ -173,7 +169,9 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
-        if(postServices.loadPostById(postId)!=null){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        if(postServices.loadPostById(postId)!=null && postServices.loadPostById(postId).getUser().getUserName().matches(authentication.getName())){
             postServices.deletePostDB(postId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Delete Succesfully","")
@@ -302,5 +300,23 @@ public class PostController {
     public ArrayList<PostReportType> getAllReportTypes(){
         return reportService.getAllPostReportTypes();
     }
+
+    @GetMapping("/find-post")
+    public ArrayList<PostResponse> findPost(@RequestParam("findContent") String findContent){
+        ArrayList<Post> allPost = postServices.retrivePostFromDB();
+        ArrayList<Post> findResult = new ArrayList<>();
+        if(findContent!= null && findContent != "\s") {
+            for (Post p : allPost) {
+                if (p.getTitles()!= null && p.getTitles().toLowerCase().contains(findContent.toLowerCase().trim())) {
+                    findResult.add(p);
+                }
+            }
+        }else {
+            return null;
+        }
+        return responseConvertService.postResponseArrayList(findResult);
+    }
+
+
 
 }

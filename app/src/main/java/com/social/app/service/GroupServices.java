@@ -1,6 +1,7 @@
 package com.social.app.service;
 
 import com.social.app.model.Groups;
+import com.social.app.model.Post;
 import com.social.app.model.User;
 import com.social.app.repository.GroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 public class GroupServices {
@@ -44,4 +47,11 @@ public class GroupServices {
 
 
     }
+    public ArrayList<Groups> retriveGroupFromDB(){
+        ArrayList<Groups> result = groupRepository.findAll();
+        return result;
+    }
+
+
+
 }

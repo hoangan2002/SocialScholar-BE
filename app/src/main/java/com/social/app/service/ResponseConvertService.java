@@ -38,6 +38,7 @@ public class ResponseConvertService {
                 .groupName(post.getGroup().getGroupName())
                 .comments(commentResponseArrayList(post.getComments()))
                 .likes(postLikeResponse(post.getLikes()))
+                .titles(post.getTitles())
                 .build();
 
         return postResponse;

@@ -27,20 +27,28 @@ public class ProfileController {
     ImageStorageService imageStorageService;
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
     @GetMapping("/{userId}")
-    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable int userId) {
-        User theUser = service.findById(userId);
-        return theUser!=null?
-        ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
-        :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable String userId) {
+        try {
+            User theUser = service.findUserByUsername(userId);
+
+            if(theUser == null)  theUser = service.findById(Integer.parseInt(userId));
+
+            if (theUser == null) {
+                throw new Exception("User not found"); // Ném ngoại lệ nếu người dùng không tồn tại
+            }
+
+            System.out.println(theUser);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("Successful", "OK", theUser));
+        } catch (Exception e) {
+            // Xử lý ngoại lệ UserNotFoundException ở đây
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject("Fail", e.getMessage(), null));
+        }
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResponseObject> getUserProfileByName(@PathVariable String name) {
-        User theUser = service.findById(userId);
-        return theUser!=null?
-                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
-                :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
-    }
+
 
 
     @PutMapping("/edit-username")

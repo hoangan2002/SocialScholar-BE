@@ -1,30 +1,24 @@
 package com.social.app.controller;
 
 import com.social.app.entity.GroupDTO;
+import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 import com.social.app.model.User;
-import com.social.app.repository.UserRepository;
 import com.social.app.service.GroupServices;
 import com.social.app.service.ImageStorageService;
-import com.social.app.service.UserInfoDetails;
 import com.social.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 @RestController
 @RequestMapping("/group")
@@ -130,6 +124,22 @@ public class GroupController {
             return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Read Group Success", "OK",groupDTO));
         }
         else return   ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("Read Group Fail", "ERROR",null));
+    }
+
+    @GetMapping("/find-group")
+    public ArrayList<Groups> findPost(@RequestParam("findContent") String findContent){
+        ArrayList<Groups> allGroup = groupServices.retriveGroupFromDB();
+        ArrayList<Groups> findResult = new ArrayList<>();
+        if(findContent!= null && findContent != "\s") {
+            for (Groups p : allGroup) {
+                if (p.getGroupName() != null && p.getGroupName().toLowerCase().contains(findContent.toLowerCase().trim())) {
+                    findResult.add(p);
+                }
+            }
+        }else {
+            return null;
+        }
+        return findResult;
     }
 
 
