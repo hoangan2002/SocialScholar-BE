@@ -12,6 +12,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -152,5 +153,19 @@ public class ImageStorageService implements IStorageService{
         }
 
         return encodedfile;
+    }
+
+    public Resource loadAsResource(File file){
+        try{
+
+            Path path = Path.of(file.getAbsolutePath());
+            Resource resource = new UrlResource(path.toUri());
+            if(resource.exists()|| resource.isReadable()){
+                return resource;
+            }
+            throw  new RuntimeException("Can not read file: "+ file);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
