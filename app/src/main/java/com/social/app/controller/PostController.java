@@ -323,6 +323,24 @@ public class PostController {
         return responseConvertService.postResponseArrayList(findResult);
     }
 
-
+    @PostMapping("/donate/{postid}")
+    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        User user = userService.loadUserById(userid);
+        Post post = postServices.loadPostById(postid);
+        if(user.getCoin()>coins && postServices.loadPostById(postid).getUser()!= user){
+            user.setCoin(user.getCoin()-coins);
+            userService.save(user);
+            post.getUser().setCoin(post.getUser().getCoin()+coins);
+            userService.save(post.getUser());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Donate successfully","")
+            );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                new ResponseObject("Failed","Donate failed","")
+        );
+    }
 
 }
