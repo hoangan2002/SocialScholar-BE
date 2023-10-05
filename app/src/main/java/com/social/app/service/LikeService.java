@@ -1,10 +1,12 @@
 package com.social.app.service;
 
+import com.social.app.dto.CommentDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentLikeRepository;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostLikeRepository;
 import com.social.app.repository.PostRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,9 @@ public class LikeService {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     public PostLike createPostLike(Post post, User user, byte status){
         PostLike postLike = new PostLike();
         // set user, post and status for postlike
@@ -43,8 +48,11 @@ public class LikeService {
         return postLikeRepository.save(postLike);
     }
 
-    public CommentLike createCommentLike(Comment comment, User user, byte status){
+    public CommentLike createCommentLike(CommentDTO commentDTO, User user, byte status){
         CommentLike commentLike = new CommentLike();
+        // Map commentDTO to comment;
+        Comment comment = modelMapper.map(commentDTO, Comment.class);
+
         // set user, post and status for commentlike
         commentLike.setUser(user);
         commentLike.setComment(comment);

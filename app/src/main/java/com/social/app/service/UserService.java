@@ -108,6 +108,11 @@ public class UserService implements UserDetailsService {
         } else throw new RuntimeException("Did not find employee id - " + id);
         return theUser;
     }
+
+    public User loadUserByUserName(String userName){
+        User user = repository.findByUserName(userName).orElseThrow(()-> new RuntimeException("User does not exist!"));
+        return user;
+    }
     public Boolean existPhone(String phone){
         Optional<User> result = repository.findByUserName(phone);
         return result.isPresent();

@@ -1,16 +1,21 @@
 package com.social.app.service;
 
+import com.social.app.dto.CommentDTO;
+import com.social.app.dto.CommentReportDTO;
+import com.social.app.dto.PostReportDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentReportRepository;
 import com.social.app.repository.CommentReportTypeRepo;
 import com.social.app.repository.PostReportRepository;
 import com.social.app.repository.PostReportTypeRepo;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class ReportService {
@@ -27,7 +32,10 @@ public class ReportService {
     PostServices postServices;
     @Autowired
     CommentService commentService;
-    public ArrayList<PostReport> getAllPostReports(long postId){
+    @Autowired
+    ModelMapper modelMapper;
+
+    public ArrayList<PostReport> getAllPostReportsByPostId(long postId){
         Post post = postServices.loadPostById(postId);
         return postReportRepository.findByPost(post);
     }
@@ -46,12 +54,23 @@ public class ReportService {
         return postReportRepository.save(postReport);
     }
 
-    public ArrayList<CommentReport> getAllCommentReports(long commentId){
-        Comment comment = commentService.getCommentByID(commentId);
-        return commentReportRepository.findByComment(comment);
+    public ArrayList<CommentReportDTO> getAllCommentReportsByCommentId(long commentId){
+        CommentDTO commentDTO = commentService.getCommentByID(commentId);
+        // Map commentDTO to comment;
+        Comment comment = modelMapper.map(commentDTO, Comment.class);
+        // Find comment report
+        List<CommentReport> commentReports = commentReportRepository.findByComment(comment);
+        ArrayList<CommentReportDTO> commentReportDTOs = new ArrayList<>();
+        // Map commentReport to commentReportDTO then return
+        for (CommentReport commentReport: commentReports) {
+            commentReportDTOs.add(modelMapper.map(commentReport, CommentReportDTO.class));
+        }
+        return commentReportDTOs;
     }
 
-    public CommentReport createCommentReport(Comment comment, User user, CommentReport commentReport, int typeId){
+    public CommentReport createCommentReport(CommentDTO commentDTO, User user, CommentReport commentReport, int typeId){
+        // Map commentDTO to comment;
+        Comment comment = modelMapper.map(commentDTO, Comment.class);
         // set info to report
         commentReport.setComment(comment);
         commentReport.setUser(user);
@@ -71,5 +90,23 @@ public class ReportService {
 
     public ArrayList<CommentReportType> getAllCommentReportTypes(){
         return new ArrayList<>(commentReportTypeRepo.findAll());
+    }
+
+    public ArrayList<CommentReportDTO> getAllCommentReports(){
+        List<CommentReport> commentReports = commentReportRepository.findAll();
+        ArrayList<CommentReportDTO> commentReportDTOs = new ArrayList<>();
+        for (CommentReport commentReport: commentReports) {
+            commentReportDTOs.add(modelMapper.map(commentReport, CommentReportDTO.class));
+        }
+        return commentReportDTOs;
+    }
+
+    public ArrayList<PostReportDTO> getAllPostReports(){
+        List<PostReport> postReports = postReportRepository.findAll();
+        ArrayList<PostReportDTO> postReportDTOs = new ArrayList<>();
+        for (PostReport postReport: postReports) {
+            postReportDTOs.add(modelMapper.map(postReport, PostReportDTO.class));
+        }
+        return postReportDTOs;
     }
 }
