@@ -24,7 +24,6 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/myProfile")
-//@PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
 
 public class ProfileController {
 
@@ -37,19 +36,29 @@ public class ProfileController {
 
     @Autowired
     ImageStorageService imageStorageService;
-    private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
 
-    @GetMapping("")
-    public ResponseEntity<ResponseObject> getUserProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User theUser = service.findUserByUsername(authentication.getName());
+    private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
+    @GetMapping("/{username}")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
+        User theUser = service.findUserByUsername(username);
         return theUser!=null?
-        ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
-        :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+                :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
 
+//    @GetMapping("")
+//    public ResponseEntity<ResponseObject> getUserProfile() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User theUser = service.findUserByUsername(authentication.getName());
+//
+//        return theUser!=null?
+//                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+//                :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+//    }
 
     @PutMapping("/edit-username")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> editUsername(@RequestParam("name") String name){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = service.findUserByUsername(authentication.getName());
@@ -63,6 +72,7 @@ public class ProfileController {
     }
 
     @PutMapping("/edit-phone")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> editPhone(@RequestParam("phone") String phone){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = service.findUserByUsername(authentication.getName());
@@ -76,6 +86,7 @@ public class ProfileController {
     }
 
     @PutMapping("/edit-password")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public  ResponseEntity<ResponseObject> editPassword( @RequestParam("old-pass") String oldPass, @RequestParam("new-pass") String newPass){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -115,6 +126,7 @@ public class ProfileController {
 //    }
 
     @PutMapping("/edit-avatar")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> editAvatar(@RequestParam(value = "file") MultipartFile file){
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -147,6 +159,7 @@ public class ProfileController {
     }
 
     @GetMapping("get-avatar")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getAvatar(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = service.findUserByUsername(authentication.getName());
