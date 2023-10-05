@@ -190,6 +190,7 @@ public class ImageStorageService implements IStorageService{
         try{
 
             Path path = Path.of(file.getAbsolutePath());
+            System.out.println(path+"              AAAAAAAAAAAAAAAAAAAAAA");
             Resource resource = new UrlResource(path.toUri());
             if(resource.exists()|| resource.isReadable()){
                 return resource;

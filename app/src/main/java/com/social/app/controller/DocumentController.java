@@ -6,7 +6,10 @@ import com.social.app.model.Document;
 import com.social.app.model.User;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 @RestController
@@ -32,6 +36,8 @@ public class DocumentController {
     GroupServices groupServices;
     @Autowired
     ImageStorageService storageService;
+    @Autowired
+    BillService billService;
 
     @PostMapping("/document")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -133,5 +139,34 @@ public class DocumentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject(e.getMessage(), "failed", ""));
         }
+    }
+
+    @GetMapping("/download/{docId}")
+    public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = userService.findUserByUsername(authentication.getName());
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        if(documentDB.getAuthor().getUserId()!=theUser.getUserId() || billService.findByDocumentAndUser(documentDB,theUser)!=null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The user does not have download permission", "failed", ""));
+        Resource resource = null;
+        String filename = documentDB.getUrl();
+        File file = new File(storageService.getUploadsPath()+filename);
+        resource = storageService.loadAsResource(file);
+
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/octet-stream";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( resource);
     }
 }

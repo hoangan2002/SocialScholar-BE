@@ -1,17 +1,12 @@
 package com.social.app.controller;
 
-import com.social.app.entity.AuthRequest;
 import com.social.app.entity.ResponseObject;
-import com.social.app.model.Groups;
 import com.social.app.model.User;
-import com.social.app.repository.UserRepository;
-import com.social.app.service.EditProfileService;
 import com.social.app.service.ImageStorageService;
-import com.social.app.service.JwtService;
 import com.social.app.service.UserService;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +15,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 
 @RestController
@@ -159,11 +151,5 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
     }
 
-    @GetMapping("getavatar/{id}")
-    public ResponseEntity<ResponseObject> getAvatarUri() throws IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User theUser = service.findUserByUsername(authentication.getName());
-        File file = new File(imageStorageService.getUploadsPath() + theUser.getAvatarURL());
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",imageStorageService.loadAsResource(file).getURL()));
-    }
+
 }
