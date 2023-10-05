@@ -161,7 +161,7 @@ public class PostController {
     //______________________________________Get_post____________________________________________________//
 
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @GetMapping("/getPost")
+    @GetMapping("/getPosts")
     public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return responseConvertService.postResponseArrayList(result);

@@ -46,7 +46,7 @@ public class ImageStorageService implements IStorageService{
     private boolean isDocumentFile(MultipartFile file) {
         //Let install FileNameUtils
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
-        return Arrays.asList(new String[] {"doc","pdf","docx", "txt"})
+        return Arrays.asList(new String[] {"doc","pdf","docx", "txt", "xlsx"})
                 .contains(fileExtension.trim().toLowerCase());
     }
     @Override
@@ -83,6 +83,37 @@ public class ImageStorageService implements IStorageService{
         }
         catch (IOException exception) {
             throw new RuntimeException("Failed to store file.", exception);
+        }
+    }
+    public String storeDoc(MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                throw new RuntimeException("Failed to store empty file.");
+            }
+            //check file is Doc ?
+            if(!isDocumentFile(file)) {
+                throw new RuntimeException("You can only upload image file");
+            }
+            //File must be rename, why ?
+            String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+            String generatedFileName = UUID.randomUUID().toString().replace("-", "");
+            generatedFileName = generatedFileName+"."+fileExtension;
+            Path destinationFilePath = this.storageFolder.resolve(
+                            Paths.get(generatedFileName))
+                    .normalize().toAbsolutePath();
+            if (!destinationFilePath.getParent().equals(this.storageFolder.toAbsolutePath())) {
+                // This is a security check
+                throw new RuntimeException(
+                        "Cannot store file outside current directory.");
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFilePath,
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+            return generatedFileName;
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Failed to store file.", e);
         }
     }
 
