@@ -24,7 +24,6 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/myProfile")
-
 public class ProfileController {
 
     @Autowired
