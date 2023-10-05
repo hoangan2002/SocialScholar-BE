@@ -102,6 +102,8 @@ public class UserService implements UserDetailsService {
         }
 
     }
+
+
     public User loadUserById(int id) throws UsernameNotFoundException {
         Optional<User> result = repository.findById(id);
         User theUser = null;
@@ -211,6 +213,17 @@ public class UserService implements UserDetailsService {
     public boolean isGroupMember(int userId, long groupId){
         // Get user by userId
         User user = loadUserById(userId);
+        // Get list joinmanagement by user
+        ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
+        for (JoinManagement join:joins) {
+            // Check if user joined in group, return true, else return false
+            if (join.getGroup().getGroupId() == groupId) return true;
+        }
+        return  false;
+    }
+    public boolean isGroupMember(String userName, long groupId){
+        // Get user by userId
+        User user = (User) loadUserByUsername(userName);
         // Get list joinmanagement by user
         ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
         for (JoinManagement join:joins) {

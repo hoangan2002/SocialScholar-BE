@@ -24,34 +24,41 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/myProfile")
+<<<<<<< HEAD
+=======
+//@PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+
+>>>>>>> 6b03cb516d7b11242918bc22efd350936d28db17
 public class ProfileController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+
     @Autowired
     private UserService service;
 
     @Autowired
     ImageStorageService imageStorageService;
+<<<<<<< HEAD
 
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @GetMapping("/{username}")
-    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
-    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
-        User theUser = service.findUserByUsername(username);
+
+    private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
+
+    @GetMapping("")
+    public ResponseEntity<ResponseObject> getUserProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = service.findUserByUsername(authentication.getName());
+
         return theUser!=null?
                 ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
                 :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
 
-//    @GetMapping("")
-//    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
-//    public ResponseEntity<ResponseObject> getUserProfile() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        User theUser = service.findUserByUsername(authentication.getName());
-//        return theUser!=null?
-//        ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
-//        :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
-//    }
+
 
     @PutMapping("/edit-username")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
