@@ -3,6 +3,7 @@ package com.social.app.service;
 import com.social.app.repository.PostRepository;
 import lombok.Getter;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -10,9 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,7 +46,7 @@ public class ImageStorageService implements IStorageService{
     private boolean isDocumentFile(MultipartFile file) {
         //Let install FileNameUtils
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
-        return Arrays.asList(new String[] {"doc","pdf","docx", "txt"})
+        return Arrays.asList(new String[] {"doc","pdf","docx", "txt", "xlsx"})
                 .contains(fileExtension.trim().toLowerCase());
     }
     @Override
@@ -83,6 +83,37 @@ public class ImageStorageService implements IStorageService{
         }
         catch (IOException exception) {
             throw new RuntimeException("Failed to store file.", exception);
+        }
+    }
+    public String storeDoc(MultipartFile file) {
+        try {
+            if (file.isEmpty()) {
+                throw new RuntimeException("Failed to store empty file.");
+            }
+            //check file is Doc ?
+            if(!isDocumentFile(file)) {
+                throw new RuntimeException("You can only upload image file");
+            }
+            //File must be rename, why ?
+            String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+            String generatedFileName = UUID.randomUUID().toString().replace("-", "");
+            generatedFileName = generatedFileName+"."+fileExtension;
+            Path destinationFilePath = this.storageFolder.resolve(
+                            Paths.get(generatedFileName))
+                    .normalize().toAbsolutePath();
+            if (!destinationFilePath.getParent().equals(this.storageFolder.toAbsolutePath())) {
+                // This is a security check
+                throw new RuntimeException(
+                        "Cannot store file outside current directory.");
+            }
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, destinationFilePath,
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+            return generatedFileName;
+        }
+        catch (IOException e) {
+            throw new RuntimeException("Failed to store file.", e);
         }
     }
 
@@ -127,8 +158,46 @@ public class ImageStorageService implements IStorageService{
 
     public boolean deleteFile(String path){
         File file = new File(path);
+        System.out.println(getUploadsPath());
         if(file.exists())
             return file.delete();
         return false;
+    }
+
+    public String getUploadsPath(){
+        return String.valueOf(Paths.get("uploads").toAbsolutePath()+File.separator);
+    }
+
+    public String encodeFileToBase64Binary(File file){
+        String encodedfile = null;
+        try {
+            FileInputStream fileInputStreamReader = new FileInputStream(file);
+            byte[] bytes = new byte[(int)file.length()];
+            fileInputStreamReader.read(bytes);
+            encodedfile = Base64.encodeBase64URLSafeString(bytes).toString();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return encodedfile;
+    }
+
+    public Resource loadAsResource(File file){
+        try{
+
+            Path path = Path.of(file.getAbsolutePath());
+            System.out.println(path+"              AAAAAAAAAAAAAAAAAAAAAA");
+            Resource resource = new UrlResource(path.toUri());
+            if(resource.exists()|| resource.isReadable()){
+                return resource;
+            }
+            throw  new RuntimeException("Can not read file: "+ file);
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

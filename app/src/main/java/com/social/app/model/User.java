@@ -37,9 +37,11 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
 
+
     @OneToMany(mappedBy = "author")
     List<Document> documents;
 
+    @JsonManagedReference(value = "bill_user")
     @OneToMany(mappedBy = "user")
     List<Bill> bills;
 
