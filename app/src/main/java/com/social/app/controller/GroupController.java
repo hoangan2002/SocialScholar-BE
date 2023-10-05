@@ -114,16 +114,28 @@ public class GroupController {
     }
     @GetMapping("/{groupId}")
 //    @PreAuthorize("hasRole('ROLE_HOST')")
-    public  ResponseEntity<ResponseObject> readGroup(@PathVariable Long groupId){
+    public  ResponseEntity<ResponseObject> readGroup(@PathVariable String groupId){
 //        if(groupServices.isGroupHost(groupId)){
 //
 //        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
-        Groups group = groupServices.loadGroupById(groupId);
-        if (group != null) {
-            GroupDTO groupDTO = new GroupDTO(group);
-            return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Read Group Success", "OK",groupDTO));
+        try {
+            Groups group = groupServices.loadGroupById(Integer.parseInt(groupId));
+
+            if(group == null)  group = groupServices.loadGroupByName(groupId);
+            System.out.println(groupId);
+            System.out.println(group);
+            if (group == null) {
+                throw new Exception("Group not found"); // Ném ngoại lệ nếu người dùng không tồn tại
+            }
+
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("Successful", "OK", group));
+        } catch (Exception e) {
+            // Xử lý ngoại lệ UserNotFoundException ở đây
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject("Fail", e.getMessage(), null));
         }
-        else return   ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseObject("Read Group Fail", "ERROR",null));
     }
 
     @GetMapping("/find-group")
@@ -142,7 +154,12 @@ public class GroupController {
         return findResult;
     }
 
-
+//    @GetMapping("/{groupId}")
+////    @PreAuthorize("hasRole('ROLE_HOST')")
+//    public  String checkGroupMember(@PathVariable String groupId){
+//
+//    }
+//
 
 
 }

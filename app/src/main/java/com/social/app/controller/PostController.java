@@ -5,6 +5,7 @@ import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
+import com.social.app.request.PostDTO;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +21,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/postservices")
+@RequestMapping("/api/poster")
 public class PostController {
     @Autowired
     PostServices postServices;
@@ -51,37 +52,41 @@ public class PostController {
     //______________________________________Make_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
-    public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
-                                                     @RequestParam(value = "file", required = false) MultipartFile[] file,
-//                                                     @RequestParam("userid") int userid,
-                                                     @RequestParam("groupid") int groupid){
+    public ResponseEntity<ResponseObject> submitPost(@RequestPart PostDTO body){
+        Post post = new Post();
+        String content ;
+        Timestamp time;
+        int userId;
+        int groupId;
+        String title ;
         // Check if user is not in group, user can not dislike post
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
-        if(!userService.isGroupMember(userid, groupid))
+        if(!userService.isGroupMember(userid, body.getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
         try {
             if (userService.loadUserById(userid) != null) {
-                body.setUser(userService.loadUserById(userid));
-                if (groupServices.loadGroupById(groupid) != null) {
+                post.setUser(userService.loadUserById(userid));
+                if (groupServices.loadGroupById(body.getGroupId()) != null) {
 
-                    body.setGroup(groupServices.loadGroupById(groupid));
+                    post.setGroup(groupServices.loadGroupById(body.getGroupId()));
+                    post.setTime(body.getTime());
 
-                    if (file != null && !file[0].isEmpty()) {
-                        String imagePath="";
-                        for(int i=0; i<file.length;i++) {
-                            String fileName = imageStorageService.storeFile(file[i]);
-                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
-                        }
-                        body.setImageURL(imagePath.trim());
-                    }else {
-                        body.setImageURL("");
-                    }
-                    postServices.submitPostToDB(body);
+//                    if (file != null && !file[0].isEmpty()) {
+//                        String imagePath="";
+//                        for(int i=0; i<file.length;i++) {
+//                            String fileName = imageStorageService.storeFile(file[i]);
+//                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+//                        }
+//                        body.setImageURL(imagePath.trim());
+//                    }else {
+//                        body.setImageURL("");
+//                    }
+                    postServices.submitPostToDB(post);
                     return ResponseEntity.status(HttpStatus.OK).body(
-                            new ResponseObject("ok", "Post successfully", body));
+                            new ResponseObject("ok", "Post successfully", post));
                 }
             }
         }catch (RuntimeException exception){
@@ -169,6 +174,7 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         if(postServices.loadPostById(postId)!=null && postServices.loadPostById(postId).getUser().getUserName().matches(authentication.getName())){
@@ -183,7 +189,9 @@ public class PostController {
     }
 
     @PostMapping("/dislike/{postId}")
-    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
+        User current = userService.findUserByUsername(userName);
+        int userId = current != null ?current.getUserId():-1;
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -214,8 +222,11 @@ public class PostController {
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
         // check if post is not found, return
+        User current = userService.findUserByUsername(userName);
+        int userId = current != null ?current.getUserId():-1;
+        System.out.println(userId); 
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ResponseObject("Failed","Can't find post","")

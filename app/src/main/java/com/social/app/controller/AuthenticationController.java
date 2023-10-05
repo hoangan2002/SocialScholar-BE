@@ -63,6 +63,7 @@ public class AuthenticationController {
     }
 
 
+
     @PostMapping("/sign-in")
     public ResponseEntity<ResponseObject> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 public interface GroupRepository  extends JpaRepository<Groups, Long> {
     Groups findByGroupId(long groupId);
+    Groups findByGroupName(String groupName);
     Groups save(Groups groups);
 
     ArrayList<Groups> findAll();
