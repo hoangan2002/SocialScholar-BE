@@ -26,6 +26,7 @@ public class User {
     private String password;
     private String email;
     private String avatarURL;
+    private String backgroundURL;
     private String level;
     private String role;
     private long coin;

@@ -30,14 +30,14 @@ public class ProfileController {
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable String userId) {
         try {
             User theUser = service.findUserByUsername(userId);
-
-            if(theUser == null)  theUser = service.findById(Integer.parseInt(userId));
+            System.out.println(theUser);
+//            if(theUser == null)  theUser = service.findById(Integer.parseInt(userId));
 
             if (theUser == null) {
                 throw new Exception("User not found"); // Ném ngoại lệ nếu người dùng không tồn tại
             }
 
-            System.out.println(theUser);
+
 
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseObject("Successful", "OK", theUser));
