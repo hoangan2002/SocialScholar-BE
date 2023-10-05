@@ -1,10 +1,13 @@
 package com.social.app.service;
+import com.social.app.config.ModelMapperConfig;
 import com.social.app.config.SecurityConfig;
+import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,6 +36,13 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private SecurityConfig securityConfig;
+    @Autowired
+    ModelMapper modelMapper;
+
+    public UserDTO MapUserDTO(User user){
+        UserDTO userDTO = modelMapper.map(user,UserDTO.class);
+        return userDTO;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
