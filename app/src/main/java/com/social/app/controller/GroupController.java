@@ -1,29 +1,32 @@
 package com.social.app.controller;
 
+import com.social.app.entity.GroupDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
+
 import com.social.app.model.JoinManagement;
 import com.social.app.model.Post;
 import com.social.app.model.User;
 import com.social.app.repository.UserRepository;
 import com.social.app.service.*;
+
+import com.social.app.model.User;
+import com.social.app.service.GroupServices;
+import com.social.app.service.ImageStorageService;
+import com.social.app.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 @RestController
 @RequestMapping("/group")
@@ -122,18 +125,30 @@ public class GroupController {
             }
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
-    @GetMapping("/read/{groupId}")
-    @PreAuthorize("hasRole('ROLE_HOST')")
-    public  ResponseEntity<ResponseObject> readGroup(@PathVariable Long groupId){
-        if(groupServices.isGroupHost(groupId)){
-            Groups group = groupServices.loadGroupById(groupId);
-            if (group != null) {
+    @GetMapping("/{groupId}")
+//    @PreAuthorize("hasRole('ROLE_HOST')")
+    public  ResponseEntity<ResponseObject> readGroup(@PathVariable String groupId){
+//        if(groupServices.isGroupHost(groupId)){
+//
+//        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
+        try {
+            Groups group = groupServices.loadGroupById(Integer.parseInt(groupId));
 
-                return  ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Read Group Success", "OK",group));
+            if(group == null)  group = groupServices.loadGroupByName(groupId);
+            System.out.println(groupId);
+            System.out.println(group);
+            if (group == null) {
+                throw new Exception("Group not found"); // Ném ngoại lệ nếu người dùng không tồn tại
             }
 
-        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
 
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("Successful", "OK", group));
+        } catch (Exception e) {
+            // Xử lý ngoại lệ UserNotFoundException ở đây
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject("Fail", e.getMessage(), null));
+        }
     }
 
     @GetMapping("/find-group")
@@ -155,7 +170,6 @@ public class GroupController {
     public  ResponseEntity<ResponseObject> joinGroup(@PathVariable Long groupId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-
         if(userService.isGroupMember(groupId) || groupServices.isGroupHost(groupId)){
             return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User Joined Group", "ERROR",null));
         }
@@ -189,5 +203,6 @@ public class GroupController {
 
 
     }
+
 
 }

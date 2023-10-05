@@ -1,9 +1,12 @@
 package com.social.app.service;
 
 import com.social.app.entity.CommentResponse;
+import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.LikeResponse;
 import com.social.app.entity.PostResponse;
+
 import com.social.app.entity.UserResponse;
+
 import com.social.app.model.*;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +63,20 @@ public class ResponseConvertService {
                 .build();
         return likeResponse;
     }
+
+    public DocumentResponse documentResponse(Document document){
+        var documentResponse = DocumentResponse.builder()
+                .documentId(document.getDocumentId())
+                .documentName(document.getDocumentName())
+                .description(document.getDescription())
+                .cost(document.getCost())
+                .ratings(document.getRatings())
+                .time(document.getTime())
+                .author(document.getAuthor().getUserName())
+                .groupName(document.getGroup().getGroupName())
+                .build();
+        return  documentResponse;
+    }
     public LikeResponse likeResponse(CommentLike like) {
         var likeResponse = LikeResponse.builder()
                 .likeId(like.getLikeId())
@@ -69,6 +86,7 @@ public class ResponseConvertService {
                 .build();
         return likeResponse;
     }
+
     public ArrayList<UserResponse> userResponseArrayList (ArrayList<User> userArrayList)
     {
         ArrayList<UserResponse> userResponses = new ArrayList<>();
@@ -82,6 +100,21 @@ public class ResponseConvertService {
         return userResponses;
     }
 
+    public ArrayList<DocumentResponse> documentResponseArrayList (ArrayList<Document> documentArrayList)
+    {
+        ArrayList<DocumentResponse> documentResponses = new ArrayList<>();
+
+
+        for (Document document : documentArrayList) {
+
+            DocumentResponse documentResponse = documentResponse(document);
+
+            documentResponses.add(documentResponse);
+        }
+
+
+        return documentResponses;
+    }
     public ArrayList<PostResponse> postResponseArrayList (ArrayList<Post> postArrayList)
     {
         ArrayList<PostResponse> postResponses = new ArrayList<>();
