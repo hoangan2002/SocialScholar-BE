@@ -1,4 +1,5 @@
 package com.social.app.service;
+import com.social.app.config.SecurityConfig;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
@@ -30,6 +31,9 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private SecurityConfig securityConfig;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
@@ -45,7 +49,7 @@ public class UserService implements UserDetailsService {
                 .userName(request.getUserName())
                 .phone(request.getPhone())
                 .email(request.getEmail())
-                .password(encoder.encode(request.getPassword()))
+                .password(encoder.encode(request.getPassword().trim()))
                 .role(String.valueOf(Role.ROLE_USER))
                 .build();
         System.out.println(user);
@@ -112,7 +116,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
     public Boolean existPhone(String phone){
-        Optional<User> result = repository.findByUserName(phone);
+        Optional<User> result = repository.findByPhone(phone);
         return result.isPresent();
     }
 
@@ -224,5 +228,8 @@ public class UserService implements UserDetailsService {
 
     public User findUserByUsername(String username){
         return repository.findUserByUserName(username);
+    }
+    public String encodePass(String pass){
+        return  securityConfig.passwordEncoder().encode(pass);
     }
 }

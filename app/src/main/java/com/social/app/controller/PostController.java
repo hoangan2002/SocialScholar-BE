@@ -74,7 +74,7 @@ public class PostController {
                         String imagePath="";
                         for(int i=0; i<file.length;i++) {
                             String fileName = imageStorageService.storeFile(file[i]);
-                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+                            imagePath=fileName+" ";
                         }
                         body.setImageURL(imagePath.trim());
                     }else {
@@ -139,7 +139,7 @@ public class PostController {
 
                     for(int i=0; i<file.length;i++) {
                         String fileName = imageStorageService.storeFile(file[i]);
-                        imagePathUploadEdit= imagePathUploadEdit + FOLDER_PATH + fileName+" ";
+                        imagePathUploadEdit= imagePathUploadEdit + fileName+" ";
 
                     }
                     postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
@@ -161,7 +161,7 @@ public class PostController {
     //______________________________________Get_post____________________________________________________//
 
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @GetMapping("/getPost")
+    @GetMapping("/getPosts")
     public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return responseConvertService.postResponseArrayList(result);
