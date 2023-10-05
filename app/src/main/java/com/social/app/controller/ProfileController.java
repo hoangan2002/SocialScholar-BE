@@ -34,16 +34,24 @@ public class ProfileController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
-
-    @GetMapping("")
+    @GetMapping("/{username}")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
-    public ResponseEntity<ResponseObject> getUserProfile() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User theUser = service.findUserByUsername(authentication.getName());
+    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
+        User theUser = service.findUserByUsername(username);
         return theUser!=null?
-        ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
-        :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+                :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
+
+//    @GetMapping("")
+//    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+//    public ResponseEntity<ResponseObject> getUserProfile() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User theUser = service.findUserByUsername(authentication.getName());
+//        return theUser!=null?
+//        ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+//        :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
+//    }
 
     @PutMapping("/edit-username")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
