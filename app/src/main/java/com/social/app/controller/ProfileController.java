@@ -38,26 +38,6 @@ public class ProfileController {
     @Autowired
     ImageStorageService imageStorageService;
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
-    @GetMapping("/{userId}")
-    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable String userId) {
-        try {
-            User theUser = service.findUserByUsername(userId);
-            System.out.println(theUser);
-//            if(theUser == null)  theUser = service.findById(Integer.parseInt(userId));
-
-            if (theUser == null) {
-                throw new Exception("User not found"); // Ném ngoại lệ nếu người dùng không tồn tại
-            }
-
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseObject("Successful", "OK", theUser));
-        } catch (Exception e) {
-            // Xử lý ngoại lệ UserNotFoundException ở đây
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseObject("Fail", e.getMessage(), null));
-        }
-    }
 
     @GetMapping("")
     public ResponseEntity<ResponseObject> getUserProfile() {
