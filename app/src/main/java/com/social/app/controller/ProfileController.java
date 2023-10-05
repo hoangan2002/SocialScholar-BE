@@ -24,17 +24,40 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/myProfile")
-@PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+//@PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+
 public class ProfileController {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+
     @Autowired
     private UserService service;
 
     @Autowired
     ImageStorageService imageStorageService;
+    private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
+    @GetMapping("/{userId}")
+    public ResponseEntity<ResponseObject> getUserProfile(@PathVariable String userId) {
+        try {
+            User theUser = service.findUserByUsername(userId);
+            System.out.println(theUser);
+//            if(theUser == null)  theUser = service.findById(Integer.parseInt(userId));
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+            if (theUser == null) {
+                throw new Exception("User not found"); // Ném ngoại lệ nếu người dùng không tồn tại
+            }
 
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseObject("Successful", "OK", theUser));
+        } catch (Exception e) {
+            // Xử lý ngoại lệ UserNotFoundException ở đây
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseObject("Fail", e.getMessage(), null));
+        }
+    }
 
     @GetMapping("")
     public ResponseEntity<ResponseObject> getUserProfile() {
@@ -44,6 +67,7 @@ public class ProfileController {
         ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
         :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
+
 
     @PutMapping("/edit-username")
     public ResponseEntity<ResponseObject> editUsername(@RequestParam("name") String name){
