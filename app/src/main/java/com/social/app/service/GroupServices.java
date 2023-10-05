@@ -40,7 +40,21 @@ public class GroupServices {
 
         UserDetails user =userService.loadUserByUsername(authentication.getName());
         Groups groups= groupRepository.findByGroupId(groupId);
+        System.out.println(groups.getHosts().getUserName());
+        System.out.println(user.getUsername());
         if(groups.getHosts().getUserName().equals(user.getUsername())){
+            System.out.println("in ra true");
+            return true;
+        }
+        System.out.println("in ra false");
+        return false;
+
+
+    }
+    public boolean isGroupHost( Long groupId, String userName) {
+
+        Groups groups= groupRepository.findByGroupId(groupId);
+        if(groups.getHosts().getUserName().equals(userName)){
             return true;
         }
         return false;

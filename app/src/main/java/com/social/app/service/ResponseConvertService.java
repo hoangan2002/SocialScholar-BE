@@ -3,10 +3,8 @@ package com.social.app.service;
 import com.social.app.entity.CommentResponse;
 import com.social.app.entity.LikeResponse;
 import com.social.app.entity.PostResponse;
-import com.social.app.model.Comment;
-import com.social.app.model.CommentLike;
-import com.social.app.model.Post;
-import com.social.app.model.PostLike;
+import com.social.app.entity.UserResponse;
+import com.social.app.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,6 +41,15 @@ public class ResponseConvertService {
 
         return postResponse;
     }
+    public UserResponse userResponse(User user) {
+        var userResponse = UserResponse.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .level(user.getLevel())
+                .isLocked(user.isLocked())
+                .build();
+        return userResponse;
+    }
 
     public LikeResponse likeResponse(PostLike like) {
         var likeResponse = LikeResponse.builder()
@@ -61,6 +68,18 @@ public class ResponseConvertService {
                 .time(like.getTime())
                 .build();
         return likeResponse;
+    }
+    public ArrayList<UserResponse> userResponseArrayList (ArrayList<User> userArrayList)
+    {
+        ArrayList<UserResponse> userResponses = new ArrayList<>();
+
+        for (User user : userArrayList) {
+            UserResponse userResponse = userResponse(user);
+            userResponses.add(userResponse);
+        }
+
+
+        return userResponses;
     }
 
     public ArrayList<PostResponse> postResponseArrayList (ArrayList<Post> postArrayList)
