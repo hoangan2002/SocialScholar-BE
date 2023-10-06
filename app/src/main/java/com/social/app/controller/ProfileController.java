@@ -42,7 +42,7 @@ public class ProfileController {
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
         User theUser = service.findUserByUsername(username);
         return theUser!=null?
-                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser))
+                ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.MapUserDTO(theUser)))
                 :ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Fail", "OK",null));
     }
 
@@ -65,7 +65,8 @@ public class ProfileController {
             if(!theUser.getUserName().equals(name))
                 if(!service.existUserName(name)){
                     theUser.setUserName(name);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
+                    User result = service.save(theUser);
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",result.getUserName()));
                 }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "OK",null));
     }
@@ -79,7 +80,8 @@ public class ProfileController {
             if(!theUser.getPhone().equals(phone))
                 if(!service.existPhone(phone)){
                     theUser.setPhone(phone);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",service.save(theUser)));
+                    User result = service.save(theUser);
+                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",result.getPhone()));
                 }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "OK",null));
     }
