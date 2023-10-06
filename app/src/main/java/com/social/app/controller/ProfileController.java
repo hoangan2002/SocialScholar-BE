@@ -38,7 +38,7 @@ public class ProfileController {
 
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
     @GetMapping("/{username}")
-    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
         User theUser = service.findUserByUsername(username);
         return theUser!=null?
