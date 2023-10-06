@@ -42,6 +42,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<Bill> bills;
 
+    @JsonManagedReference(value = "exchange_user")
+    @OneToMany(mappedBy = "user")
+    List<ExchangeRequest> exchangeRequests;
+
     @OneToMany(mappedBy = "user")
     List<Rating> ratings;
 

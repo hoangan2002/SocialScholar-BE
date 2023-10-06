@@ -64,9 +64,11 @@ public class PaypalController {
                     cancelUrl,
                     successUrl
             );
-//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//            int userid = userService.findUserByUsername(authentication.getName()).getUserId();
-            int userid=1;
+            //test có login thì dùng dòng 68,69
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+            //test không password thì cho bừa 1 id có sẵn trong dòng 71
+//            int userid=1;
             double amounts = Double.parseDouble(amount);
             tokenPaymentHistory.setAmountMoney(amounts);
             Date date = new Date();
