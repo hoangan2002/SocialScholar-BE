@@ -1,13 +1,12 @@
 package com.social.app.service;
 
 import com.social.app.entity.CommentResponse;
-import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.LikeResponse;
 import com.social.app.entity.PostResponse;
-
-import com.social.app.entity.UserResponse;
-
-import com.social.app.model.*;
+import com.social.app.model.Comment;
+import com.social.app.model.CommentLike;
+import com.social.app.model.Post;
+import com.social.app.model.PostLike;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,15 +43,6 @@ public class ResponseConvertService {
 
         return postResponse;
     }
-    public UserResponse userResponse(User user) {
-        var userResponse = UserResponse.builder()
-                .userId(user.getUserId())
-                .userName(user.getUserName())
-                .level(user.getLevel())
-                .isLocked(user.isLocked())
-                .build();
-        return userResponse;
-    }
 
     public LikeResponse likeResponse(PostLike like) {
         var likeResponse = LikeResponse.builder()
@@ -62,20 +52,6 @@ public class ResponseConvertService {
                 .time(like.getTime())
                 .build();
         return likeResponse;
-    }
-
-    public DocumentResponse documentResponse(Document document){
-        var documentResponse = DocumentResponse.builder()
-                .documentId(document.getDocumentId())
-                .documentName(document.getDocumentName())
-                .description(document.getDescription())
-                .cost(document.getCost())
-                .ratings(document.getRatings())
-                .time(document.getTime())
-                .author(document.getAuthor().getUserName())
-                .groupName(document.getGroup().getGroupName())
-                .build();
-        return  documentResponse;
     }
     public LikeResponse likeResponse(CommentLike like) {
         var likeResponse = LikeResponse.builder()
@@ -87,34 +63,6 @@ public class ResponseConvertService {
         return likeResponse;
     }
 
-    public ArrayList<UserResponse> userResponseArrayList (ArrayList<User> userArrayList)
-    {
-        ArrayList<UserResponse> userResponses = new ArrayList<>();
-
-        for (User user : userArrayList) {
-            UserResponse userResponse = userResponse(user);
-            userResponses.add(userResponse);
-        }
-
-
-        return userResponses;
-    }
-
-    public ArrayList<DocumentResponse> documentResponseArrayList (ArrayList<Document> documentArrayList)
-    {
-        ArrayList<DocumentResponse> documentResponses = new ArrayList<>();
-
-
-        for (Document document : documentArrayList) {
-
-            DocumentResponse documentResponse = documentResponse(document);
-
-            documentResponses.add(documentResponse);
-        }
-
-
-        return documentResponses;
-    }
     public ArrayList<PostResponse> postResponseArrayList (ArrayList<Post> postArrayList)
     {
         ArrayList<PostResponse> postResponses = new ArrayList<>();

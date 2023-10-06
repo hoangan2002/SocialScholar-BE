@@ -26,7 +26,6 @@ public class User {
     private String password;
     private String email;
     private String avatarURL;
-    private String backgroundURL;
     private String level;
     private String role;
     private long coin;
@@ -37,13 +36,15 @@ public class User {
     @OneToMany(mappedBy = "user")
     List<JoinManagement> joins;
 
-
     @OneToMany(mappedBy = "author")
     List<Document> documents;
 
-    @JsonManagedReference(value = "bill_user")
     @OneToMany(mappedBy = "user")
     List<Bill> bills;
+
+    @JsonManagedReference(value = "exchange_user")
+    @OneToMany(mappedBy = "user")
+    List<ExchangeRequest> exchangeRequests;
 
     @OneToMany(mappedBy = "user")
     List<Rating> ratings;
