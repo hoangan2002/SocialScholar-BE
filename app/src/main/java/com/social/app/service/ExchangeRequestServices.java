@@ -35,7 +35,7 @@ public class ExchangeRequestServices {
         ExchangeRequest exchangeRequest = exchangeRequestRepository.findByRequestId(requestId);
         if(exchangeRequest!=null)
             return exchangeRequest;
-        else throw new RuntimeException("Can't find Request");
+        else return null;
     }
 
 }

@@ -51,10 +51,13 @@ public class ExchangeRequestController {
     @PostMapping("check-request/{requestid}")
     public ResponseEntity<ResponseObject> checkRequest(@PathVariable("requestid") long id, @RequestParam byte status){
         ExchangeRequest e = exchangeRequestServices.loadRequestById(id);
+        if (e==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("Failed","Can't find the request","")
+        );
         e.setStatus(status);
         exchangeRequestServices.submitRequest(e);
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Update status success","")
+                new ResponseObject("OK","Update status success",e)
         );
     }
 }

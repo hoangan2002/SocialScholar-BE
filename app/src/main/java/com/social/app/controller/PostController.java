@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.dto.PostDTO;
 import com.social.app.dto.PostReportDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
@@ -341,6 +342,30 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                 new ResponseObject("Failed","Donate failed","")
         );
+    }
+
+    @GetMapping("/getPostDTO")
+    public ArrayList<PostDTO> retrieveAllPostDTO(){
+        ArrayList<Post> result = postServices.retrivePostFromDB();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObylike")
+    public ArrayList<PostDTO> retrieveAllPostDTOByLike(){
+        ArrayList<Post> result = postServices.getAllPostByLike();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObycomment")
+    public ArrayList<PostDTO> retrieveAllPostDTOByComment(){
+        ArrayList<Post> result = postServices.getAllPostByComment();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObytime")
+    public ArrayList<PostDTO> retrieveAllPostDTOByTime(){
+        ArrayList<Post> result = postServices.getAllPostByTime();
+        return postServices.ArrayListPostDTO(result);
     }
 
 }

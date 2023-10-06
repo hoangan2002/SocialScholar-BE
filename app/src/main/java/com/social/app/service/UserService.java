@@ -1,9 +1,11 @@
 package com.social.app.service;
+import com.social.app.dto.PostDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,6 +31,7 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder encoder;
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
