@@ -94,6 +94,11 @@ public class ImageStorageService implements IStorageService{
             if(!isDocumentFile(file)) {
                 throw new RuntimeException("You can only upload image file");
             }
+            //file must be <= 5Mb
+            float fileSizeInMegabytes = file.getSize() / 1_000_000.0f;
+            if(fileSizeInMegabytes > 100.0f) {
+                throw new RuntimeException("File must be <= 100Mb");
+            }
             //File must be rename, why ?
             String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
             String generatedFileName = UUID.randomUUID().toString().replace("-", "");

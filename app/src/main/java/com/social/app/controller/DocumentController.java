@@ -142,6 +142,7 @@ public class DocumentController {
     }
 
     @GetMapping("/download/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = userService.findUserByUsername(authentication.getName());
@@ -149,7 +150,7 @@ public class DocumentController {
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
-        if(documentDB.getAuthor().getUserId()!=theUser.getUserId() || billService.findByDocumentAndUser(documentDB,theUser)!=null)
+        if(documentDB.getAuthor().getUserId()!=theUser.getUserId() || billService.findByDocumentAndUser(documentDB,theUser)==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The user does not have download permission", "failed", ""));
         Resource resource = null;
@@ -168,5 +169,39 @@ public class DocumentController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body( resource);
+    }
+
+    @PostMapping("/buy/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public  ResponseEntity<ResponseObject> buyDocument(@PathVariable("docId") long docId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User customer = userService.findUserByUsername(authentication.getName());
+        Document document = documentService.findDocumentbyId(docId);
+        if (document==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        // Neu da mua roi thi not dc mua nua
+        if (billService.findByDocumentAndUser(document,customer)!=null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User has bought document", "failed", ""));
+        // Neu la author thi not can mua
+        if(document.getAuthor().getUserId()==customer.getUserId())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User is author", "failed", ""));
+        try {
+            // check coins cua customer vs cost cua document
+            if (customer.getCoin() < document.getCost())
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("Not enough Coins", "failed", ""));
+            boolean result = documentService.DocumentExchangeTransaction(customer,document);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Transaction successfully"
+                            , result));
+        }
+        catch (RuntimeException e){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Transaction failed", "failed", ""));
+        }
+
     }
 }
