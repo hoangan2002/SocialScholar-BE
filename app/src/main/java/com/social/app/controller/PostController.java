@@ -63,7 +63,7 @@ public class PostController {
         // Check if user is not in group, user can not dislike post
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
-        if(!userService.isGroupMember(userid, body.getGroupId()))
+        if(!userService.isGroupMember(body.getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -203,7 +203,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not dislike post
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+        if(!userService.isGroupMember( post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -237,7 +237,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not like post
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+        if(!userService.isGroupMember( post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -287,7 +287,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not report post
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+        if(!userService.isGroupMember(post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -335,6 +335,22 @@ public class PostController {
         }
         return responseConvertService.postResponseArrayList(findResult);
     }
+    @GetMapping("/find-post/{groupId}")
+    public ArrayList<PostResponse> findPostGroup(@PathVariable Long groupId,@RequestParam("findContent") String findContent){
+        ArrayList<Post> allPostGroup = postServices.retriveGroupPostFromDB(groupId);
+        ArrayList<Post> findResultGroup = new ArrayList<>();
+        if(findContent!= null && findContent != "\s") {
+            for (Post p : allPostGroup) {
+                if (p.getTitles()!= null && p.getTitles().toLowerCase().contains(findContent.toLowerCase().trim())) {
+                    findResultGroup.add(p);
+                }
+            }
+        }else {
+            return null;
+        }
+        return responseConvertService.postResponseArrayList(findResultGroup);
+    }
+
 
 
 
