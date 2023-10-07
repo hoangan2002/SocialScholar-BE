@@ -166,7 +166,7 @@ public class DocumentController {
 
     @GetMapping("/download/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<?> downloadDocument(@PathVariable("docId") long docId) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = userService.findUserByUsername(authentication.getName());
         Document documentDB = documentService.findDocumentbyId(docId);
@@ -278,5 +278,29 @@ public class DocumentController {
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject(exception.getMessage(), "failed", ""));
         }
+    }
+    @GetMapping("/test/{docId}")
+    public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+
+        Resource resource = null;
+        String filename = documentDB.getUrl();
+        File file = new File(storageService.getUploadsPath()+filename);
+        resource = storageService.loadAsResource(file);
+
+        if (resource == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/octet-stream";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( resource);
     }
 }
