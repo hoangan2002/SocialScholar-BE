@@ -47,9 +47,14 @@ public class DocumentController {
                                                       @RequestParam("groupid") int groupid)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+<<<<<<< HEAD
         User user = userService.findUserByUsername(authentication.getName());
         int userid = user.getUserId();
         if(!userService.isGroupMember(user.getUserName(), groupid))
+=======
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        if(!userService.isGroupMember(String.valueOf(userid), groupid))
+>>>>>>> a56d522fec1da40473f161fdc45e134e8089d761
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("User must be in group","Failed","")
             );
