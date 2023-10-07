@@ -1,17 +1,13 @@
 package com.social.app.controller;
 
-import com.social.app.entity.GroupDTO;
-import com.social.app.entity.PostResponse;
+import com.social.app.dto.GroupDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 
 import com.social.app.model.JoinManagement;
-import com.social.app.model.Post;
 import com.social.app.model.User;
-import com.social.app.repository.UserRepository;
 import com.social.app.service.*;
 
-import com.social.app.model.User;
 import com.social.app.service.GroupServices;
 import com.social.app.service.ImageStorageService;
 import com.social.app.service.UserService;
@@ -205,6 +201,60 @@ public class GroupController {
 
 
     }
+    @GetMapping("/suggest")
+    public ArrayList<GroupDTO> suggestGroups(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ArrayList<Groups> groups =  groupServices.findAll();
+        ArrayList<GroupDTO> groupsSuggest = new ArrayList<>();
+         //Gợi ý
+        for (Groups group :groups )  {
+            Groups groups1 = new Groups();
+            groups1.setGroupId(group.getGroupId());
+            groups1.setGroupName(group.getGroupName());
+            groups1.setImageURLGAvatar(group.getImageURLGAvatar());
+            GroupDTO groupDTO= groupServices.MapGroupDTO(groups1);
+            groupDTO.setIsJoin(false);
+            if(!userService.isGroupMember(username,group.getGroupId())){
+               groupsSuggest.add(groupDTO);
+            }
+        }
+
+        return  groupsSuggest;
+    }
+    @GetMapping("/find-group-login/{groupName}")
+    public ArrayList<GroupDTO> findGroups(@PathVariable String groupName){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ArrayList<Groups> groups =  groupServices.findAll();
+        ArrayList<GroupDTO> groupsSuggest = new ArrayList<>();
+        //Search group
+        if(groupName!=null){
+            ArrayList<GroupDTO> joinedGroups  = new ArrayList<>();
+            ArrayList<GroupDTO> otherGroups  = new ArrayList<>();
+            for (Groups group :groups )  { Groups GroupDTO = new Groups();
+                GroupDTO.setGroupName(group.getGroupName());
+                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
+                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
+                GroupDTO groupDTO= groupServices.MapGroupDTO(GroupDTO);
+                if(userService.isGroupMember(username,group.getGroupId()) && group.getGroupName().toLowerCase().contains(groupName.toLowerCase().trim())){
+
+                    groupDTO.setIsJoin(true);
+                    joinedGroups.add(groupDTO);
+                } else if( group.getGroupName().contains(groupName)){
+
+                    groupDTO.setIsJoin(false);
+                    otherGroups.add(groupDTO);
+                }
+            }
+            groupsSuggest.addAll(joinedGroups);
+            groupsSuggest.addAll(otherGroups);
+            return groupsSuggest;
+        } else return null;
+
+
+    }
+
 
 
 }

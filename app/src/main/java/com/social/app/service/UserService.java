@@ -237,7 +237,8 @@ public class UserService implements UserDetailsService {
     }
     public boolean isGroupMember(String userName, long groupId){
         // Get user by userId
-        User user = (User) loadUserByUsername(userName);
+        User user = loadUserByUserName(userName);
+       // User user = (User) loadUserByUsername(userName);
         // Get list joinmanagement by user
         ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
         for (JoinManagement join:joins) {
