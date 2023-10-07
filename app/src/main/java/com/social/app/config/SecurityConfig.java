@@ -45,7 +45,8 @@ public class SecurityConfig{
                 .authorizeHttpRequests()
                 .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/poster/**").permitAll()
                 .and()
-                .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**", "/group/**", "/myProfile/**").authenticated()
+                        .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**", "/group/**", "/myProfile/**","admin/**").authenticated()
+
 
 
 //                .formLogin().loginPage("/auth/login").successHandler(successHandler)

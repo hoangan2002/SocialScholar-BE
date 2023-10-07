@@ -4,10 +4,18 @@ import com.social.app.entity.GroupDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
+
+import com.social.app.model.JoinManagement;
+import com.social.app.model.Post;
+import com.social.app.model.User;
+import com.social.app.repository.UserRepository;
+import com.social.app.service.*;
+
 import com.social.app.model.User;
 import com.social.app.service.GroupServices;
 import com.social.app.service.ImageStorageService;
 import com.social.app.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +37,8 @@ public class GroupController {
     UserService userService;
     @Autowired
     ImageStorageService imageStorageService;
+    @Autowired
+    JoinService joinService;
     private final String FOLDER_PATH="D:\\New folder\\upload\\";
 
 
@@ -62,7 +72,10 @@ public class GroupController {
                 //Thời gian tạo
 
                 group.setTimeCreate(Calendar.getInstance().getTime());
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Create Group Success", "OK", groupServices.createGroup(group)));
+                groupServices.createGroup(group);
+                joinService.saveJoin(new JoinManagement(group,user,Calendar.getInstance().getTime()));
+
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Create Group Success", "OK", null));
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Create Group Fail", "ERROR",null));
         } catch (RuntimeException exception){
@@ -155,13 +168,43 @@ public class GroupController {
         }
         return findResult;
     }
+    @PostMapping("/join-group/{groupId}")
+    public  ResponseEntity<ResponseObject> joinGroup(@PathVariable Long groupId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        if(userService.isGroupMember(groupId) || groupServices.isGroupHost(groupId)){
+            return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User Joined Group", "ERROR",null));
+        }
 
-//    @GetMapping("/{groupId}")
-////    @PreAuthorize("hasRole('ROLE_HOST')")
-//    public  String checkGroupMember(@PathVariable String groupId){
-//
-//    }
-//
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Join Success", "OK",joinService.saveJoin(new JoinManagement(groupServices.loadGroupById(groupId), userService.findUserByUsername(username), Calendar.getInstance().getTime()))));
+    }
+    @DeleteMapping("/exit-group/{groupId}")
+    public  ResponseEntity<ResponseObject> exitGroup(@PathVariable Long groupId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        if(!userService.isGroupMember(groupId) || groupServices.isGroupHost(groupId)){
+            return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User not in Group/ User is Host", "ERROR",null));
+        }
+        joinService.deleteJoin(groupServices.loadGroupById(groupId),userService.findUserByUsername(username));
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Exit Success", "OK",null));
+    }
+    @DeleteMapping("/kick-user/{groupId}")
+    @PreAuthorize("hasRole('ROLE_HOST')")
+    public  ResponseEntity<ResponseObject> kickUser(@PathVariable Long groupId,@RequestParam String userName){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String usernameHost = authentication.getName();
+        if(!groupServices.isGroupHost(groupId)){
+            return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User is not Host of Group", "ERROR",null));
+        }
+        //cannot self-provoke
+        if(groupServices.isGroupHost(groupId, userName)){
+            return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Can't kick Host of Group", "ERROR",null));
+        }
+        joinService.deleteJoin(groupServices.loadGroupById(groupId),userService.findUserByUsername(userName));
+        return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Kick out Success", "OK", null));
+
+
+    }
 
 
 }
