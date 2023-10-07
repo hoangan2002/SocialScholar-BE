@@ -1,5 +1,6 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,28 +8,25 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
-@Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "Token_Payment_History")
-public class TokenPaymentHistory {
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+@Table(name = "Exchange_Request")
+public class ExchangeRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long toHistoryId;
-    private String paymentId;
-    private long amountToken;
-    private double amountMoney;
+    private long requestId;
     private Timestamp time;
-
+    private long amountCoins;
+    private double totalMoney;
     private byte status;
 
+    @JsonBackReference(value = "exchange_user")
     @ManyToOne
-    @JoinColumn(name="userId")
+    @JoinColumn(name="user_Id")
     private User user;
-
 
 }
