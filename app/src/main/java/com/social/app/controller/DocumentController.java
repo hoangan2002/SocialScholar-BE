@@ -3,6 +3,7 @@ package com.social.app.controller;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Document;
+import com.social.app.model.Groups;
 import com.social.app.model.User;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,23 +72,45 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                 new ResponseObject("Create Error", "Failed", ""));
     }
+    // -------------------------------------------- DOCUMENT LIST ------------------------------------------------------
+    //                                                                                                                --
+    // Tat ca doc đã duyệt
     @GetMapping("/documents")
     public ArrayList<DocumentResponse> retrieveAllApprovedDocument(){
         ArrayList<Document> result = documentService.allApprovedDocuments();
         return responseConvertService.documentResponseArrayList(result);
     }
+    //                                                                                                                --
+    // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public ArrayList<DocumentResponse> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
         return responseConvertService.documentResponseArrayList(result);
     }
+    //                                                                                                                --
+    // Tat ca doc dc duyet cua user
     @GetMapping("/my-documents")
-    public ArrayList<DocumentResponse> UserApporevedCreatedDocuments(){
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentResponse> UserApprovedCreatedDocuments(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByUsername(authentication.getName());
         ArrayList<Document> result = documentService.UserApprovedCreatedDocuments(user);
         return responseConvertService.documentResponseArrayList(result);
     }
+
+    // Tat ca doc duoc duyet cua group
+    @GetMapping("group-documents/{groupId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentResponse> GroupApprovedDocuments(@PathVariable("groupId") long id){
+        Groups groups = groupServices.loadGroupById(id);
+        if (groups==null) throw new RuntimeException("Group is not exist");
+        ArrayList<Document> result = documentService.GroupApprovedDocuments(groups);
+        return responseConvertService.documentResponseArrayList(result);
+    }
+    //                                                                                                                --
+    // -----------------------------------------------------------------------------------------------------------------
+
     @DeleteMapping("/document/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public  ResponseEntity<ResponseObject> userDeleteDocument(@PathVariable("docId") long docId){
@@ -150,7 +173,7 @@ public class DocumentController {
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
-        if(documentDB.getAuthor().getUserId()!=theUser.getUserId() || billService.findByDocumentAndUser(documentDB,theUser)==null)
+        if(documentDB.getAuthor().getUserId()!=theUser.getUserId() && billService.findByDocumentAndUser(documentDB,theUser)==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The user does not have download permission", "failed", ""));
         Resource resource = null;
@@ -203,5 +226,57 @@ public class DocumentController {
                     new ResponseObject("Transaction failed", "failed", ""));
         }
 
+    }
+
+    // Admin duyet doc oke
+    @PutMapping("/approve/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    public  ResponseEntity<ResponseObject> ApproveDocument(@PathVariable("docId") long docId){
+        try{
+            Document document = documentService.findDocumentbyId(docId);
+            if (document==null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ResponseObject("The document is not exist", "failed", ""));
+            if (document.isApproved())
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("The document has already been approved", "failed", ""));
+            document.setApproved(true);
+            documentService.update(document);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Update successfully", "Approved"));
+        } catch (RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject(exception.getMessage(), "failed", ""));
+        }
+
+    }
+
+    // Admin xoa doc
+    @DeleteMapping ("/delete/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    public  ResponseEntity<ResponseObject> AdminDeleteDocument(@PathVariable("docId") long docId){
+        try {
+            Document document = documentService.findDocumentbyId(docId);
+            if (document==null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ResponseObject("The document is not exist", "failed", ""));
+            if (document.isApproved())
+                System.out.println("Co le tai lieu da vi pham mot so tieu chuan, nen bi xoa");
+            else System.out.println("Tai lieu cua ban duoc chap nhan phe duyet");
+
+            // xoa file trong thu muc
+            String deletePath = storageService.getUploadsPath()+document.getUrl();
+            File deleteFile = new File(deletePath);
+            if(deleteFile.exists())
+                storageService.deleteFile(deletePath);
+
+            // xoa document
+            String result = documentService.deleteDocumentById(docId);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Delete successfully", result));
+        }catch (RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject(exception.getMessage(), "failed", ""));
+        }
     }
 }

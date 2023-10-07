@@ -58,7 +58,7 @@ public class ResponseConvertService {
                 .documentName(document.getDocumentName())
                 .description(document.getDescription())
                 .cost(document.getCost())
-                .ratings(document.getRatings())
+                .ratings(document.getRatings().size())
                 .time(document.getTime())
                 .author(document.getAuthor().getUserName())
                 .groupName(document.getGroup().getGroupName())
