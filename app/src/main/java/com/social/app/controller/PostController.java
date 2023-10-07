@@ -350,7 +350,49 @@ public class PostController {
         }
         return responseConvertService.postResponseArrayList(findResultGroup);
     }
+    @PostMapping("/donate/{postid}")
+    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        User user = userService.loadUserById(userid);
+        Post post = postServices.loadPostById(postid);
+        if(user.getCoin()>coins && postServices.loadPostById(postid).getUser()!= user){
+            user.setCoin(user.getCoin()-coins);
+            userService.save(user);
+            post.getUser().setCoin(post.getUser().getCoin()+coins);
+            userService.save(post.getUser());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Donate success","")
+            );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                new ResponseObject("Failed","Donate failed","")
+        );
+    }
 
+    @GetMapping("/getPostDTO")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTO(){
+        ArrayList<Post> result = postServices.retrivePostFromDB();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObylike")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(){
+        ArrayList<Post> result = postServices.getAllPostByLike();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObycomment")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(){
+        ArrayList<Post> result = postServices.getAllPostByComment();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObytime")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(){
+        ArrayList<Post> result = postServices.getAllPostByTime();
+        return postServices.ArrayListPostDTO(result);
+    }
 
 
 

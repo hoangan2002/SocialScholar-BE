@@ -8,4 +8,6 @@ public class Views {
     public static class PostLikeView{}
     public static class UserView {}
     public static class GroupsView {}
+    public static class PostView {}
+
 }
