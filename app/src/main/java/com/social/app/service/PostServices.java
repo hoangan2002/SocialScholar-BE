@@ -1,13 +1,11 @@
 package com.social.app.service;
 
-import com.social.app.dto.PostDTO;
 import com.social.app.model.Post;
 import com.social.app.model.PostLike;
 import com.social.app.model.User;
 import com.social.app.repository.PostLikeRepository;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -37,23 +35,6 @@ public class PostServices {
 
     @Autowired
     PostLikeRepository postLikeRepository;
-
-    @Autowired
-    ModelMapper modelMapper;
-
-    public PostDTO MapPostDTO(Post post){
-        PostDTO postDTO = modelMapper.map(post,PostDTO.class);
-        return postDTO;
-    }
-
-    public ArrayList<PostDTO> ArrayListPostDTO(ArrayList<Post> posts){
-        ArrayList<PostDTO> postDTOS = new ArrayList<>();
-        for(Post p: posts){
-            PostDTO pDTO = MapPostDTO(p);
-            postDTOS.add(pDTO);
-        }
-        return postDTOS;
-    }
     public Post submitPostToDB(Post postData){
 
         Date date = new Date();
@@ -68,6 +49,10 @@ public class PostServices {
 
     public ArrayList<Post> retrivePostFromDB(){
         ArrayList<Post> result = postRepository.findAll();
+        return result;
+    }
+    public ArrayList<Post> retriveGroupPostFromDB(Long groupId){
+        ArrayList<Post> result = postRepository.findAllByGroupGroupId(groupId);
         return result;
     }
 
@@ -161,27 +146,5 @@ public class PostServices {
         return valueList;
     }
 
-    public ArrayList<Post> getAllPostByLike() {
-        ArrayList<Post> posts = retrivePostFromDB();
-        posts.sort(((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size())));
-        return posts;
-    }
-
-    public ArrayList<Post> getAllPostByComment() {
-        ArrayList<Post> posts = retrivePostFromDB();
-        Collections.sort(posts, ((o1, o2) -> Integer.compare(o2.getComments().size(), o1.getComments().size())));
-        return posts;
-    }
-
-    public ArrayList<Post> getAllPostByTime() {
-        ArrayList<Post> posts = retrivePostFromDB();
-        Collections.sort(posts, new Comparator<Post>() {
-            @Override
-            public int compare(Post o1, Post o2) {
-                return o2.getTime().compareTo(o1.getTime());
-            }
-        });
-        return posts;
-    }
 
 }

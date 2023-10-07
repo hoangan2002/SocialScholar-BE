@@ -1,5 +1,0 @@
-
-paypal:
-  client-id: AfjeUBEZZPAGm0u1Wlz6t6V_W4Xkq0KpzZc4UeyOqfh3aVCkYCUlOwGnxhlkeHqhHg3q6IrjP_qMl2yC
-  client-secret: ENbOoXy9jGtjdAP_WyU9v_W4nn-UDyCQj6FPEScvrjxukZwGpoVB7lg-bDV7ztUNRs3fLyxa58Trtz4-
-  mode: sandbox # Use #sandbox' for testing and 'live' for Production
