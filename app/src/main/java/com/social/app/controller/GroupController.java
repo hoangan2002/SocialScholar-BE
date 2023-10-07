@@ -122,15 +122,17 @@ public class GroupController {
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
     @GetMapping("/{groupId}")
+
 //    @PreAuthorize("hasRole('ROLE_HOST')")
     public  ResponseEntity<ResponseObject> readGroup(@PathVariable String groupId){
 //        if(groupServices.isGroupHost(groupId)){
 //
 //        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
+        System.out.println(groupId);
         try {
-            Groups group = groupServices.loadGroupById(Integer.parseInt(groupId));
+            Groups group  = groupServices.loadGroupByName(groupId);
 
-            if(group == null)  group = groupServices.loadGroupByName(groupId);
+            if(group == null) ;
             System.out.println(groupId);
             System.out.println(group);
             if (group == null) {
