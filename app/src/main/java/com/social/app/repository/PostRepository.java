@@ -13,5 +13,4 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Post save(Post post);
     void deleteById(long id);
     Post findByPostId(long postId);
-    ArrayList<Post> findAllByGroupGroupId(long groupId);
 }

@@ -1,12 +1,12 @@
 package com.social.app.controller;
 
+import com.social.app.dto.PostDTO;
 import com.social.app.dto.PostReportDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
-import com.social.app.request.PostDTO;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/poster")
+@RequestMapping("/api/postservices")
 public class PostController {
     @Autowired
     PostServices postServices;
@@ -53,42 +53,37 @@ public class PostController {
     //______________________________________Make_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
-    public ResponseEntity<ResponseObject> submitPost(@RequestPart PostDTO body){
-        Post post = new Post();
-        String content ;
-        Timestamp time;
-        int userId;
-        int groupId;
-        String title ;
+    public ResponseEntity<ResponseObject> submitPost(@RequestPart Post body,
+                                                     @RequestParam(value = "file", required = false) MultipartFile[] file,
+//                                                     @RequestParam("userid") int userid,
+                                                     @RequestParam("groupid") int groupid){
         // Check if user is not in group, user can not dislike post
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
-        if(!userService.isGroupMember(body.getGroupId()))
+        if(!userService.isGroupMember(userid, groupid))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
         try {
             if (userService.loadUserById(userid) != null) {
-                post.setUser(userService.loadUserById(userid));
-                if (groupServices.loadGroupById(body.getGroupId()) != null) {
+                body.setUser(userService.loadUserById(userid));
+                if (groupServices.loadGroupById(groupid) != null) {
 
-                    post.setGroup(groupServices.loadGroupById(body.getGroupId()));
-                    post.setTime(body.getTime());
+                    body.setGroup(groupServices.loadGroupById(groupid));
 
-//                    if (file != null && !file[0].isEmpty()) {
-//                        String imagePath="";
-//                        for(int i=0; i<file.length;i++) {
-//                            String fileName = imageStorageService.storeFile(file[i]);
-//                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
-//                        }
-//                        body.setImageURL(imagePath.trim());
-//                    }else {
-//                        body.setImageURL("");
-//                    }
-                    postServices.submitPostToDB(post);
-
+                    if (file != null && !file[0].isEmpty()) {
+                        String imagePath="";
+                        for(int i=0; i<file.length;i++) {
+                            String fileName = imageStorageService.storeFile(file[i]);
+                            imagePath=imagePath + FOLDER_PATH + fileName+" ";
+                        }
+                        body.setImageURL(imagePath.trim());
+                    }else {
+                        body.setImageURL("");
+                    }
+                    postServices.submitPostToDB(body);
                     return ResponseEntity.status(HttpStatus.OK).body(
-                            new ResponseObject("ok", "Post successfully", post));
+                            new ResponseObject("ok", "Post successfully", body));
                 }
             }
         }catch (RuntimeException exception){
@@ -145,7 +140,7 @@ public class PostController {
 
                     for(int i=0; i<file.length;i++) {
                         String fileName = imageStorageService.storeFile(file[i]);
-                        imagePathUploadEdit= imagePathUploadEdit + fileName+" ";
+                        imagePathUploadEdit= imagePathUploadEdit + FOLDER_PATH + fileName+" ";
 
                     }
                     postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
@@ -166,9 +161,8 @@ public class PostController {
 
     //______________________________________Get_post____________________________________________________//
 
-    //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @GetMapping("/getPosts")
+    @GetMapping("/getPost")
     public ArrayList<PostResponse> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return responseConvertService.postResponseArrayList(result);
@@ -177,7 +171,6 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @DeleteMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         if(postServices.loadPostById(postId)!=null && postServices.loadPostById(postId).getUser().getUserName().matches(authentication.getName())){
@@ -192,9 +185,7 @@ public class PostController {
     }
 
     @PostMapping("/dislike/{postId}")
-    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
-        User current = userService.findUserByUsername(userName);
-        int userId = current != null ?current.getUserId():-1;
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -203,7 +194,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not dislike post
-        if(!userService.isGroupMember( post.getGroup().getGroupId()))
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -225,11 +216,8 @@ public class PostController {
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("userid")int userId){
         // check if post is not found, return
-        User current = userService.findUserByUsername(userName);
-        int userId = current != null ?current.getUserId():-1;
-        System.out.println(userId); 
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ResponseObject("Failed","Can't find post","")
@@ -237,7 +225,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not like post
-        if(!userService.isGroupMember( post.getGroup().getGroupId()))
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -287,7 +275,7 @@ public class PostController {
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not report post
-        if(!userService.isGroupMember(post.getGroup().getGroupId()))
+        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
@@ -335,23 +323,49 @@ public class PostController {
         }
         return responseConvertService.postResponseArrayList(findResult);
     }
-    @GetMapping("/find-post/{groupId}")
-    public ArrayList<PostResponse> findPostGroup(@PathVariable Long groupId,@RequestParam("findContent") String findContent){
-        ArrayList<Post> allPostGroup = postServices.retriveGroupPostFromDB(groupId);
-        ArrayList<Post> findResultGroup = new ArrayList<>();
-        if(findContent!= null && findContent != "\s") {
-            for (Post p : allPostGroup) {
-                if (p.getTitles()!= null && p.getTitles().toLowerCase().contains(findContent.toLowerCase().trim())) {
-                    findResultGroup.add(p);
-                }
-            }
-        }else {
-            return null;
+
+    @PostMapping("/donate/{postid}")
+    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        User user = userService.loadUserById(userid);
+        Post post = postServices.loadPostById(postid);
+        if(user.getCoin()>coins && postServices.loadPostById(postid).getUser()!= user){
+            user.setCoin(user.getCoin()-coins);
+            userService.save(user);
+            post.getUser().setCoin(post.getUser().getCoin()+coins);
+            userService.save(post.getUser());
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("OK","Donate successfully","")
+            );
         }
-        return responseConvertService.postResponseArrayList(findResultGroup);
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                new ResponseObject("Failed","Donate failed","")
+        );
     }
 
+    @GetMapping("/getPostDTO")
+    public ArrayList<PostDTO> retrieveAllPostDTO(){
+        ArrayList<Post> result = postServices.retrivePostFromDB();
+        return postServices.ArrayListPostDTO(result);
+    }
 
+    @GetMapping("/getPostDTObylike")
+    public ArrayList<PostDTO> retrieveAllPostDTOByLike(){
+        ArrayList<Post> result = postServices.getAllPostByLike();
+        return postServices.ArrayListPostDTO(result);
+    }
 
+    @GetMapping("/getPostDTObycomment")
+    public ArrayList<PostDTO> retrieveAllPostDTOByComment(){
+        ArrayList<Post> result = postServices.getAllPostByComment();
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObytime")
+    public ArrayList<PostDTO> retrieveAllPostDTOByTime(){
+        ArrayList<Post> result = postServices.getAllPostByTime();
+        return postServices.ArrayListPostDTO(result);
+    }
 
 }
