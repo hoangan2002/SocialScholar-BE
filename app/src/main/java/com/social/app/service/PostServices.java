@@ -51,6 +51,10 @@ public class PostServices {
         ArrayList<Post> result = postRepository.findAll();
         return result;
     }
+    public ArrayList<Post> retriveGroupPostFromDB(Long groupId){
+        ArrayList<Post> result = postRepository.findAllByGroupGroupId(groupId);
+        return result;
+    }
 
     public ArrayList<Post> deletePostDB(long postID){
         postRepository.deleteById(postID);
