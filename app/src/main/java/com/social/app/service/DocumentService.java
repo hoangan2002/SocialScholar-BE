@@ -2,6 +2,7 @@ package com.social.app.service;
 
 import com.social.app.model.Bill;
 import com.social.app.model.Document;
+import com.social.app.model.Groups;
 import com.social.app.model.User;
 import com.social.app.repository.BillRepository;
 import com.social.app.repository.DocumentRepository;
@@ -71,6 +72,9 @@ public class DocumentService {
     }
     public ArrayList<Document> UserApprovedCreatedDocuments(User user){
         return documentRepository.findByAuthorAndIsApprovedIsTrue(user);
+    }
+    public ArrayList<Document> GroupApprovedDocuments(Groups groups){
+        return documentRepository.findByGroupAndIsApprovedIsTrue(groups);
     }
 
     public Document findDocumentbyId(long id){
