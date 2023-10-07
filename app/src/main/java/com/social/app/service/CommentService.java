@@ -102,7 +102,10 @@ public class CommentService {
         Comment commentParent = this.commentRepository.findById(commentParentId).orElseThrow(()-> new RuntimeException());
         // set info to comment
         commentReply.setPost(commentParent.getPost());
-        commentReply.setCommentParentId(commentParentId);
+            // check if it's parent has grandparent, make it up level
+        if (commentRepository.findByCommentId(commentParent.getCommentParentId()).getCommentParentId() != 0)
+        commentReply.setCommentParentId(commentParent.getCommentParentId());
+
 
         // set current time to comment
         Date date = new Date();
