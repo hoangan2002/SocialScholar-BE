@@ -20,7 +20,6 @@ public class CommentLikeDTO {
     private Date time;
     private User user;
     private Comment comment;
-    private String author;
 
     @JsonView({Views.CommentLikeView.class})
     public long getLikeId() {
@@ -37,10 +36,6 @@ public class CommentLikeDTO {
     @JsonView({Views.CommentLikeView.class})
     public int getUser() {
         return user.getUserId();
-    }
-    @JsonView({Views.CommentLikeView.class})
-    public String getAuthor() {
-        return user.getUserName();
     }
     @JsonView({Views.CommentLikeView.class})
     public long getComment() {
