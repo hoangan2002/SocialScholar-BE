@@ -1,15 +1,9 @@
 package com.social.app.model;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.util.Date;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "Rating")
 public class Rating {
     @Id
@@ -19,8 +13,7 @@ public class Rating {
     private String description;
     private Date time;
 
-    @JsonBackReference(value = "rate_document")
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name="document_Id")
     private Document document;
 

@@ -68,6 +68,4 @@ public class FileUploadController {
                     ResponseObject("failed", "List files failed", new String[] {}));
         }
     }
-
-
 }

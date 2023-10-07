@@ -7,10 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class AppApplicationTests {
 
 	@Test
-	String contextLoads() {
-	return "abc";
-
-    }
-
+	void contextLoads() {
+	}
 
 }

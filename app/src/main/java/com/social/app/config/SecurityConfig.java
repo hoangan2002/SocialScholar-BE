@@ -43,10 +43,9 @@ public class SecurityConfig{
         return
                 http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/postservices/**").permitAll()
+                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/postservices/hotpost/**").permitAll()
                 .and()
-                        .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**", "/group/**", "/myProfile/**","admin/**").authenticated()
-
+                .authorizeHttpRequests().requestMatchers("/auth/profile/**","api/postservices/**", "/group/**").authenticated()
 
 
 //                .formLogin().loginPage("/auth/login").successHandler(successHandler)
