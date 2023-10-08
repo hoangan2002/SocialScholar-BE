@@ -376,21 +376,39 @@ public class PostController {
         return postServices.ArrayListPostDTO(result);
     }
 
-    @GetMapping("/getPostDTObylike")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(){
-        ArrayList<Post> result = postServices.getAllPostByLike();
+    @GetMapping("/getPostDTObylike/{groupid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(@PathVariable long groupid){
+        ArrayList<Post> result = postServices.getAllPostByLike(groupid);
         return postServices.ArrayListPostDTO(result);
     }
 
-    @GetMapping("/getPostDTObycomment")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(){
-        ArrayList<Post> result = postServices.getAllPostByComment();
+    @GetMapping("/getPostDTObycomment/{groupid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(@PathVariable long groupid){
+        ArrayList<Post> result = postServices.getAllPostByComment(groupid);
         return postServices.ArrayListPostDTO(result);
     }
 
-    @GetMapping("/getPostDTObytime")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(){
-        ArrayList<Post> result = postServices.getAllPostByTime();
+    @GetMapping("/getPostDTObytime/{groupid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(@PathVariable long groupid){
+        ArrayList<Post> result = postServices.getAllPostByTime(groupid);
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObylike-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByLikeUser(userid);
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObycomment-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByCommentUser(userid);
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObytime-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByTimeUser(userid);
         return postServices.ArrayListPostDTO(result);
     }
 
