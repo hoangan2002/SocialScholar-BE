@@ -37,7 +37,7 @@ public class ProfileController {
     ImageStorageService imageStorageService;
 
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
-    @GetMapping("/{username}")
+    @PostMapping("/{username}")
 //    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
         User theUser = service.findUserByUsername(username);

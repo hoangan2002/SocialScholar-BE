@@ -53,13 +53,8 @@ public class PostController {
     //______________________________________Make_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/posting")
-    public ResponseEntity<ResponseObject> submitPost(@RequestPart PostDTO body){
+    public ResponseEntity<ResponseObject> submitPost(@RequestBody PostDTO body){
         Post post = new Post();
-        String content ;
-        Timestamp time;
-        int userId;
-        int groupId;
-        String title ;
         // Check if user is not in group, user can not dislike post
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
@@ -101,67 +96,68 @@ public class PostController {
     }
     //______________________________________Edit_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @PutMapping("/editpost")
-    public ResponseEntity<ResponseObject>  updateUser(@RequestPart Post postData,
+    @PostMapping("/editpost")
+    public ResponseEntity<ResponseObject>  updateUser(@RequestBody PostDTO postData,
 //                                                      @RequestParam("userid") int userid,
-                                                      @RequestParam("postid") long postid,
+                                                      @RequestParam("postid") long postid
                                                       //nhap vao vi tri anh can xoa. Example: anh thu 1 va 2 => imageRemove[1,2]
-                                                      @RequestParam(value="imageRemove",required = false)int[] imageRemove,
+
                                                       //thêm ảnh nếu cần
-                                                      @RequestParam(value = "file", required = false) MultipartFile[] file){
+                                                     ){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
-        try {
-            boolean check = false;
-
-            if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
-                postData.setPostId(postid);
-                String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
-                ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
-                String newImageList="";
-                if(imageRemove!= null){
-                    for(int index:imageRemove){
-                        if(index>=arr.length)
-                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                                    new ResponseObject("failed", "We have "+arr.length+" Images, can't find the remove index", ""));
-                    }
-
-                    for(int i=0; i<imageRemove.length;i++){
-                        imagesArraylist.set(imageRemove[i],"");
-                    }
-
-                    for(int i=0; i<imagesArraylist.size();i++){
-                        newImageList= newImageList + imagesArraylist.get(i)+" ";
-                    }
-                    postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
-                    check=true;
-                }
-
-                if (file != null) {
-                    String  imagePathUploadEdit="";
-
-                    if(check) newImageList=postData.getImageURL()+" ";
-                    else  newImageList=postServices.loadPostById(postid).getImageURL().trim();
-
-                    for(int i=0; i<file.length;i++) {
-                        String fileName = imageStorageService.storeFile(file[i]);
-                        imagePathUploadEdit= imagePathUploadEdit + fileName+" ";
-
-                    }
-                    postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
-                }
-
-
-                Post result = postServices.editPostDB(postData);
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ResponseObject("ok", "Post Edit successfully", result));
-            }
-        }catch (RuntimeException exception){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject("failed", "There are problem..", ""));
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("Failed", "Post Not Found", ""));
+//        try {
+//            boolean check = false;
+//
+//            if (postServices.loadPostById(postid).getUser().getUserId() == userid) {
+//                postData.setPostId(postid);
+//                String arr[] = postServices.loadPostById(postid).getImageURL().trim().replaceAll("\\s+", " ").split(" ");
+//                ArrayList<String> imagesArraylist = new ArrayList<String>(Arrays.asList(arr));
+//                String newImageList="";
+////                if(imageRemove!= null){
+////                    for(int index:imageRemove){
+////                        if(index>=arr.length)
+////                            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+////                                    new ResponseObject("failed", "We have "+arr.length+" Images, can't find the remove index", ""));
+////                    }
+////
+////                    for(int i=0; i<imageRemove.length;i++){
+////                        imagesArraylist.set(imageRemove[i],"");
+////                    }
+////
+////                    for(int i=0; i<imagesArraylist.size();i++){
+////                        newImageList= newImageList + imagesArraylist.get(i)+" ";
+////                    }
+////                    postData.setImageURL(newImageList.replaceAll("\\s+", " ").trim());
+////                    check=true;
+////                }
+////
+////                if (file != null) {
+////                    String  imagePathUploadEdit="";
+////
+////                    if(check) newImageList=postData.getImageURL()+" ";
+////                    else  newImageList=postServices.loadPostById(postid).getImageURL().trim();
+////
+////                    for(int i=0; i<file.length;i++) {
+////                        String fileName = imageStorageService.storeFile(file[i]);
+////                        imagePathUploadEdit= imagePathUploadEdit + fileName+" ";
+////
+////                    }
+////                    postData.setImageURL((newImageList+" "+imagePathUploadEdit).replaceAll("\\s+", " ").trim());
+////                }
+//
+//
+//                Post result = postServices.editPostDB(postData);
+//                return ResponseEntity.status(HttpStatus.OK).body(
+//                        new ResponseObject("ok", "Post Edit successfully", result));
+//            }
+//        }catch (RuntimeException exception){
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+//                    new ResponseObject("failed", "There are problem..", ""));
+//        }
+//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                new ResponseObject("Failed", "Post Not Found", ""));
+        return  null;
     }
 
     //______________________________________Get_post____________________________________________________//
@@ -175,7 +171,7 @@ public class PostController {
     }
     //______________________________________Delete_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    @DeleteMapping("/deletepost/{postId}")
+    @PostMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -193,6 +189,7 @@ public class PostController {
 
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
+
         User current = userService.findUserByUsername(userName);
         int userId = current != null ?current.getUserId():-1;
         // check if post is not found, return
@@ -320,8 +317,8 @@ public class PostController {
         return reportService.getAllPostReportTypes();
     }
 
-    @GetMapping("/find-post")
-    public ArrayList<PostResponse> findPost(@RequestParam("findContent") String findContent){
+    @PostMapping("/find-post")
+    public ArrayList<PostResponse> findPost(@RequestBody String findContent){
         ArrayList<Post> allPost = postServices.retrivePostFromDB();
         ArrayList<Post> findResult = new ArrayList<>();
         if(findContent!= null && findContent != "\s") {
@@ -393,7 +390,6 @@ public class PostController {
         ArrayList<Post> result = postServices.getAllPostByTime();
         return postServices.ArrayListPostDTO(result);
     }
-
 
 
 }
