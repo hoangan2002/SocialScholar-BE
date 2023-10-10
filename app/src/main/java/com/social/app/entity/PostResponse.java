@@ -17,6 +17,7 @@ public class PostResponse {
     private String titles;
     private String imageURL;
     private String author;
+    private  long groupId;
     private String groupName;
     private List<CommentResponse> comments;
     private List<LikeResponse> likes;

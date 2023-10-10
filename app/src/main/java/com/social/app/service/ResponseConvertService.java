@@ -37,6 +37,7 @@ public class ResponseConvertService {
                 .imageURL(post.getImageURL())
                 .author(post.getUser().getUserName())
                 .groupName(post.getGroup().getGroupName())
+                .groupId(post.getGroup().getGroupId())
                 .comments(commentResponseArrayList(post.getComments()))
                 .likes(postLikeResponse(post.getLikes()))
                 .titles(post.getTitles())

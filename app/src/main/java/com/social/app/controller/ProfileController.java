@@ -37,7 +37,7 @@ public class ProfileController {
     ImageStorageService imageStorageService;
 
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
-    @GetMapping("/{username}")
+    @PostMapping("/{username}")
 //    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
         User theUser = service.findUserByUsername(username);
@@ -126,30 +126,19 @@ public class ProfileController {
 //        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("Fail", "OK",null));
 //    }
 
-    @PutMapping("/edit-avatar")
+    @PostMapping("/edit-avatar")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
-    public ResponseEntity<ResponseObject> editAvatar(@RequestParam(value = "file") MultipartFile file){
+    public ResponseEntity<ResponseObject> editAvatar(@RequestBody User user){
+        System.out.println(user.getAvatarURL());
+        System.out.println(user.getBackgroundURL());
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User theUser = service.findUserByUsername(authentication.getName());
             if(theUser!=null){
-                if(file!=null&&!file.isEmpty()){
-                    if (theUser.getAvatarURL()!=null)
-                    {
-                        // xoa avatar cu neu co trong uploads
-                        String deletePath = imageStorageService.getUploadsPath()+theUser.getAvatarURL();
-                        File deleteFile = new File(deletePath);
-                        if(deleteFile.exists())
-                            imageStorageService.deleteFile(imageStorageService.getUploadsPath()+theUser.getAvatarURL());
-                    }
-                    // add avatar
-;
-                    String filename = imageStorageService.storeFile(file);
-
-                    theUser.setAvatarURL(filename);
-                    service.save(theUser);
-                    return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",imageStorageService.getUploadsPath()+theUser.getAvatarURL()));
-                }
+                if(user.getAvatarURL() != null) theUser.setAvatarURL(user.getAvatarURL());
+                if(user.getBackgroundURL() != null) theUser.setBackgroundURL(user.getBackgroundURL());
+                if(user.getPhone() != null) theUser.setPhone(user.getPhone());
+                service.save(theUser);
             }
         }
         catch (RuntimeException e){
