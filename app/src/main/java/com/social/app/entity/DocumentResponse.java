@@ -19,7 +19,7 @@ public class DocumentResponse {
     private String description;
     private int cost;
     private Timestamp time;
-    private List<Rating> ratings;
+    private int ratings;
     private String groupName;
     private String author;
 }

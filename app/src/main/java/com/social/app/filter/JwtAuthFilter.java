@@ -30,10 +30,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         System.out.println("filter");
         String authHeader = request.getHeader("Authorization");
+        System.out.println("string" + authHeader);
         String token = null;
         String username = null;
-        if (authHeader != null ) { //&& authHeader.startsWith("Bearer ")
-            token = authHeader;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); // Bỏ đi "Bearer " để lấy token
             username = jwtService.extractUsername(token);
             System.out.println(token);
         }
@@ -48,4 +49,5 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
 }

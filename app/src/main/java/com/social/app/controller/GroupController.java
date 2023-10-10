@@ -1,17 +1,13 @@
 package com.social.app.controller;
 
-import com.social.app.entity.GroupDTO;
-import com.social.app.entity.PostResponse;
+import com.social.app.dto.GroupDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 
 import com.social.app.model.JoinManagement;
-import com.social.app.model.Post;
 import com.social.app.model.User;
-import com.social.app.repository.UserRepository;
 import com.social.app.service.*;
 
-import com.social.app.model.User;
 import com.social.app.service.GroupServices;
 import com.social.app.service.ImageStorageService;
 import com.social.app.service.UserService;
@@ -43,7 +39,7 @@ public class GroupController {
 
 
 
-    @GetMapping
+    @PostMapping("/create")
     public ResponseEntity<ResponseObject> createGroup(@RequestBody Groups group, @RequestParam(value = "fileGAvatar", required = false) MultipartFile fileGAvatar, @RequestParam(value = "fileGCover", required = false) MultipartFile fileGCover){
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -114,7 +110,7 @@ public class GroupController {
             return  ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Update Group Fail", "ERROR",null));
         }  catch (RuntimeException exception){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( new ResponseObject("Create Group THROW", "ERROR",null ));}}
-    @DeleteMapping("/delete/{groupId}")
+    @PostMapping("/delete/{groupId}")
     @PreAuthorize("hasRole('ROLE_HOST')")
     public ResponseEntity<ResponseObject> deleteGroup(@PathVariable Long groupId) {
         if(groupServices.isGroupHost(groupId)) {
@@ -126,15 +122,13 @@ public class GroupController {
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
     @GetMapping("/{groupId}")
-
-//    @PreAuthorize("hasRole('ROLE_HOST')")
-    public  ResponseEntity<ResponseObject> readGroup(@PathVariable String groupId){
+    public  GroupDTO readGroup(@PathVariable Long groupId){
 //        if(groupServices.isGroupHost(groupId)){
 //
 //        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
         System.out.println(groupId);
         try {
-            Groups group  = groupServices.loadGroupByName(groupId);
+            Groups group  = groupServices.loadGroupById(groupId);
 
             if(group == null) ;
             System.out.println(groupId);
@@ -143,18 +137,16 @@ public class GroupController {
                 throw new Exception("Group not found"); // Ném ngoại lệ nếu người dùng không tồn tại
             }
 
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseObject("Successful", "OK", group));
+            System.out.println("ssssssssssss");
+            return groupServices.MapGroupDTO(group);
         } catch (Exception e) {
             // Xử lý ngoại lệ UserNotFoundException ở đây
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseObject("Fail", e.getMessage(), null));
+            return null;
         }
     }
 
-    @GetMapping("/find-group")
-    public ArrayList<Groups> findPost(@RequestParam("findContent") String findContent){
+    @PostMapping("/find-group")
+    public ArrayList<Groups> findPost(@RequestBody String findContent){
         ArrayList<Groups> allGroup = groupServices.retriveGroupFromDB();
         ArrayList<Groups> findResult = new ArrayList<>();
         if(findContent!= null && findContent != "\s") {
@@ -178,7 +170,7 @@ public class GroupController {
 
         return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Join Success", "OK",joinService.saveJoin(new JoinManagement(groupServices.loadGroupById(groupId), userService.findUserByUsername(username), Calendar.getInstance().getTime()))));
     }
-    @DeleteMapping("/exit-group/{groupId}")
+    @PostMapping("/exit-group/{groupId}")
     public  ResponseEntity<ResponseObject> exitGroup(@PathVariable Long groupId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -188,7 +180,7 @@ public class GroupController {
         joinService.deleteJoin(groupServices.loadGroupById(groupId),userService.findUserByUsername(username));
         return   ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Exit Success", "OK",null));
     }
-    @DeleteMapping("/kick-user/{groupId}")
+    @PostMapping("/kick-user/{groupId}")
     @PreAuthorize("hasRole('ROLE_HOST')")
     public  ResponseEntity<ResponseObject> kickUser(@PathVariable Long groupId,@RequestParam String userName){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -205,6 +197,75 @@ public class GroupController {
 
 
     }
+    @PostMapping ("/suggest")
+    public ArrayList<GroupDTO> suggestGroups(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ArrayList<Groups> groups =  groupServices.findAll();
+        ArrayList<GroupDTO> groupsSuggest = new ArrayList<>();
+         //Gợi ý
+        for (Groups group :groups )  {
+            Groups groups1 = new Groups();
+            groups1.setGroupId(group.getGroupId());
+            groups1.setGroupName(group.getGroupName());
+            groups1.setImageURLGAvatar(group.getImageURLGAvatar());
+            GroupDTO groupDTO= groupServices.MapGroupDTO(groups1);
+            groupDTO.setIsJoin(false);
+            if(!userService.isGroupMember(username,group.getGroupId())){
+               groupsSuggest.add(groupDTO);
+            }
+        }
 
+        return  groupsSuggest;
+    }
+    @GetMapping("/find-group-login/{groupName}")
+    public ArrayList<GroupDTO> findGroups(@PathVariable String groupName){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        ArrayList<Groups> groups =  groupServices.findAll();
+        ArrayList<GroupDTO> groupsSuggest = new ArrayList<>();
+        //Search group
+        if(groupName!=null){
+            ArrayList<GroupDTO> joinedGroups  = new ArrayList<>();
+            ArrayList<GroupDTO> otherGroups  = new ArrayList<>();
+            for (Groups group :groups )  { Groups GroupDTO = new Groups();
+                GroupDTO.setGroupName(group.getGroupName());
+                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
+                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
+                GroupDTO groupDTO= groupServices.MapGroupDTO(GroupDTO);
+                if(userService.isGroupMember(username,group.getGroupId()) && group.getGroupName().toLowerCase().contains(groupName.toLowerCase().trim())){
+
+                    groupDTO.setIsJoin(true);
+                    joinedGroups.add(groupDTO);
+                } else if( group.getGroupName().contains(groupName)){
+
+                    groupDTO.setIsJoin(false);
+                    otherGroups.add(groupDTO);
+                }
+            }
+            groupsSuggest.addAll(joinedGroups);
+            groupsSuggest.addAll(otherGroups);
+            return groupsSuggest;
+        } else return null;
+
+
+    }
+
+
+    @GetMapping("/get-all-group/{userId}")
+    public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){
+        User user= userService.loadUserById(userId);
+        ArrayList<Groups> groups  = new ArrayList<>();
+        for (JoinManagement join: user.getJoins()
+        ) {
+            groups.add(join.getGroup());
+        }
+        return  groupServices.groupsResponses(groups);
+    }
+    @GetMapping("/getAllGroup")
+    public ArrayList<GroupDTO> getAllGroup(){
+        ArrayList<Groups> groups  = groupServices.retriveGroupFromDB();
+        return  groupServices.groupsResponses(groups);
+    }
 
 }

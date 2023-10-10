@@ -75,11 +75,6 @@ public class PostServices {
         return result;
     }
 
-    public ArrayList<Post> retriveUserPostFromDB(int userId){
-        ArrayList<Post> result = postRepository.findAllByUserUserId(userId);
-        return result;
-    }
-
     public ArrayList<Post> deletePostDB(long postID){
         postRepository.deleteById(postID);
         ArrayList<Post> result = retrivePostFromDB();
@@ -169,43 +164,20 @@ public class PostServices {
         }
         return valueList;
     }
-    public ArrayList<Post> getAllPostByLike(long groupid) {
-        ArrayList<Post> posts = retriveGroupPostFromDB(groupid);
+    public ArrayList<Post> getAllPostByLike() {
+        ArrayList<Post> posts = retrivePostFromDB();
         posts.sort(((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size())));
         return posts;
     }
 
-    public ArrayList<Post> getAllPostByComment(long groupid) {
-        ArrayList<Post> posts = retriveGroupPostFromDB(groupid);
+    public ArrayList<Post> getAllPostByComment() {
+        ArrayList<Post> posts = retrivePostFromDB();
         Collections.sort(posts, ((o1, o2) -> Integer.compare(o2.getComments().size(), o1.getComments().size())));
         return posts;
     }
 
-    public ArrayList<Post> getAllPostByTime(long groupid) {
-        ArrayList<Post> posts = retriveGroupPostFromDB(groupid);
-        Collections.sort(posts, new Comparator<Post>() {
-            @Override
-            public int compare(Post o1, Post o2) {
-                return o2.getTime().compareTo(o1.getTime());
-            }
-        });
-        return posts;
-    }
-
-    public ArrayList<Post> getAllPostByLikeUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
-        posts.sort(((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size())));
-        return posts;
-    }
-
-    public ArrayList<Post> getAllPostByCommentUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
-        Collections.sort(posts, ((o1, o2) -> Integer.compare(o2.getComments().size(), o1.getComments().size())));
-        return posts;
-    }
-
-    public ArrayList<Post> getAllPostByTimeUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
+    public ArrayList<Post> getAllPostByTime() {
+        ArrayList<Post> posts = retrivePostFromDB();
         Collections.sort(posts, new Comparator<Post>() {
             @Override
             public int compare(Post o1, Post o2) {
