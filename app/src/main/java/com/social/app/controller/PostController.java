@@ -170,6 +170,12 @@ public class PostController {
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return responseConvertService.postResponseArrayList(result);
     }
+    //______________________________________Get GROUP POSTS____________________________________________________//
+    @GetMapping("/getPosts/{groupId}")
+    public ArrayList<PostResponse> retrievePostsFromGroup(@PathVariable("groupId")long grId){
+        ArrayList<Post> result = postServices.retriveGroupPostFromDB(grId);
+        return responseConvertService.postResponseArrayList(result);
+    }
     //______________________________________Get a Single_post____________________________________________________//
     @GetMapping("/getPost/{postId}")
     public ResponseEntity<ResponseObject> getPostById(@PathVariable("postId")long postId){
