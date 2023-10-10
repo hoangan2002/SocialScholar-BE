@@ -1,9 +1,12 @@
 package com.social.app.service;
 
-import com.social.app.dto.GroupDTO;
 import com.social.app.model.Groups;
 import com.social.app.model.JoinManagement;
+import com.social.app.model.Post;
 import com.social.app.model.User;
+import com.social.app.dto.GroupDTO;
+import com.social.app.dto.UserDTO;
+import com.social.app.model.*;
 import com.social.app.repository.GroupRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Optional;
-
+import org.modelmapper.ModelMapper;
 @Service
 public class GroupServices {
     @Autowired
