@@ -38,6 +38,6 @@ public class AdminController {
              ) {
             groups.add(join.getGroup());
         }
-       return  groupServices.groupsResponses(groups);
+       return groupServices.groupsResponses(groups);
     }
 }

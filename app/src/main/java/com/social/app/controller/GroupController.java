@@ -122,7 +122,7 @@ public class GroupController {
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
     @GetMapping("/{groupId}")
-    public  GroupDTO readGroup(@PathVariable Long groupId){
+    public GroupDTO readGroup(@PathVariable Long groupId){
 //        if(groupServices.isGroupHost(groupId)){
 //
 //        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
