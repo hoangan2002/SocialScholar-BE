@@ -64,11 +64,11 @@ public class GroupDTO {
         return isJoin;
     }
     @JsonView(Views.GroupsView.class)
-    public int getMemberNumbers() {
+    public int getJoins() {
         return joins.size();
     }
     @JsonView(Views.GroupsView.class)
-    public int getPostNumbers() {
+    public int getPosts() {
         return posts.size();
     }
 }
