@@ -29,14 +29,14 @@ public class CommentService {
     ModelMapper modelMapper;
     @Autowired
     UserService userService;
-    public CommentDTO createComment(CommentDTO commentDTO, long postID, int userId){
+    public CommentDTO createComment(CommentDTO commentDTO, long postID, String userName){
         Post post = this.postRepository.findById(postID).orElseThrow(()-> new RuntimeException());
         Comment comment = modelMapper.map(commentDTO, Comment.class);
 
         // set post to comment
         comment.setPost(post);
         // set user for comment
-        comment.setUser(userService.loadUserById(userId));
+        comment.setUser(userService.loadUserByUserName(userName));
         // set current time to comment
         Date date = new Date();
         Timestamp datetime = new Timestamp(date.getTime());

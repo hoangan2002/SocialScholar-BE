@@ -1,10 +1,16 @@
 package com.social.app.service;
+import com.social.app.config.ModelMapperConfig;
+import com.social.app.config.SecurityConfig;
+import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.GroupRepository;
 import com.social.app.repository.JoinRepository;
 import com.social.app.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -30,6 +36,16 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder encoder;
 
+    @Autowired
+    private SecurityConfig securityConfig;
+    @Autowired
+    ModelMapper modelMapper;
+
+    public UserDTO MapUserDTO(User user){
+        UserDTO userDTO = modelMapper.map(user,UserDTO.class);
+        return userDTO;
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
@@ -45,7 +61,7 @@ public class UserService implements UserDetailsService {
                 .userName(request.getUserName())
                 .phone(request.getPhone())
                 .email(request.getEmail())
-                .password(encoder.encode(request.getPassword()))
+                .password(encoder.encode(request.getPassword().trim()))
                 .role(String.valueOf(Role.ROLE_USER))
                 .build();
         System.out.println(user);
@@ -98,6 +114,8 @@ public class UserService implements UserDetailsService {
         }
 
     }
+
+
     public User loadUserById(int id) throws UsernameNotFoundException {
         Optional<User> result = repository.findById(id);
         User theUser = null;
@@ -112,7 +130,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
     public Boolean existPhone(String phone){
-        Optional<User> result = repository.findByUserName(phone);
+        Optional<User> result = repository.findByPhone(phone);
         return result.isPresent();
     }
 
@@ -204,9 +222,22 @@ public class UserService implements UserDetailsService {
         return repository.save(user);
     }
 
-    public boolean isGroupMember(int userId, long groupId){
+    public boolean isGroupMember(long groupId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user =  findUserByUsername(username);
+        // Get list joinmanagement by user
+        ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
+        for (JoinManagement join:joins) {
+            // Check if user joined in group, return true, else return false
+            if (join.getGroup().getGroupId() == groupId) return true;
+        }
+        return  false;
+    }
+    public boolean isGroupMember(String userName, long groupId){
         // Get user by userId
-        User user = loadUserById(userId);
+        User user = (User) loadUserByUsername(userName);
         // Get list joinmanagement by user
         ArrayList<JoinManagement> joins = joinRepository.findByUser(user);
         for (JoinManagement join:joins) {
@@ -224,5 +255,13 @@ public class UserService implements UserDetailsService {
 
     public User findUserByUsername(String username){
         return repository.findUserByUserName(username);
+    }
+
+    public ArrayList<User> findAll() {
+        return repository.findAll();
+    }
+    public String encodePass(String pass){
+        return  securityConfig.passwordEncoder().encode(pass);
+
     }
 }

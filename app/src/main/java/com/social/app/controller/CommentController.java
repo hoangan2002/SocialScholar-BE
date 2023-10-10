@@ -39,15 +39,18 @@ public class CommentController {
                                                  @PathVariable long postID){
         // Get userId by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String username = authentication.getName();
 
         try {
             // Get post from postId
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
-            if(!userService.isGroupMember(userId, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+
+            if(!userService.isGroupMember(username, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+
+            if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // create comment
-            CommentDTO newComment = this.commentService.createComment(comment, postID, userId);
+            CommentDTO newComment = this.commentService.createComment(comment, postID, username);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject("Successfully", "Create comment successfully", newComment));
         }
@@ -128,7 +131,7 @@ public class CommentController {
 
         // Check if user is not in group, user can not dislike comment
         Post post = commentService.getPostByCommentId(commentId);
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+        if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
         User user = userService.loadUserById(userId);
         // check if user already dislike, delete commentlike
@@ -161,7 +164,7 @@ public class CommentController {
         CommentDTO comment = commentService.getCommentByID(commentId);
         // Check if user is not in group, user can not like comment
         Post post = commentService.getPostByCommentId(commentId);
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+        if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
         User user = userService.loadUserById(userId);
         // check if user already dislike, delete commentlike
@@ -197,7 +200,7 @@ public class CommentController {
             CommentDTO commentParent = commentService.getCommentByID(commentParentId);
             // Check if user is not in group, user can not create comment
             Post post = commentService.getPostByCommentId(commentParentId);
-            if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // set user for comment
             commentReply.setUser(userService.loadUserById(userid));
             // create comment
@@ -228,7 +231,7 @@ public class CommentController {
         CommentDTO comment = commentService.getCommentByID(commentId);
         // Check if user is not in group, user can not report comment
         Post post = commentService.getPostByCommentId(commentId);
-        if(!userService.isGroupMember(userId, post.getGroup().getGroupId()))
+        if(!userService.isGroupMember( post.getGroup().getGroupId()))
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("Failed","User must be in group","")
             );
