@@ -399,5 +399,17 @@ public class PostController {
         return postServices.ArrayListPostDTO(result);
     }
 
-
+    @GetMapping("/getPostDTObygroup/{groupid}")
+    public ResponseEntity<ResponseObject> getPostByGroup (@PathVariable long groupid){
+        if(groupServices.loadGroupById(groupid)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Group not exist","")
+            );
+        else {
+            ArrayList<Post> result = postServices.retriveGroupPostFromDB(groupid);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("Success","Done!",result)
+            );
+        }
+    }
 }

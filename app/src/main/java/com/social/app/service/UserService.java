@@ -265,4 +265,14 @@ public class UserService implements UserDetailsService {
         return  securityConfig.passwordEncoder().encode(pass);
 
     }
+
+    public User plusPoint(int userId, int points){
+        User user = loadUserById(userId);
+        if(user==null) return null;
+        else {
+            user.setActivityPoint(user.getActivityPoint()+points);
+            save(user);
+        }
+        return user;
+    }
 }

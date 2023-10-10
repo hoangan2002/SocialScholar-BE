@@ -5,6 +5,7 @@ import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 
 import com.social.app.model.JoinManagement;
+import com.social.app.model.Post;
 import com.social.app.model.User;
 import com.social.app.service.*;
 
@@ -268,4 +269,17 @@ public class GroupController {
         return  groupServices.groupsResponses(groups);
     }
 
+    @GetMapping("/getNumberOfMembers/{groupid}")
+    public ResponseEntity<ResponseObject> getNumberOfMembers (@PathVariable long groupid){
+        if(groupServices.loadGroupById(groupid)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Group not exist","")
+            );
+        else {
+           Groups groups = groupServices.loadGroupById(groupid);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("Success","Done!",groups.getJoins().size())
+            );
+        }
+    }
 }
