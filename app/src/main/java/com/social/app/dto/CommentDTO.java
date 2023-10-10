@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
-import com.social.app.service.CommentService;
 import jakarta.persistence.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;

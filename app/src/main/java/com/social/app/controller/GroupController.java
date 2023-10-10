@@ -122,33 +122,28 @@ public class GroupController {
         }return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Delete Group Fail", "ERROR", null));
     }
     @GetMapping("/{groupId}")
-
-//    @PreAuthorize("hasRole('ROLE_HOST')")
-    public ResponseEntity<ResponseObject> readGroup(@PathVariable String groupId) {
+    public  GroupDTO readGroup(@PathVariable Long groupId){
+//        if(groupServices.isGroupHost(groupId)){
+//
+//        }return   ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Read Group Fail", "ERROR",null));
         System.out.println(groupId);
         try {
-            Groups group = groupServices.loadGroupById(Integer.parseInt(groupId));
-            if (group==null) {
-                try {
-                    int groupIdInt = Integer.parseInt(groupId);
-                    group = groupServices.loadGroupByName(groupId);
-                } catch (NumberFormatException ex) {
-                    throw new Exception("Invalid groupId format");
-                }
-            }
+            Groups group  = groupServices.loadGroupById(groupId);
+
+            if(group == null) ;
+            System.out.println(groupId);
+            System.out.println(group);
             if (group == null) {
-                throw new Exception("Group not found"); // Ném ngoại lệ nếu group không tồn tại
+                throw new Exception("Group not found"); // Ném ngoại lệ nếu người dùng không tồn tại
             }
 
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseObject("Successful", "OK", group));
+            System.out.println("ssssssssssss");
+            return groupServices.MapGroupDTO(group);
         } catch (Exception e) {
-            // Xử lý ngoại lệ GroupNotFoundException ở đây
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ResponseObject("Fail", e.getMessage(), null));
+            // Xử lý ngoại lệ UserNotFoundException ở đây
+            return null;
         }
     }
-
 
     @PostMapping("/find-group")
     public ArrayList<Groups> findPost(@RequestBody String findContent){
@@ -202,7 +197,7 @@ public class GroupController {
 
 
     }
-    @GetMapping("/suggest")
+    @PostMapping ("/suggest")
     public ArrayList<GroupDTO> suggestGroups(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();

@@ -69,6 +69,7 @@ public class PostController {
 
                     post.setGroup(groupServices.loadGroupById(body.getGroupId()));
                     post.setTime(body.getTime());
+                    post.setContent(body.getContent());
 
 //                    if (file != null && !file[0].isEmpty()) {
 //                        String imagePath="";
@@ -347,6 +348,13 @@ public class PostController {
         }
         return responseConvertService.postResponseArrayList(findResultGroup);
     }
+    @GetMapping("/groupPost/{groupId}")
+    public ArrayList<PostResponse> groupPost(@PathVariable Long groupId){
+        ArrayList<Post> allPostGroup = postServices.retriveGroupPostFromDB(groupId);
+
+        return responseConvertService.postResponseArrayList(allPostGroup);
+    }
+
     @PostMapping("/donate/{postid}")
     public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
