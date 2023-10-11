@@ -98,4 +98,5 @@ public class GroupServices {
         return  groupRepository.findAll();
     }
 
+    public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
 }
