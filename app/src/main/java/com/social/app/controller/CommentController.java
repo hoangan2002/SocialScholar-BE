@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.social.app.dto.CommentDTO;
 import com.social.app.dto.CommentReportDTO;
+import com.social.app.dto.CommentReportTypeDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.service.*;
@@ -115,9 +116,10 @@ public class CommentController {
 
     @PostMapping("/dislike/{commentId}")
     public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        User user = userService.findUserByUsername(authentication.getName());
+        int userId = user.getUserId();
 
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
@@ -133,17 +135,19 @@ public class CommentController {
         Post post = commentService.getPostByCommentId(commentId);
         if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete commentlike
-        if(likeService.getCommentLike(commentId,userId)!=null){
-            // call delete function
-            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+        // check if user already dislike, delete commentlike and return
+        if(likeService.commentIsDisliked(commentId,userId)){
+            likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like comment successfully","")
-            );
+                    new ResponseObject("OK","Dislike comment successfully",""));
         }
 
-        // else create postlike
+        // check if user already like, delete commentlike
+        if(likeService.commentIsLiked(commentId,userId)){
+            likeService.deleteCommentLike(commentId,userId);
+        }
+
+        // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Dislike comment successfully",likeService.createCommentLike(comment, user, (byte)-1))
         );
@@ -151,9 +155,10 @@ public class CommentController {
 
     @PostMapping("/like/{commentId}")
     public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        User user = userService.findUserByUsername(authentication.getName());
+        int userId = user.getUserId();
 
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
@@ -166,17 +171,19 @@ public class CommentController {
         Post post = commentService.getPostByCommentId(commentId);
         if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete commentlike
-        if(likeService.getCommentLike(commentId,userId)!=null){
-            // call delete function
-            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+        // check if user already like, delete commentlike and return
+        if(likeService.commentIsLiked(commentId,userId)){
+            likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like comment successfully","")
-            );
+                    new ResponseObject("OK","Like comment successfully",""));
         }
 
-        // else create postlike
+        // check if user already dislike, delete commentlike
+        if(likeService.commentIsDisliked(commentId,userId)){
+            likeService.deleteCommentLike(commentId,userId);
+        }
+
+        // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Like comment successfully",likeService.createCommentLike(comment, user, (byte)1))
         );
@@ -260,7 +267,7 @@ public class CommentController {
     }
 
     @GetMapping("/all-report-types")
-    public ArrayList<CommentReportType> getAllReportTypes(){
+    public ArrayList<CommentReportTypeDTO> getAllReportTypes(){
         return reportService.getAllCommentReportTypes();
     }
 }

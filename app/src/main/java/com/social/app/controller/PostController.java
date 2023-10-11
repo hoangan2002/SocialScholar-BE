@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.social.app.dto.PostReportDTO;
+import com.social.app.dto.PostReportTypeDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
@@ -192,8 +193,11 @@ public class PostController {
     }
 
     @PostMapping("/dislike/{postId}")
-    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
-        User current = userService.findUserByUsername(userName);
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User current = userService.findUserByUsername(authentication.getName());
+
         int userId = current != null ?current.getUserId():-1;
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
@@ -208,26 +212,31 @@ public class PostController {
                     new ResponseObject("Failed","User must be in group","")
             );
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete postlike
-        if(likeService.getPostLike(postId,userId)!=null){
-            // call delete function
-            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+        // check if user already dislike, delete postlike and return
+        if(likeService.postIsDisliked(postId,userId)){
+            likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post successfully","")
-            );
+                    new ResponseObject("OK","Like post successfully",""));
+        }
+
+        // check if user already like, delete postlike
+        if(likeService.postIsLiked(postId,userId)){
+            likeService.deletePostLike(postId,userId);
         }
 
         // else create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, current, (byte)-1))
         );
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User current = userService.findUserByUsername(authentication.getName());
+
         // check if post is not found, return
-        User current = userService.findUserByUsername(userName);
         int userId = current != null ?current.getUserId():-1;
         System.out.println(userId); 
         if (postServices.loadPostById(postId)==null)
@@ -242,19 +251,21 @@ public class PostController {
                     new ResponseObject("Failed","User must be in group","")
             );
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete postlike
-        if(likeService.getPostLike(postId,userId)!=null){
-            // call delete function
-            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+        // check if user already like, delete postlike and return
+        if(likeService.postIsLiked(postId,userId)){
+            likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post successfully","")
-            );
+                    new ResponseObject("OK","Like post successfully",""));
         }
 
-        // else create postlike
+        // check if user already dislike, delete postlike
+        if(likeService.postIsDisliked(postId,userId)){
+            likeService.deletePostLike(postId,userId);
+        }
+
+        // create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, current, (byte)1))
         );
     }
 
@@ -316,7 +327,7 @@ public class PostController {
     }
 
     @GetMapping("/all-report-types")
-    public ArrayList<PostReportType> getAllReportTypes(){
+    public ArrayList<PostReportTypeDTO> getAllReportTypes(){
         return reportService.getAllPostReportTypes();
     }
 
@@ -370,8 +381,6 @@ public class PostController {
         );
     }
 
-<<<<<<< HEAD
-=======
     @GetMapping("/getPostDTO")
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTO(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
@@ -396,7 +405,4 @@ public class PostController {
         return postServices.ArrayListPostDTO(result);
     }
 
-
-
->>>>>>> a5d7bc0bd54cf9e0e877549fdd63028f0162cea4
 }
