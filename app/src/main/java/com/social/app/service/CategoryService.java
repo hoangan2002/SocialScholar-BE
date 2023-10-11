@@ -16,5 +16,7 @@ public class CategoryService {
     public ArrayList<Category> getAll(){
         return (ArrayList<Category>) categoryRepository.findAll(Sort.by(Sort.Order.asc("categoryName")));
     }
+
     public Category findByCategoryName(String name){ return categoryRepository.findByCategoryName(name);}
+
 }

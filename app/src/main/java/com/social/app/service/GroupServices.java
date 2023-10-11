@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Random;
+
 import org.modelmapper.ModelMapper;
 @Service
 public class GroupServices {
@@ -97,6 +99,26 @@ public class GroupServices {
     public ArrayList<Groups> findAll(){
         return  groupRepository.findAll();
     }
+    public ArrayList<Groups> findAllByCategoryCategoryName(String categoryName){
+        return groupRepository.findAllByCategoryCategoryNameIgnoreCase(categoryName);
+    }
+    public ArrayList<Groups> findAllByTag(String tag){
+        return groupRepository.findAllByTagsContainsIgnoreCase(tag);
+    }
+    public ArrayList<Groups> getRandomGroups(ArrayList<Groups> groups, int n) {
+        ArrayList<Groups> result = new ArrayList<>();
+        Random random = new Random();
+
+
+        for (int i = 0; i < n && !groups.isEmpty(); i++) {
+            int randomIndex = random.nextInt(groups.size());
+            result.add(groups.get(randomIndex));
+            groups.remove(randomIndex);
+        }
+
+        return result;
+    }
 
     public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
+
 }

@@ -16,5 +16,11 @@ public interface GroupRepository  extends JpaRepository<Groups, Long> {
 
     @Override
     void deleteById(Long aLong);
+
+    ArrayList<Groups> findAllByCategoryCategoryNameIgnoreCase(String categoryName);
+    ArrayList<Groups> findAllByTagsContainsIgnoreCase(String tag);
+
+
     ArrayList<Groups> findByCategory(Category category);
+
 }
