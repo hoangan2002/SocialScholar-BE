@@ -1,8 +1,6 @@
 package com.social.app.service;
 
-import com.social.app.dto.CommentDTO;
-import com.social.app.dto.CommentReportDTO;
-import com.social.app.dto.PostReportDTO;
+import com.social.app.dto.*;
 import com.social.app.model.*;
 import com.social.app.repository.CommentReportRepository;
 import com.social.app.repository.CommentReportTypeRepo;
@@ -84,12 +82,22 @@ public class ReportService {
         return commentReportRepository.save(commentReport);
     }
 
-    public ArrayList<PostReportType> getAllPostReportTypes(){
-        return new ArrayList<>(postReportTypeRepo.findAll());
+    public ArrayList<PostReportTypeDTO> getAllPostReportTypes(){
+        ArrayList<PostReportTypeDTO> listDTO = new ArrayList<>();
+        ArrayList<PostReportType> list = new ArrayList<>(postReportTypeRepo.findAll());
+        for (PostReportType type: list) {
+            listDTO.add(modelMapper.map(type, PostReportTypeDTO.class));
+        }
+        return listDTO;
     }
 
-    public ArrayList<CommentReportType> getAllCommentReportTypes(){
-        return new ArrayList<>(commentReportTypeRepo.findAll());
+    public ArrayList<CommentReportTypeDTO> getAllCommentReportTypes(){
+        ArrayList<CommentReportTypeDTO> listDTO = new ArrayList<>();
+        ArrayList<CommentReportType> list = new ArrayList<>(commentReportTypeRepo.findAll());
+        for (CommentReportType type: list) {
+            listDTO.add(modelMapper.map(type, CommentReportTypeDTO.class));
+        }
+        return listDTO;
     }
 
     public ArrayList<CommentReportDTO> getAllCommentReports(){
