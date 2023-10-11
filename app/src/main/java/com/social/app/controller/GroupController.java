@@ -1,6 +1,8 @@
 package com.social.app.controller;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.social.app.dto.GroupDTO;
+import com.social.app.dto.Views;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
 
@@ -21,8 +23,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/group")
@@ -44,8 +46,8 @@ public class GroupController {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
-
-            User user =  userService.findUser(username).orElse(null);
+            System.out.println(username);
+           User user =  userService.findUser(username).orElse(null);
 //them ngay tạo
             if(user.getActivityPoint() >= 2000){
                 //set ava group
@@ -197,7 +199,9 @@ public class GroupController {
 
 
     }
+
     @PostMapping ("/suggest")
+    @JsonView(Views.GroupsViewSuggest.class)
     public ArrayList<GroupDTO> suggestGroups(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -205,11 +209,7 @@ public class GroupController {
         ArrayList<GroupDTO> groupsSuggest = new ArrayList<>();
          //Gợi ý
         for (Groups group :groups )  {
-            Groups groups1 = new Groups();
-            groups1.setGroupId(group.getGroupId());
-            groups1.setGroupName(group.getGroupName());
-            groups1.setImageURLGAvatar(group.getImageURLGAvatar());
-            GroupDTO groupDTO= groupServices.MapGroupDTO(groups1);
+            GroupDTO groupDTO= groupServices.MapGroupDTO(group);
             groupDTO.setIsJoin(false);
             if(!userService.isGroupMember(username,group.getGroupId())){
                groupsSuggest.add(groupDTO);
@@ -218,7 +218,9 @@ public class GroupController {
 
         return  groupsSuggest;
     }
+    // tìm group bằng tên
     @GetMapping("/find-group-login/{groupName}")
+    @JsonView(Views.GroupsViewSuggest.class)
     public ArrayList<GroupDTO> findGroups(@PathVariable String groupName){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -228,11 +230,8 @@ public class GroupController {
         if(groupName!=null){
             ArrayList<GroupDTO> joinedGroups  = new ArrayList<>();
             ArrayList<GroupDTO> otherGroups  = new ArrayList<>();
-            for (Groups group :groups )  { Groups GroupDTO = new Groups();
-                GroupDTO.setGroupName(group.getGroupName());
-                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
-                GroupDTO.setImageURLGAvatar(group.getImageURLGAvatar());
-                GroupDTO groupDTO= groupServices.MapGroupDTO(GroupDTO);
+            for (Groups group :groups )  {
+                GroupDTO groupDTO= groupServices.MapGroupDTO(group);
                 if(userService.isGroupMember(username,group.getGroupId()) && group.getGroupName().toLowerCase().contains(groupName.toLowerCase().trim())){
 
                     groupDTO.setIsJoin(true);
@@ -250,8 +249,97 @@ public class GroupController {
 
 
     }
+    @PostMapping("/find-group-by-category/{categorys}")
+    @JsonView(Views.GroupsViewSuggest.class)
+    public ArrayList<GroupDTO> findGroupsByCategory(@PathVariable String categorys) {
+        ArrayList<Groups> listGroups = new ArrayList<>();
+
+        String[] category = categorys.split(",");
+        for(int i =0; i<category.length;i++){
+
+            category[i] = category[i].trim();
+
+            listGroups.addAll(groupServices.findAllByCategoryCategoryName(category[i]));
+        }
+
+        Comparator<Groups> groupComparator = (group2, group1) ->{ return Integer.compare(group1.getJoins().size(),group2.getJoins().size());};
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
 
+        if(authentication != null){
+            String username = authentication.getName();
+            User user= userService.loadUserByUserName(username);
+            ArrayList<Groups> userGroups  = new ArrayList<>();
+            for (JoinManagement join: user.getJoins()) { userGroups.add(join.getGroup()); }
+            listGroups.removeAll(userGroups);
+        }
+
+        ArrayList<Groups> randomGroups = groupServices.getRandomGroups(listGroups, 5);
+        Collections.sort(randomGroups,groupComparator);
+        return  groupServices.groupsResponses(randomGroups);
+    }
+    @PostMapping("/find-group-by-hashtag/{hashtags}")
+    @JsonView(Views.GroupsViewHashTag.class)
+    public  ArrayList<GroupDTO> findGroupsByHashTag(@PathVariable String hashtags){
+        ArrayList<Groups> listGroups = groupServices.findAll();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        //Lấy ra các group user chưa join
+        if(authentication != null){
+            String username = authentication.getName();
+            User user= userService.loadUserByUserName(username);
+            ArrayList<Groups> userGroups  = new ArrayList<>();
+            for (JoinManagement join: user.getJoins()) { userGroups.add(join.getGroup()); }
+            listGroups.removeAll(userGroups);
+        }
+        //Lấy ra các group có matching
+        Map<Groups, Integer> groupMatchingCount = new HashMap<>();
+
+        for (Groups groups:listGroups) {
+            if(groups.getTags()!=null){
+
+
+
+            String[] groupHashtagArray = groups.getTags().split(",");
+
+            String[] hashtag = hashtags.split(",");
+
+            Set<String> hashtagset = new LinkedHashSet<>(Arrays.asList(hashtag));
+            int matchingCount = 0;
+            for (String inputHashtag : hashtagset) {
+                for (String groupHashtag : groupHashtagArray) {
+                    if (inputHashtag.trim().toLowerCase().equals(groupHashtag.trim().toLowerCase())) {
+                        matchingCount++;
+                    }
+                }
+            }
+            if(matchingCount!= 0) {
+                groupMatchingCount.put(groups, matchingCount);
+            }
+            }
+        }
+        //sắp xếp theo độ matching
+        Map<Groups, Integer> sortedMap = groupMatchingCount.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+       ArrayList<Groups> result = new ArrayList<>();
+        Iterator<Groups> iterator = sortedMap.keySet().iterator();
+        int count =0;
+        while (iterator.hasNext()) {
+              if(count<5){
+                  result.add(iterator.next());
+                  count++;
+              } else break;
+        }
+           return groupServices.groupsResponses(result);
+    }
     @GetMapping("/get-all-group/{userId}")
     public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){
         User user= userService.loadUserById(userId);
