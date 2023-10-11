@@ -3,13 +3,12 @@ package com.social.app.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.social.app.model.Category;
-import com.social.app.model.Groups;
-import com.social.app.model.User;
+import com.social.app.model.*;
 import lombok.*;
 
 
 import java.util.Date;
+import java.util.List;
 
 @Builder
 @Getter
@@ -26,7 +25,14 @@ public class GroupDTO {
     private Date timeCreate;
     private User hosts;
     private Category category;
+
     private Boolean isJoin=false;
+
+    private String hashtag;
+
+    private List<JoinManagement> joins;
+    private List<Post> posts;
+
 
     @JsonView({Views.GroupsView.class, Views.GroupsView1.class})
     public long getGroupId(){return  groupId;}
@@ -63,5 +69,13 @@ public class GroupDTO {
     @JsonView({Views.GroupsView.class, Views.GroupsView1.class})
     public Boolean getIsJoin() {
         return isJoin;
+    }
+    @JsonView(Views.GroupsView.class)
+    public int getJoins() {
+        return joins.size();
+    }
+    @JsonView(Views.GroupsView.class)
+    public int getPosts() {
+        return posts.size();
     }
 }

@@ -109,6 +109,7 @@ public class GroupServices {
         ArrayList<Groups> result = new ArrayList<>();
         Random random = new Random();
 
+
         for (int i = 0; i < n && !groups.isEmpty(); i++) {
             int randomIndex = random.nextInt(groups.size());
             result.add(groups.get(randomIndex));
@@ -117,4 +118,7 @@ public class GroupServices {
 
         return result;
     }
+
+    public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
+
 }
