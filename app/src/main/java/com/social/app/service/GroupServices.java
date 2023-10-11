@@ -1,5 +1,9 @@
 package com.social.app.service;
 
+import com.social.app.model.Groups;
+import com.social.app.model.JoinManagement;
+import com.social.app.model.Post;
+import com.social.app.model.User;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
@@ -13,7 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Optional;
-
+import org.modelmapper.ModelMapper;
 @Service
 public class GroupServices {
     @Autowired
@@ -23,18 +27,13 @@ public class GroupServices {
     @Autowired
     ModelMapper modelMapper;
 
-    public Groups loadGroupById(long gid) throws RuntimeException {
-        Groups groups = groupRepository.findByGroupId(gid);
-        if(groups!=null)
-            return groups;
-        else throw new RuntimeException("Not valid group");
+
+    public Groups loadGroupById(long gid) {
+        return groupRepository.findByGroupId(gid);
     }
 
-    public Groups loadGroupByName(String groupName) throws RuntimeException {
-        Groups groups = groupRepository.findByGroupName(groupName);
-        if(groups!=null)
-            return groups;
-        else throw new RuntimeException("Not valid group");
+    public Groups loadGroupByName(String groupName)  {
+        return groupRepository.findByGroupName(groupName);
     }
     public Groups createGroup(Groups groups){
        return groupRepository.save(groups);
@@ -47,11 +46,9 @@ public class GroupServices {
     }
     public boolean isGroupHost( Long groupId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         UserDetails user =userService.loadUserByUsername(authentication.getName());
         Groups groups= groupRepository.findByGroupId(groupId);
-        System.out.println(groups.getHosts().getUserName());
-        System.out.println(user.getUsername());
+        if(groups == null) return false;
         if(groups.getHosts().getUserName().equals(user.getUsername())){
             System.out.println("in ra true");
             return true;
@@ -85,6 +82,7 @@ public class GroupServices {
 
         return foundUser.orElse(null);
     }
+
     public ArrayList<GroupDTO> groupsResponses(ArrayList<Groups> groups){
         ArrayList<GroupDTO> groupDTOS = new ArrayList<>();
         for (Groups group : groups) {
@@ -100,5 +98,5 @@ public class GroupServices {
         return  groupRepository.findAll();
     }
 
-
+    public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
 }
