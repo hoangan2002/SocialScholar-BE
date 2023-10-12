@@ -28,6 +28,7 @@ public class CommentDTO {
     private User user;
     private String author;
     private ArrayList<CommentDTO> commentChildren;
+    private List<CommentLikeDTO> likes;
     @JsonView(Views.CommentView.class)
     public long getCommentId() {
         return commentId;
@@ -59,6 +60,10 @@ public class CommentDTO {
     @JsonView(Views.CommentView.class)
     public ArrayList<CommentDTO> getCommentChildren() {
         return this.commentChildren;
+    }
+    @JsonView(Views.CommentView.class)
+    public List<CommentLikeDTO> getLikes() {
+        return likes;
     }
 
     public void setCommentChildren(ArrayList<CommentDTO> commentChildren){
