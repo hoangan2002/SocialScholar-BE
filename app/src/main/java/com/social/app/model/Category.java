@@ -18,4 +18,9 @@ public class Category {
     private String categoryName;
     @OneToMany(mappedBy = "category")
     private List<Groups> groups;
+
+    public Category(int i, String name) {
+        this.categoryId = i;
+        this.categoryName = name;
+    }
 }
