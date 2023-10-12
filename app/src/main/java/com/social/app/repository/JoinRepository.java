@@ -16,4 +16,5 @@ public interface JoinRepository extends JpaRepository<JoinManagement, Long> {
 
 
     void deleteByGroupAndUser(Groups groups, User user);
+
 }
