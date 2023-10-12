@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    public ArrayList<Comment> findByPost(Post post);
+    public ArrayList<Comment> findByPostId(Post post);
     public Comment findByCommentId(long commentId);
 
     public ArrayList<Comment> findByCommentParentId(long commentParentId);

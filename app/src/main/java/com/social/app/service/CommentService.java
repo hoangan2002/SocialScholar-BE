@@ -5,18 +5,13 @@ import com.social.app.model.Comment;
 import com.social.app.model.Post;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostRepository;
-import com.social.app.request.CommentRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CommentService {
@@ -35,7 +30,7 @@ public class CommentService {
         Comment comment = modelMapper.map(commentDTO, Comment.class);
 
         // set post to comment
-        comment.setPost(post);
+        comment.setPostId(post);
         // set user for comment
         comment.setUser(userService.loadUserByUserName(userName));
         // set current time to comment
@@ -53,7 +48,7 @@ public class CommentService {
         // Get post by postid
         Post post = this.postRepository.findById(postID).orElseThrow(()-> new RuntimeException("Post not exits !"));
         // Get all comments children by post
-        ArrayList<Comment> comments = this.commentRepository.findByPost(post);
+        ArrayList<Comment> comments = this.commentRepository.findByPostId(post);
         ArrayList<CommentDTO> commentDTOS = new ArrayList<>();
         for (Comment comment: comments) {
             // if comment has comment parent -> skip
@@ -102,7 +97,7 @@ public class CommentService {
     public CommentDTO createCommentReply(Comment commentReply, long commentParentId){
         Comment commentParent = this.commentRepository.findById(commentParentId).orElseThrow(()-> new RuntimeException());
         // set info to comment
-        commentReply.setPost(commentParent.getPost());
+        commentReply.setPostId(commentParent.getPostId());
             // check if it's parent has grandparent, make it up level
         if (commentRepository.findByCommentId(commentParent.getCommentParentId()).getCommentParentId() != 0)
         commentReply.setCommentParentId(commentParent.getCommentParentId());
@@ -131,6 +126,6 @@ public class CommentService {
 
     public Post getPostByCommentId(long commentId){
         Comment comment = commentRepository.findByCommentId(commentId);
-        return comment.getPost();
+        return comment.getPostId();
     }
 }

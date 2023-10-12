@@ -405,6 +405,37 @@ public class PostController {
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return postServices.ArrayListPostDTO(result);
     }
+    // Lay 30 bai viet cho home page
+    @GetMapping("/getPostDTO-homepage")
+    public ArrayList<com.social.app.dto.PostDTO> getRandomPostHomePage(){
+        ArrayList<Post> allPosts = postServices.retrivePostFromDB();
+       // Sap xep theo thoi gian uu tien 3
+        Collections.sort(allPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.getTime().compareTo(x.getTime());
+            }
+        });
+        ArrayList<Post> returnPosts = new ArrayList<>();
+        for(int i = 0; i<30; i++){
+            if(i==allPosts.size()) break;
+            returnPosts.add(allPosts.get(i));
+        }
+
+        // Sap xep theo tong tuong tac uu tien 2
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return (y.cmtNumbers()+y.likeNumbers()) - (x.cmtNumbers()+x.likeNumbers());
+            }
+        });
+        // Sap xep theo tong likes uu tien nhat
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.likeNumbers() - x.likeNumbers();
+            }
+        });
+
+        return postServices.ArrayListPostDTO(returnPosts);
+    }
 
     @GetMapping("/getPostDTObylike")
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(){
