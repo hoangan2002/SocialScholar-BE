@@ -46,7 +46,7 @@ public class CommentDTO {
         return commentParentId;
     }
     @JsonView(Views.CommentView.class)
-    public long getPost() {
+    public long getPostId() {
         return postId.getPostId();
     }
     @JsonView(Views.CommentView.class)
