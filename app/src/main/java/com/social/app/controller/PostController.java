@@ -437,4 +437,21 @@ public class PostController {
             );
         }
     }
+    @GetMapping("/getPostDTObylike-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByLikeUser(userid);
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObycomment-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByCommentUser(userid);
+        return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObytime-user/{userid}")
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(@PathVariable int userid){
+        ArrayList<Post> result = postServices.getAllPostByTimeUser(userid);
+        return postServices.ArrayListPostDTO(result);
+    }
 }
