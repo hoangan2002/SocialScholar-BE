@@ -5,6 +5,7 @@ import com.social.app.model.Comment;
 import com.social.app.model.Post;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostRepository;
+import com.social.app.request.CommentRequest;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;

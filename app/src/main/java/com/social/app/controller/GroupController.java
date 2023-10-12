@@ -356,4 +356,18 @@ public class GroupController {
         return  groupServices.groupsResponses(groups);
     }
 
+    @GetMapping("/getNumberOfMembers/{groupid}")
+    public ResponseEntity<ResponseObject> getNumberOfMembers (@PathVariable long groupid) {
+        if (groupServices.loadGroupById(groupid) == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed", "Group not exist", "")
+            );
+        else {
+            Groups groups = groupServices.loadGroupById(groupid);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("Success", "Done!", groups.getJoins().size())
+            );
+        }
+    }
+
 }

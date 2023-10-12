@@ -77,6 +77,7 @@ public class PostServices {
 
     public ArrayList<Post> deletePostDB(long postID){
         postRepository.deleteById(postID);
+
         ArrayList<Post> result = retrivePostFromDB();
         return result;
     }
