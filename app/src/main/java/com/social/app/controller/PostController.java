@@ -192,7 +192,6 @@ public class PostController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/deletepost/{postId}")
     public  ResponseEntity<ResponseObject> deleteParticularPost(@PathVariable("postId")long postId){
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         if(postServices.loadPostById(postId)!=null && postServices.loadPostById(postId).getUser().getUserName().matches(authentication.getName())){
@@ -406,6 +405,37 @@ public class PostController {
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return postServices.ArrayListPostDTO(result);
     }
+    // Lay 30 bai viet cho home page
+    @GetMapping("/getPostDTO-homepage")
+    public ArrayList<com.social.app.dto.PostDTO> getRandomPostHomePage(){
+        ArrayList<Post> allPosts = postServices.retrivePostFromDB();
+       // Sap xep theo thoi gian uu tien 3
+        Collections.sort(allPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.getTime().compareTo(x.getTime());
+            }
+        });
+        ArrayList<Post> returnPosts = new ArrayList<>();
+        for(int i = 0; i<30; i++){
+            if(i==allPosts.size()) break;
+            returnPosts.add(allPosts.get(i));
+        }
+
+        // Sap xep theo tong tuong tac uu tien 2
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return (y.cmtNumbers()+y.likeNumbers()) - (x.cmtNumbers()+x.likeNumbers());
+            }
+        });
+        // Sap xep theo tong likes uu tien nhat
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.likeNumbers() - x.likeNumbers();
+            }
+        });
+
+        return postServices.ArrayListPostDTO(returnPosts);
+    }
 
     @GetMapping("/getPostDTObylike")
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(){
@@ -423,5 +453,19 @@ public class PostController {
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(){
         ArrayList<Post> result = postServices.getAllPostByTime();
         return postServices.ArrayListPostDTO(result);
+    }
+
+    @GetMapping("/getPostDTObygroup/{groupid}")
+    public ResponseEntity<ResponseObject> getPostByGroup (@PathVariable long groupid) {
+        if (groupServices.loadGroupById(groupid) == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed", "Group not exist", "")
+            );
+        else {
+            ArrayList<Post> result = postServices.retriveGroupPostFromDB(groupid);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("Success", "Done!", postServices.ArrayListPostDTO(result))
+            );
+        }
     }
 }

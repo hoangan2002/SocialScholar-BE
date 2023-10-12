@@ -166,4 +166,20 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getAvatarURL()));
     }
 
+    @PostMapping("/getPoint")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getPoint(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = service.findUserByUsername(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getActivityPoint()));
+    }
+
+    @PostMapping("/getCoint")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getCoint(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = service.findUserByUsername(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
+    }
+
 }

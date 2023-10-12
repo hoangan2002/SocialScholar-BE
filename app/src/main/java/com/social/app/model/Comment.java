@@ -7,12 +7,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import jakarta.persistence.*;
 import lombok.Data;
 
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -32,7 +30,7 @@ public class Comment {
     @JsonBackReference(value = "post_comment")
     @ManyToOne
     @JoinColumn(name="post_Id")
-    private Post post;
+    private Post postId;
 
     @JsonBackReference(value = "comment_user")
     @ManyToOne
