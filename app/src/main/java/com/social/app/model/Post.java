@@ -60,4 +60,6 @@ public class Post {
         return like;
     }
 
+    public int likeNumbers(){return likes.size();}
+    public int cmtNumbers(){return  comments.size();}
 }
