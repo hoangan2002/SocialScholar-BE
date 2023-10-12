@@ -20,7 +20,7 @@ public class CommentLikeDTO {
     private Date time;
     private User user;
     private Comment comment;
-
+    private String auth;
     @JsonView({Views.CommentLikeView.class})
     public long getLikeId() {
         return likeId;
@@ -40,5 +40,9 @@ public class CommentLikeDTO {
     @JsonView({Views.CommentLikeView.class})
     public long getComment() {
         return comment.getCommentId();
+    }
+    @JsonView(Views.CommentView.class)
+    public String getAuth() {
+        return user.getUserName();
     }
 }

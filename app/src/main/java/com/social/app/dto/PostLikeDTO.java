@@ -20,7 +20,7 @@ public class PostLikeDTO {
     private byte status;
     private Date time;
     private User user;
-    private String author;
+    private String auth;
     private Post post;
 
     @JsonView({Views.PostLikeView.class})
@@ -45,7 +45,7 @@ public class PostLikeDTO {
     }
 
     @JsonView(Views.CommentView.class)
-    public String getAuthor() {
+    public String getAuth() {
         return user.getUserName();
     }
 }
