@@ -18,7 +18,7 @@ public class ResponseConvertService {
     public CommentResponse commentResponse(Comment comment) {
         var commentResponse = CommentResponse.builder()
                 .commentId(comment.getCommentId())
-                .postId(comment.getPost().getPostId())
+                .postId(comment.getPostId().getPostId())
                 .commentParentId(comment.getCommentParentId())
                 .content(comment.getContent())
                 .time(comment.getTime())
