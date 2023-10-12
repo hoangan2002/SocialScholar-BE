@@ -4,6 +4,7 @@ import com.social.app.dto.CommentDTO;
 import com.social.app.dto.CommentReportDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
+import com.social.app.request.CommentRequest;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,7 +53,7 @@ public class CommentController {
     }*/
     @PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> createComment(@RequestPart CommentDTO comment,
+    ResponseEntity<ResponseObject> createComment(@RequestBody CommentDTO comment,
                                                  @RequestParam("userid") int userid,
                                                  @PathVariable long postID){
         try {
@@ -72,7 +73,7 @@ public class CommentController {
         }
     }
 
-    @DeleteMapping("/delete/{commentID}")
+    @PostMapping("/delete/{commentID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> deleteComment(@PathVariable long commentID, @RequestParam("userid") int userid){
         try {
@@ -90,8 +91,8 @@ public class CommentController {
         }
     }
 
-    @GetMapping("/all-comments/{postID}")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
+    @PostMapping("/all-comments/{postID}")
+//    @PreAuthorize("hasAuthority('ROLE_USER')")
     ArrayList<CommentDTO> getAllComments(@PathVariable long postID){
         ArrayList<CommentDTO> allComments = this.commentService.getAllComments(postID);
         return allComments;
