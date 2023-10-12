@@ -68,11 +68,12 @@ public class LikeService {
     }
 
 
-    public void deletePostLike(PostLike postLike){
+    public void deletePostLike(long postId, int userId){
+        PostLike postLike = getPostLike(postId,userId);
         postLikeRepository.delete(postLike);
     }
-
-    public void deleteCommentLike(CommentLike commentLike){
+    public void deleteCommentLike(long commentId, int userId){
+        CommentLike commentLike = getCommentLike(commentId,userId);
         commentLikeRepository.delete(commentLike);
     }
 
@@ -84,6 +85,38 @@ public class LikeService {
                 return postLike;
         }
         return null;
+    }
+
+    // check if post is liked before
+    public boolean postIsLiked(long postId, int userId){
+        PostLike postLike = getPostLike(postId, userId);
+        if (postLike == null) return false;
+        if(postLike.getStatus() == 1) return true;
+        return false;
+    }
+
+    // check if post is disliked before
+    public boolean postIsDisliked(long postId, int userId){
+        PostLike postLike = getPostLike(postId, userId);
+        if (postLike == null) return false;
+        if(postLike.getStatus() == -1) return true;
+        return false;
+    }
+
+    // check if comment is liked before
+    public boolean commentIsLiked(long commentId, int userId){
+        CommentLike commentLike = getCommentLike(commentId,userId);
+        if (commentLike == null) return false;
+        if(commentLike.getStatus() == 1) return true;
+        return false;
+    }
+
+    // check if comment is disliked before
+    public boolean commentIsDisliked(long commentId, int userId){
+        CommentLike commentLike = getCommentLike(commentId,userId);
+        if (commentLike == null) return false;
+        if(commentLike.getStatus() == -1) return true;
+        return false;
     }
 
     public CommentLike getCommentLike(long commentId, int userId){

@@ -38,16 +38,16 @@ public class Post {
     @JoinColumn(name="group_Id")
     private Groups group;
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post",cascade = CascadeType.REMOVE)
     @JsonManagedReference(value = "post_comment")
     private List<Comment> comments;
 
     @JsonManagedReference(value = "post_report")
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post",cascade = CascadeType.REMOVE)
     private List<PostReport> reports;
 
 
-    @OneToMany(mappedBy = "post")
+    @OneToMany(mappedBy = "post",cascade = CascadeType.REMOVE)
     @JsonManagedReference(value = "post_like")
     private List<PostLike> likes;
 

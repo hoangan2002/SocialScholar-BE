@@ -148,14 +148,22 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(new ResponseObject("Fail", "OK",null));
     }
 
+//    @GetMapping("get-avatar")
+//    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+//    public ResponseEntity<ResponseObject> getAvatar(){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        User theUser = service.findUserByUsername(authentication.getName());
+//        File file = new File(imageStorageService.getUploadsPath() + theUser.getAvatarURL());
+//        String encodstring = imageStorageService.encodeFileToBase64Binary(file);
+//        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+//    }
+
     @GetMapping("get-avatar")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getAvatar(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User theUser = service.findUserByUsername(authentication.getName());
-        File file = new File(imageStorageService.getUploadsPath() + theUser.getAvatarURL());
-        String encodstring = imageStorageService.encodeFileToBase64Binary(file);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getAvatarURL()));
     }
 
     @PostMapping("/getPoint")
@@ -173,6 +181,5 @@ public class ProfileController {
         User theUser = service.findUserByUsername(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
     }
-
 
 }

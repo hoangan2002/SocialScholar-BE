@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.social.app.dto.CommentDTO;
 import com.social.app.dto.CommentReportDTO;
+import com.social.app.dto.CommentReportTypeDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.request.CommentRequest;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -31,38 +34,27 @@ public class CommentController {
     private PostServices postServices;
     @Autowired
     private ReportService reportService;
-    /*@PostMapping("/{postID}/comments")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> createComment(@RequestPart CommentDTO comment,
-                                                 @RequestParam("userid") int userid,
-                                                 @PathVariable long postID){
-        try {
-            // Get post from postId
-            Post post = postServices.loadPostById(postID);
-            // Check if user is not in group, user can not create comment
-            if(!userService.isGroupMember(userid, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
-            // create comment
-            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("Success", "Create new comment successfully", newComment));
-        }
-        catch (RuntimeException runtimeException){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject("Failed", "There are problem..", ""));
-        }
-    }*/
+
     @PostMapping("/{postID}/comments")
     @PreAuthorize("hasAuthority('ROLE_USER')")
+
     ResponseEntity<ResponseObject> createComment(@RequestBody CommentDTO comment,
-                                                 @RequestParam("userid") int userid,
+
                                                  @PathVariable long postID){
+        // Get userId by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
         try {
             // Get post from postId
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
+
+            if(!userService.isGroupMember(username, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+
             if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // create comment
-            CommentDTO newComment = this.commentService.createComment(comment, postID, userid);
+            CommentDTO newComment = this.commentService.createComment(comment, postID, username);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject("Successfully", "Create comment successfully", newComment));
         }
@@ -75,12 +67,16 @@ public class CommentController {
 
     @PostMapping("/delete/{commentID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> deleteComment(@PathVariable long commentID, @RequestParam("userid") int userid){
+    ResponseEntity<ResponseObject> deleteComment(@PathVariable long commentID){
+        // Get userId by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+
         try {
             // Get comment from commentId
             CommentDTO comment = commentService.getCommentByID(commentID);
             // Check if user don't create comment, user can not delete
-            if(!userService.isCommemtCreator(userid, commentID))  throw new RuntimeException("Must be group member");
+            if(!userService.isCommemtCreator(userId, commentID))  throw new RuntimeException("Must be group member");
             // Call delete method
             this.commentService.deleteComment(commentID);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Success", "Delete comment successfully", ""));
@@ -100,12 +96,16 @@ public class CommentController {
 
     @PutMapping("/edit/{commentID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    ResponseEntity<ResponseObject> editComment(@PathVariable long commentID, @RequestPart Comment newComment, @RequestParam("userid") int userid){
+    ResponseEntity<ResponseObject> editComment(@PathVariable long commentID, @RequestPart Comment newComment){
+        // Get userId by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+
         try {
             // Get comment from commentId
             CommentDTO comment = commentService.getCommentByID(commentID);
             // Check if user don't create comment, user can not edit
-            if(!userService.isCommemtCreator(userid, commentID)) throw new RuntimeException("Must be group member");
+            if(!userService.isCommemtCreator(userId, commentID)) throw new RuntimeException("Must be group member");
             // Call edit method
             CommentDTO editedComment = this.commentService.editComment(newComment, commentID);
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Success", "Edit comment successfully", editedComment));
@@ -118,7 +118,12 @@ public class CommentController {
 
 
     @PostMapping("/dislike/{commentId}")
-    public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId, @RequestParam("userid")int userId){
+    public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        int userId = user.getUserId();
+
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -133,24 +138,31 @@ public class CommentController {
         Post post = commentService.getPostByCommentId(commentId);
         if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete commentlike
-        if(likeService.getCommentLike(commentId,userId)!=null){
-            // call delete function
-            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+        // check if user already dislike, delete commentlike and return
+        if(likeService.commentIsDisliked(commentId,userId)){
+            likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like comment successfully","")
-            );
+                    new ResponseObject("OK","Dislike comment successfully",""));
         }
 
-        // else create postlike
+        // check if user already like, delete commentlike
+        if(likeService.commentIsLiked(commentId,userId)){
+            likeService.deleteCommentLike(commentId,userId);
+        }
+
+        // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Dislike comment successfully",likeService.createCommentLike(comment, user, (byte)-1))
         );
     }
 
     @PostMapping("/like/{commentId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId, @RequestParam("userid")int userId){
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        int userId = user.getUserId();
+
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -162,17 +174,19 @@ public class CommentController {
         Post post = commentService.getPostByCommentId(commentId);
         if(!userService.isGroupMember(post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete commentlike
-        if(likeService.getCommentLike(commentId,userId)!=null){
-            // call delete function
-            likeService.deleteCommentLike(likeService.getCommentLike(commentId,userId));
+        // check if user already like, delete commentlike and return
+        if(likeService.commentIsLiked(commentId,userId)){
+            likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like comment successfully","")
-            );
+                    new ResponseObject("OK","Like comment successfully",""));
         }
 
-        // else create postlike
+        // check if user already dislike, delete commentlike
+        if(likeService.commentIsDisliked(commentId,userId)){
+            likeService.deleteCommentLike(commentId,userId);
+        }
+
+        // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Like comment successfully",likeService.createCommentLike(comment, user, (byte)1))
         );
@@ -187,6 +201,10 @@ public class CommentController {
     ResponseEntity<ResponseObject> replyComment(@RequestPart Comment commentReply,
                                                  @RequestParam("userid") int userid,
                                                  @PathVariable long commentParentId){
+        // Get userId by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+
         try {
             // Get commentParent from commentParentId
             CommentDTO commentParent = commentService.getCommentByID(commentParentId);
@@ -208,8 +226,12 @@ public class CommentController {
     }
 
     @PostMapping("/report/{commentId}")
-    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long commentId, @RequestParam("userid")int userId,
-                                                      @RequestParam("typeid") int typeId, @RequestParam("description") String description){
+    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long commentId, @RequestParam("typeid") int typeId,
+                                                      @RequestParam("description") String description){
+        // Get userId by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -248,7 +270,7 @@ public class CommentController {
     }
 
     @GetMapping("/all-report-types")
-    public ArrayList<CommentReportType> getAllReportTypes(){
+    public ArrayList<CommentReportTypeDTO> getAllReportTypes(){
         return reportService.getAllCommentReportTypes();
     }
 }
