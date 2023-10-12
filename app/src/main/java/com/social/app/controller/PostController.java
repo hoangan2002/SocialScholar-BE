@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.social.app.dto.PostReportDTO;
+import com.social.app.dto.PostReportTypeDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
@@ -170,6 +171,23 @@ public class PostController {
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return responseConvertService.postResponseArrayList(result);
     }
+    //______________________________________Get GROUP POSTS____________________________________________________//
+    @GetMapping("/getPosts/{groupId}")
+    public ArrayList<PostResponse> retrievePostsFromGroup(@PathVariable("groupId")long grId){
+        ArrayList<Post> result = postServices.retriveGroupPostFromDB(grId);
+        return responseConvertService.postResponseArrayList(result);
+    }
+    //______________________________________Get a Single_post____________________________________________________//
+    @GetMapping("/getPost/{postId}")
+    public ResponseEntity<ResponseObject> getPostById(@PathVariable("postId")long postId){
+        Post post = postServices.loadPostById(postId);
+        if (post == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Post ID - Not exist","Failed",""));
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Return Post","OK",postServices.MapPostDTO(post))
+        );
+    }
     //______________________________________Delete_post____________________________________________________//
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/deletepost/{postId}")
@@ -189,9 +207,10 @@ public class PostController {
     }
 
     @PostMapping("/dislike/{postId}")
-    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
-
-        User current = userService.findUserByUsername(userName);
+    public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User current = userService.findUserByUsername(authentication.getName());
         int userId = current != null ?current.getUserId():-1;
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
@@ -206,26 +225,31 @@ public class PostController {
                     new ResponseObject("Failed","User must be in group","")
             );
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete postlike
-        if(likeService.getPostLike(postId,userId)!=null){
-            // call delete function
-            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+        // check if user already dislike, delete postlike and return
+        if(likeService.postIsDisliked(postId,userId)){
+            likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post successfully","")
-            );
+                    new ResponseObject("OK","Like post successfully",""));
+        }
+
+        // check if user already like, delete postlike
+        if(likeService.postIsLiked(postId,userId)){
+            likeService.deletePostLike(postId,userId);
         }
 
         // else create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, current, (byte)-1))
         );
     }
 
     @PostMapping("/like/{postId}")
-    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId, @RequestParam("user")String userName){
+    public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User current = userService.findUserByUsername(authentication.getName());
+
         // check if post is not found, return
-        User current = userService.findUserByUsername(userName);
         int userId = current != null ?current.getUserId():-1;
         System.out.println(userId); 
         if (postServices.loadPostById(postId)==null)
@@ -240,19 +264,21 @@ public class PostController {
                     new ResponseObject("Failed","User must be in group","")
             );
 
-        User user = userService.loadUserById(userId);
-        // check if user already dislike, delete postlike
-        if(likeService.getPostLike(postId,userId)!=null){
-            // call delete function
-            likeService.deletePostLike(likeService.getPostLike(postId,userId));
+        // check if user already like, delete postlike and return
+        if(likeService.postIsLiked(postId,userId)){
+            likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("OK","Like post successfully","")
-            );
+                    new ResponseObject("OK","Like post successfully",""));
         }
 
-        // else create postlike
+        // check if user already dislike, delete postlike
+        if(likeService.postIsDisliked(postId,userId)){
+            likeService.deletePostLike(postId,userId);
+        }
+
+        // create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, current, (byte)1))
         );
     }
 
@@ -314,7 +340,7 @@ public class PostController {
     }
 
     @GetMapping("/all-report-types")
-    public ArrayList<PostReportType> getAllReportTypes(){
+    public ArrayList<PostReportTypeDTO> getAllReportTypes(){
         return reportService.getAllPostReportTypes();
     }
 
@@ -397,19 +423,5 @@ public class PostController {
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(){
         ArrayList<Post> result = postServices.getAllPostByTime();
         return postServices.ArrayListPostDTO(result);
-    }
-
-    @GetMapping("/getPostDTObygroup/{groupid}")
-    public ResponseEntity<ResponseObject> getPostByGroup (@PathVariable long groupid){
-        if(groupServices.loadGroupById(groupid)==null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("Failed","Group not exist","")
-            );
-        else {
-            ArrayList<Post> result = postServices.retriveGroupPostFromDB(groupid);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("Success","Done!",result)
-            );
-        }
     }
 }

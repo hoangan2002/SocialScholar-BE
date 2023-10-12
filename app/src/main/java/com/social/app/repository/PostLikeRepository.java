@@ -12,4 +12,5 @@ import java.util.ArrayList;
 @Repository
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     public ArrayList<PostLike> findByPost(Post post);
+    public PostLike findByLikeId(long id);
 }

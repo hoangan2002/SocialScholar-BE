@@ -1,5 +1,6 @@
 package com.social.app.repository;
 
+import com.social.app.model.Category;
 import com.social.app.model.Groups;
 import com.social.app.model.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +16,11 @@ public interface GroupRepository  extends JpaRepository<Groups, Long> {
 
     @Override
     void deleteById(Long aLong);
+
+    ArrayList<Groups> findAllByCategoryCategoryNameIgnoreCase(String categoryName);
+    ArrayList<Groups> findAllByTagsContainsIgnoreCase(String tag);
+
+
+    ArrayList<Groups> findByCategory(Category category);
 
 }
