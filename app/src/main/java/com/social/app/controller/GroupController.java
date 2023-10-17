@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.Views;
 import com.social.app.entity.ResponseObject;
+import com.social.app.model.Category;
 import com.social.app.model.Groups;
 
 import com.social.app.model.JoinManagement;
 import com.social.app.model.User;
+import com.social.app.request.GroupRequest;
 import com.social.app.service.*;
 
 import com.social.app.service.GroupServices;
@@ -42,36 +44,42 @@ public class GroupController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseObject> createGroup(@RequestBody Groups group, @RequestParam(value = "fileGAvatar", required = false) MultipartFile fileGAvatar, @RequestParam(value = "fileGCover", required = false) MultipartFile fileGCover){
+    public ResponseEntity<ResponseObject> createGroup(@RequestBody GroupRequest group, @RequestParam(value = "fileGAvatar", required = false) MultipartFile fileGAvatar, @RequestParam(value = "fileGCover", required = false) MultipartFile fileGCover){
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String username = authentication.getName();
             System.out.println(username);
            User user =  userService.findUser(username).orElse(null);
+           Groups newGroup = new Groups();
 //them ngay tạo
             if(user.getActivityPoint() >= 2000){
                 //set ava group
 
-                if (fileGAvatar!=null) {
-
-                    String fileName = imageStorageService.storeFile(fileGAvatar);
-
-                    group.setImageURLGAvatar(FOLDER_PATH + fileName);
-
-                }
+//                if (fileGAvatar!=null) {
+//
+//                    String fileName = imageStorageService.storeFile(fileGAvatar);
+//
+//                    group.setImageURLGAvatar(FOLDER_PATH + fileName);
+//
+//                }
 
                 //set ảnh bìa group
-                if (fileGCover!=null) {
-                    String fileName = imageStorageService.storeFile(fileGCover);
-                    group.setImageUrlGCover(FOLDER_PATH + fileName);
-                }
-                group.setHosts(user);
+//                if (fileGCover!=null) {
+//                    String fileName = imageStorageService.storeFile(fileGCover);
+//                    group.setImageUrlGCover(FOLDER_PATH + fileName);
+//                }
+                newGroup.setHosts(user);
+                newGroup.setGroupName(group.getGroupName());
+                newGroup.setDescription(group.getDescription());
                 userService.setRoleHost(user);
+//                Category category = new Category(9,"Xã Hội");
+//                newGroup.setCategory(category);
+                newGroup.setTags(group.getTags());
                 //Thời gian tạo
 
-                group.setTimeCreate(Calendar.getInstance().getTime());
-                groupServices.createGroup(group);
-                joinService.saveJoin(new JoinManagement(group,user,Calendar.getInstance().getTime()));
+                newGroup.setTimeCreate(group.getTimeCreate());
+                groupServices.createGroup(newGroup);
+                joinService.saveJoin(new JoinManagement(newGroup,user,Calendar.getInstance().getTime()));
 
                 return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Create Group Success", "OK", null));
             }

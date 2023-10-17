@@ -1,4 +1,5 @@
 package com.social.app.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -50,6 +51,7 @@ public class Groups {
 
     @ManyToOne
     @JoinColumn(name="category_Id")
+    @JsonBackReference(value = "category_groups")
     private Category category;
 
 

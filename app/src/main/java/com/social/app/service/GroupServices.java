@@ -38,13 +38,13 @@ public class GroupServices {
         return groupRepository.findByGroupName(groupName);
     }
     public Groups createGroup(Groups groups){
-       return groupRepository.save(groups);
+        return groupRepository.save(groups);
     }
     public Groups updateGroup(Groups groups){
         return groupRepository.save(groups);
     }
     public void deleteGroup(Long id){
-         groupRepository.deleteById(id);
+        groupRepository.deleteById(id);
     }
     public boolean isGroupHost( Long groupId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

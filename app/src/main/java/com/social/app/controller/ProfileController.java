@@ -178,6 +178,7 @@ public class ProfileController {
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getCoint(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("data la"+authentication.getName());
         User theUser = service.findUserByUsername(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
     }

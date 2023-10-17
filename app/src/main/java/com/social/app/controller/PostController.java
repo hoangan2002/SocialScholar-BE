@@ -381,7 +381,7 @@ public class PostController {
     }
 
     @PostMapping("/donate/{postid}")
-    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
+    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam("coins")int coins){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         User user = userService.loadUserById(userid);
