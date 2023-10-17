@@ -71,7 +71,6 @@ public class GroupController {
                 newGroup.setHosts(user);
                 newGroup.setGroupName(group.getGroupName());
                 newGroup.setDescription(group.getDescription());
-
                 userService.setRoleHost(user);
 //                Category category = new Category(9,"Xã Hội");
 //                newGroup.setCategory(category);

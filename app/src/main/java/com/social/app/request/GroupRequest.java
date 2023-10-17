@@ -14,5 +14,5 @@ public class GroupRequest {
     String groupName;
     Timestamp timeCreate;
     String tags;
-    String category ;
+    int categoryId ;
 }
