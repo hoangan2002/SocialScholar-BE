@@ -22,7 +22,7 @@ public class CategoryController {
     @Autowired
     GroupServices groupServices;
 
-    @GetMapping("getAll")
+    @GetMapping("/getAll")
     public ArrayList<Category> getAll(){
         return categoryService.getAll();
     }

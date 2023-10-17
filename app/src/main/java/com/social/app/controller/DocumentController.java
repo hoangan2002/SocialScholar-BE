@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.dto.DocumentDTO;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Document;
@@ -27,9 +28,6 @@ import java.util.ArrayList;
 public class DocumentController {
     @Autowired
     DocumentService documentService;
-
-    @Autowired
-    ResponseConvertService responseConvertService;
 
     @Autowired
     UserService userService;
@@ -77,37 +75,46 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc đã duyệt
     @GetMapping("/documents")
-    public ArrayList<DocumentResponse> retrieveAllApprovedDocument(){
+    public ArrayList<DocumentDTO> retrieveAllApprovedDocument(){
         ArrayList<Document> result = documentService.allApprovedDocuments();
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
-    public ArrayList<DocumentResponse> retrieveAllUnApprovedDocument(){
+    public ArrayList<DocumentDTO> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // Tat ca doc dc duyet cua user
     @GetMapping("/my-documents")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ArrayList<DocumentResponse> UserApprovedCreatedDocuments(){
+    public ArrayList<DocumentDTO> UserApprovedCreatedDocuments(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByUsername(authentication.getName());
         ArrayList<Document> result = documentService.UserApprovedCreatedDocuments(user);
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
+    }
+    // Tat ca doc user da mua
+    @GetMapping("/bought-documents")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> BoughtDocuments(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        ArrayList<Document> result = documentService.BoughtDocuments(user);
+        return documentService.ListDocumentDTO(result);
     }
 
     // Tat ca doc duoc duyet cua group
     @GetMapping("group-documents/{groupId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ArrayList<DocumentResponse> GroupApprovedDocuments(@PathVariable("groupId") long id){
+    public ArrayList<DocumentDTO> GroupApprovedDocuments(@PathVariable("groupId") long id){
         Groups groups = groupServices.loadGroupById(id);
         if (groups==null) throw new RuntimeException("Group is not exist");
         ArrayList<Document> result = documentService.GroupApprovedDocuments(groups);
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // -----------------------------------------------------------------------------------------------------------------
@@ -164,6 +171,7 @@ public class DocumentController {
                     new ResponseObject(e.getMessage(), "failed", ""));
         }
     }
+
 
     @GetMapping("/download/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
