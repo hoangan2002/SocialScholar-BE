@@ -21,9 +21,9 @@ public class UserDTO {
     private int activityPoint;
     private boolean isLocked;
 
-    @JsonView(Views.UserView.class)
+    @JsonView({Views.UserView.class, Views.UserView1.class})
     public int getUserId(){ return userId; }
-    @JsonView(Views.UserView.class)
+    @JsonView({Views.UserView.class, Views.UserView1.class})
     public String getUserName(){ return userName; }
     @JsonView(Views.UserView.class)
     public String getPhone(){ return phone; }
@@ -41,9 +41,9 @@ public class UserDTO {
     public String getRole(){ return role; }
     @JsonView(Views.UserView.class)
     public long getCoin(){ return coin; }
-    @JsonView(Views.UserView.class)
+    @JsonView({Views.UserView.class, Views.UserView1.class})
     public int getActivityPoint(){ return activityPoint; }
-    @JsonView(Views.UserView.class)
+    @JsonView({Views.UserView.class, Views.UserView1.class})
     public boolean getIsLocked(){ return isLocked; }
 
 

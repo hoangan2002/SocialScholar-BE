@@ -1,6 +1,7 @@
 package com.social.app.service;
 import com.social.app.config.ModelMapperConfig;
 import com.social.app.config.SecurityConfig;
+import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
@@ -264,5 +265,12 @@ public class UserService implements UserDetailsService {
     public String encodePass(String pass){
         return  securityConfig.passwordEncoder().encode(pass);
 
+    }
+    public ArrayList<UserDTO> userResponses(ArrayList<User> users){
+        ArrayList<UserDTO> userDTOSDTOS = new ArrayList<>();
+        for (User user : users) {
+            userDTOSDTOS.add(MapUserDTO(user));
+        }
+        return userDTOSDTOS;
     }
 }

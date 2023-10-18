@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.social.app.dto.GroupDTO;
+import com.social.app.dto.UserDTO;
 import com.social.app.dto.Views;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Groups;
@@ -199,7 +200,7 @@ public class GroupController {
 
 
     }
-
+// đề xuất group
     @PostMapping ("/suggest")
     @JsonView(Views.GroupsViewSuggest.class)
     public ArrayList<GroupDTO> suggestGroups(){
@@ -249,6 +250,7 @@ public class GroupController {
 
 
     }
+    // tìm group bằng category
     @PostMapping("/find-group-by-category/{categorys}")
     @JsonView(Views.GroupsViewSuggest.class)
     public ArrayList<GroupDTO> findGroupsByCategory(@PathVariable String categorys) {
@@ -279,6 +281,7 @@ public class GroupController {
         Collections.sort(randomGroups,groupComparator);
         return  groupServices.groupsResponses(randomGroups);
     }
+    // tìm group bằng hasstag
     @PostMapping("/find-group-by-hashtag/{hashtags}")
     @JsonView(Views.GroupsViewHashTag.class)
     public  ArrayList<GroupDTO> findGroupsByHashTag(@PathVariable String hashtags){
@@ -340,6 +343,7 @@ public class GroupController {
         }
            return groupServices.groupsResponses(result);
     }
+    //lấy ra tất cả group mà user tham gia
     @GetMapping("/get-all-group/{userId}")
     public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){
         User user= userService.loadUserById(userId);
@@ -350,10 +354,23 @@ public class GroupController {
         }
         return  groupServices.groupsResponses(groups);
     }
+    //Lấy tất cả group
     @GetMapping("/getAllGroup")
     public ArrayList<GroupDTO> getAllGroup(){
         ArrayList<Groups> groups  = groupServices.retriveGroupFromDB();
         return  groupServices.groupsResponses(groups);
     }
-
+    //Lấy tất cả user của 1 group
+    @GetMapping("/getalluser/{groupId}")
+    @PreAuthorize("hasRole('ROLE_HOST')")
+    @JsonView(Views.UserView1.class)
+    public ArrayList<UserDTO> getAllUserByGroup(@PathVariable long groupId){
+        Groups group = groupServices.loadGroupById(groupId);
+        ArrayList<User> users = new ArrayList<>();
+        for (JoinManagement join: group.getJoins()
+        ) {
+            users.add(join.getUser());
+        }
+        return userService.userResponses(users);
+    }
 }
