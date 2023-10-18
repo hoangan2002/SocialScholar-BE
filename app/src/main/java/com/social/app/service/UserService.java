@@ -266,11 +266,22 @@ public class UserService implements UserDetailsService {
         return  securityConfig.passwordEncoder().encode(pass);
 
     }
-    public ArrayList<UserDTO> userResponses(ArrayList<User> users){
+
+    public ArrayList<UserDTO> userResponses(ArrayList<User> users) {
         ArrayList<UserDTO> userDTOSDTOS = new ArrayList<>();
         for (User user : users) {
             userDTOSDTOS.add(MapUserDTO(user));
         }
         return userDTOSDTOS;
+    }
+    public User plusPoint(int userId, int points){
+        User user = loadUserById(userId);
+        if(user==null) return null;
+        else {
+            user.setActivityPoint(user.getActivityPoint()+points);
+            save(user);
+        }
+        return user;
+
     }
 }

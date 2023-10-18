@@ -1,8 +1,28 @@
 package com.social.app.service;
 
+import com.itextpdf.forms.PdfPageFormCopier;
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageData;
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.geom.Rectangle;
+import com.itextpdf.kernel.pdf.*;
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
+import com.itextpdf.layout.Canvas;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Image;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Text;
 import com.social.app.repository.PostRepository;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
+import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -20,6 +40,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Stream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+
+import static com.itextpdf.layout.properties.TextAlignment.CENTER;
+import static com.itextpdf.layout.properties.VerticalAlignment.TOP;
+import static java.lang.Math.PI;
 
 @Service
 public class ImageStorageService implements IStorageService{
@@ -46,7 +72,13 @@ public class ImageStorageService implements IStorageService{
     private boolean isDocumentFile(MultipartFile file) {
         //Let install FileNameUtils
         String fileExtension = FilenameUtils.getExtension(file.getOriginalFilename());
-        return Arrays.asList(new String[] {"doc","pdf","docx", "txt", "xlsx"})
+        return Arrays.asList(new String[] {"pdf","docx"})
+                .contains(fileExtension.trim().toLowerCase());
+    }
+    private boolean isDocx(String path) {
+        //Let install FileNameUtils
+        String fileExtension = FilenameUtils.getExtension(path);
+        return Arrays.asList(new String[] {"docx"})
                 .contains(fileExtension.trim().toLowerCase());
     }
     @Override
@@ -204,5 +236,90 @@ public class ImageStorageService implements IStorageService{
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public ByteArrayInputStream PreviewDocument(String path) throws IOException {
+
+        if(isDocx(path)){
+            String pdfName = path.replace(".docx",".pdf");
+            File docxFile = new File(path);
+            File pdfFile = new File(pdfName);
+
+            if(!pdfFile.exists()){
+                try(InputStream inputStream = new FileInputStream(getUploadsPath()+path);
+                    OutputStream outputStream = new FileOutputStream(getUploadsPath()+pdfName)) {
+                    XWPFDocument document = new XWPFDocument(inputStream);
+                    PdfOptions options = PdfOptions.create();
+                    // Convert .docx file to .pdf file
+                    PdfConverter.getInstance().convert(document, outputStream, options);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            path = pdfName;
+        }
+
+        // Rut gon doc
+        PdfReader reader = new PdfReader(getUploadsPath()+path);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(out);
+        PdfDocument srcDocument = new PdfDocument(reader);
+        PdfDocument pdfDocument = new PdfDocument(writer);
+        Document document = new Document(pdfDocument);
+
+        PdfPageFormCopier formCopier = new PdfPageFormCopier();
+        int pages = srcDocument.getNumberOfPages();
+
+        IPdfPageExtraCopier copier = new PdfPageFormCopier();
+        if (pages>12){
+            srcDocument.copyPagesTo(1,12,pdfDocument,copier);
+
+        }
+        else
+            srcDocument.copyPagesTo(1,pages,pdfDocument,copier);
+
+
+        // Tao chu watermark
+        PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+        Text text = new Text("Schoolar School");
+        text.setFont(font);
+        text.setFontSize(100);
+        text.setOpacity(0.7f);
+        Paragraph paragraph = new Paragraph(text);
+        // Tao do nghieng va opacity
+        PdfPage pdfPage = document.getPdfDocument().getPage(1);
+        PageSize pageSize = (PageSize) pdfPage.getPageSizeWithRotation();
+        float x = (pageSize.getLeft() + pageSize.getRight()) / 2;
+        float y = (pageSize.getTop() + pageSize.getBottom()) / 2;
+        float xOffset = 100f / 2;
+        float verticalOffset = 100f / 4;
+        float rotationInRadians = (float) (PI / 180 * 60f);
+
+        // Add watermark
+        for(int i=1; i<= pdfDocument.getNumberOfPages();i++) {
+            document.showTextAligned(paragraph, x - xOffset, y + verticalOffset,
+                    i, CENTER, TOP, rotationInRadians);
+        }
+
+        // Add img
+        ImageData imageData = ImageDataFactory.create(getUploadsPath()+"Logo.jpg");
+        Image image = new Image(imageData);
+        image.setFixedPosition(7,0);
+        image.setOpacity(0.9f);
+//        image.setWidth(pdfDocument.getDefaultPageSize().getWidth());
+//        image.setHeight(pdfDocument.getDefaultPageSize().getHeight());
+        image.scaleAbsolute(pdfDocument.getDefaultPageSize().getWidth(),pdfDocument.getDefaultPageSize().getHeight());
+        for(int i=2; i<= pdfDocument.getNumberOfPages();i++){
+            PdfPage page = document.getPdfDocument().getPage(i);
+            PdfCanvas aboveCanvas = new PdfCanvas(page.newContentStreamAfter(),
+                    page.getResources(), pdfDocument);
+            Rectangle area = page.getPageSize();
+            new Canvas(aboveCanvas, area)
+                    .add(image);
+        }
+        document.close();
+        return new ByteArrayInputStream(out.toByteArray());
     }
 }

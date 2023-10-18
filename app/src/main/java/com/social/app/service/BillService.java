@@ -7,6 +7,8 @@ import com.social.app.repository.BillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class BillService {
     @Autowired
@@ -14,4 +16,7 @@ public class BillService {
     public Bill findByDocumentAndUser(Document doc, User user){
         return billRepository.findByDocumentAndUser(doc,user);
     }
+    public ArrayList<Bill> findByUser(User user){
+        return billRepository.findByUser(user);
+    };
 }
