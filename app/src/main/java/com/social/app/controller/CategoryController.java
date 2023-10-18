@@ -25,11 +25,7 @@ public class CategoryController {
     ModelMapper modelMapper;
 
     @GetMapping("/getAll")
-<<<<<<< HEAD
-    public ArrayList<Category> getAll(){
-=======
     public ArrayList<CategoryDTO> getAll(){
->>>>>>> d2733966aba1905d5a252a0aa8503d4c3bde9ce6
         return categoryService.getAll();
     }
 

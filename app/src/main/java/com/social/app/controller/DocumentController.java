@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.itextpdf.commons.utils.Base64;
 import com.social.app.dto.DocumentDTO;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
@@ -8,6 +9,7 @@ import com.social.app.model.Groups;
 import com.social.app.model.User;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -288,28 +291,28 @@ public class DocumentController {
                     new ResponseObject(exception.getMessage(), "failed", ""));
         }
     }
-    @GetMapping("/test/{docId}")
-    public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
+    @GetMapping("/preview/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<?> Test(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
 
-        Resource resource = null;
         String filename = documentDB.getUrl();
-        File file = new File(storageService.getUploadsPath()+filename);
-        resource = storageService.loadAsResource(file);
 
-        if (resource == null) {
+        ByteArrayInputStream bis = storageService.PreviewDocument(filename);
+
+        if (bis == null) {
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
 
-        String contentType = "application/octet-stream";
-        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
-                .body( resource);
+                .body( new InputStreamResource(bis));
     }
 }
