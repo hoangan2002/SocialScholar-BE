@@ -306,10 +306,11 @@ public class ImageStorageService implements IStorageService{
         // Add img
         ImageData imageData = ImageDataFactory.create(getUploadsPath()+"Logo.jpg");
         Image image = new Image(imageData);
-        image.setFixedPosition(0,0);
+        image.setFixedPosition(7,0);
         image.setOpacity(0.9f);
-        image.setWidth(pdfDocument.getDefaultPageSize().getWidth());
-        image.setHeight(pdfDocument.getDefaultPageSize().getHeight());
+//        image.setWidth(pdfDocument.getDefaultPageSize().getWidth());
+//        image.setHeight(pdfDocument.getDefaultPageSize().getHeight());
+        image.scaleAbsolute(pdfDocument.getDefaultPageSize().getWidth(),pdfDocument.getDefaultPageSize().getHeight());
         for(int i=2; i<= pdfDocument.getNumberOfPages();i++){
             PdfPage page = document.getPdfDocument().getPage(i);
             PdfCanvas aboveCanvas = new PdfCanvas(page.newContentStreamAfter(),

@@ -2,6 +2,7 @@ package com.social.app.dto;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.social.app.model.Bill;
 import com.social.app.model.Groups;
 import com.social.app.model.Rating;
 import com.social.app.model.User;
@@ -26,21 +27,36 @@ public class DocumentDTO {
     private Timestamp time;
     private Groups group;
     private User author;
-    private List<Rating> ratings;
-    @JsonView(Views.UserView.class)
+    private List<RatingDTO> ratings;
+    private List<Bill> bills;
+    @JsonView(Views.DocumentView.class)
     public long getDocumentId(){ return documentId; }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public String getDocumentName(){ return documentName; }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public String getDescription(){ return description; }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public int getCost(){ return cost; }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public Timestamp getTime(){ return time; }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public String getGroup(){ return group.getGroupName(); }
-    @JsonView(Views.UserView.class)
+    @JsonView(Views.DocumentView.class)
     public String getAuthor(){ return author.getUserName(); }
-    @JsonView(Views.UserView.class)
-    public List<Rating> getRatings(){ return ratings; }
+//    @JsonView(Views.UserView.class)
+//    public int[] getRatings(){
+//        int[] userRates = new int[ratings.size()];
+//        int i=0;
+//        for(Rating rating: ratings){
+//            userRates[i] = rating.getUser().getUserId();
+//            i++;
+//        };
+//        return userRates;
+//    }
+    @JsonView(Views.DocumentView.class)
+    public List<RatingDTO> getRatings(){ return ratings; }
+    @JsonView(Views.DocumentView.class)
+    public int getAuthorPoints(){ return author.getActivityPoint(); }
+    @JsonView(Views.DocumentView.class)
+    public int getBills(){ return bills.size(); }
 }

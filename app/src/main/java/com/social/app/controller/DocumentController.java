@@ -42,7 +42,7 @@ public class DocumentController {
     BillService billService;
 
     @PostMapping("/document")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseObject> createDocument(@RequestPart Document document,
                                                       @RequestParam("file")MultipartFile file,
                                                       @RequestParam("groupid") int groupid)
@@ -78,6 +78,7 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc đã duyệt
     @GetMapping("/documents")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> retrieveAllApprovedDocument(){
         ArrayList<Document> result = documentService.allApprovedDocuments();
         return documentService.ListDocumentDTO(result);
@@ -85,7 +86,7 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
         return documentService.ListDocumentDTO(result);
