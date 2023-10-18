@@ -1,5 +1,7 @@
 package com.social.app.service;
 
+import com.social.app.dto.DocumentDTO;
+import com.social.app.dto.UserDTO;
 import com.social.app.model.Bill;
 import com.social.app.model.Document;
 import com.social.app.model.Groups;
@@ -7,6 +9,7 @@ import com.social.app.model.User;
 import com.social.app.repository.BillRepository;
 import com.social.app.repository.DocumentRepository;
 import com.social.app.repository.UserRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,22 @@ public class DocumentService {
     UserRepository userRepository;
     @Autowired
     BillRepository billRepository;
+    @Autowired
+    ModelMapper modelMapper;
+
+    public DocumentDTO MapDocumentDTO(Document document){
+        DocumentDTO documentDTO = modelMapper.map(document,DocumentDTO.class);
+        return documentDTO;
+    }
+
+    public ArrayList<DocumentDTO> ListDocumentDTO(ArrayList<Document> documents){
+        ArrayList<DocumentDTO> documentDTOS = new ArrayList<>();
+        for (Document item:
+            documents ) {
+            documentDTOS.add(MapDocumentDTO(item));
+        }
+        return documentDTOS;
+    }
 
     @Transactional
     public boolean  DocumentExchangeTransaction(User customer, Document document){
@@ -75,6 +94,14 @@ public class DocumentService {
     }
     public ArrayList<Document> GroupApprovedDocuments(Groups groups){
         return documentRepository.findByGroupAndIsApprovedIsTrue(groups);
+    }
+    public ArrayList<Document> BoughtDocuments(User user){
+        ArrayList<Bill> myBills = billRepository.findByUser(user);
+        ArrayList<Document> result = new ArrayList<>();
+        for (Bill bill: myBills){
+            result.add(bill.getDocument());
+        }
+        return result;
     }
 
     public Document findDocumentbyId(long id){
