@@ -38,7 +38,7 @@ public class ProfileController {
 
     private final String FOLDER_PATH="F:\\CampSchoolar\\uploads\\";
     @PostMapping("/{username}")
-//    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+   @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getUserProfile(@PathVariable("username") String username) {
         User theUser = service.findUserByUsername(username);
         return theUser!=null?
@@ -158,7 +158,7 @@ public class ProfileController {
 //        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
 //    }
 
-    @GetMapping("get-avatar")
+    @GetMapping("/get-avatar")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getAvatar(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -178,6 +178,7 @@ public class ProfileController {
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public ResponseEntity<ResponseObject> getCoint(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("data la"+authentication.getName());
         User theUser = service.findUserByUsername(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
     }
