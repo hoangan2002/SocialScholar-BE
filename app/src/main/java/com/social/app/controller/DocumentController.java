@@ -42,7 +42,7 @@ public class DocumentController {
     BillService billService;
 
     @PostMapping("/document")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<ResponseObject> createDocument(@RequestPart Document document,
                                                       @RequestParam("file")MultipartFile file,
                                                       @RequestParam("groupid") int groupid)
@@ -316,4 +316,17 @@ public class DocumentController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body( new InputStreamResource(bis));
     }
+    @GetMapping("/preview/cover/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+
+        String filename = documentDB.getUrl();
+        String encodstring = storageService.getCover(filename);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+    }
+
 }
