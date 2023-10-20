@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.social.app.dto.GroupDTO;
+import com.social.app.dto.UserDTO;
 import com.social.app.entity.UserResponse;
 import com.social.app.model.Groups;
 import com.social.app.model.JoinManagement;
@@ -25,9 +26,9 @@ public class AdminController {
     GroupServices groupServices;
     @GetMapping("/getalluser")
     @PreAuthorize("hasRole('ADMIN')")
-    public ArrayList<UserResponse> getalluser(){
+    public ArrayList<UserDTO> getalluser(){
         ArrayList<User> listUser = userService.findAll();
-        return  responseConvertService.userResponseArrayList(listUser);
+        return  userService.userResponses(listUser);
     }
     @GetMapping("/getallgroup/{userId}")
     @PreAuthorize("hasRole('ADMIN')")

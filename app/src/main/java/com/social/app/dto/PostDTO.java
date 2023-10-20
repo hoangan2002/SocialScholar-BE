@@ -27,9 +27,14 @@ public class PostDTO {
     private String titles;
     private String imageURL;
     private User user;
+    private int authorPoints;
     private Groups group;
     private List<CommentDTO> comments;
     private List<PostLikeDTO> likes;
+    @JsonView(Views.PostView.class)
+    public int getAuthorPoints() {
+        return user.getActivityPoint();
+    }
 
     @JsonView(Views.PostView.class)
     public long getPostId() {
