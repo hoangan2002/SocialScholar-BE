@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.itextpdf.commons.utils.Base64;
 import com.social.app.dto.DocumentDTO;
+import com.social.app.dto.RatingDTO;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Document;
@@ -327,6 +328,28 @@ public class DocumentController {
         String filename = documentDB.getUrl();
         String encodstring = storageService.getCover(filename);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+    }
+
+    @PostMapping("/rate/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> rateDocument(@PathVariable long docId, @RequestParam int stars){
+        // Get username by authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        // Check if username rated before
+        if (documentService.docIsRatedBefore(docId, username))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User already rate this document", "failed", ""));
+        // Get document by id
+        Document documentDB = documentService.findDocumentbyId(docId);
+        // Throw error if null
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        // Rate document
+        RatingDTO ratingDTO = documentService.rateDocument(docId, username, stars);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("Rate document successfully", "OK", ratingDTO));
     }
 
 }
