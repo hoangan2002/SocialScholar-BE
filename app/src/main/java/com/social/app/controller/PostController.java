@@ -48,7 +48,8 @@ public class PostController {
     @Autowired
     ResponseConvertService responseConvertService;
 
-
+    @Autowired
+    CommentService commentService;
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
@@ -467,5 +468,29 @@ public class PostController {
                     new ResponseObject("Success", "Done!", postServices.ArrayListPostDTO(result))
             );
         }
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserLike")
+    public ResponseEntity<ResponseObject> getPostByLike(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user like
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", likeService.getPostByUserLike(user.getUserId()))
+        );
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserComment")
+    public ResponseEntity<ResponseObject> getPostByComment(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user comment
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", commentService.getPostByUserComment(user.getUserId()))
+        );
     }
 }
