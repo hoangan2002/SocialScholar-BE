@@ -398,5 +398,55 @@ public class GroupController {
         }
     }
 
+    // thuật toán search: hashtags=>groups
+    @GetMapping("/search-by-hashtag/{hashtags}")
+    @JsonView(Views.GroupsView.class)
+    public  ArrayList<GroupDTO> searchGroupsByHashTag(@PathVariable String hashtags){
+        ArrayList<Groups> listGroups = groupServices.findAll();
+        //Lấy ra các group có matching
 
+        Map<Groups, Integer> groupMatchingCount = new HashMap<>();
+
+        for (Groups groups:listGroups) {
+            if(groups.getTags()!=null){
+                String[] groupHashtagArray = groups.getTags().split(",");
+                String[] hashtag = hashtags.split(",");
+                Set<String> hashtagset = new LinkedHashSet<>(Arrays.asList(hashtag));
+                int matchingCount = 0;
+                for (String inputHashtag : hashtagset) {
+                    for (String groupHashtag : groupHashtagArray) {
+                        if (inputHashtag.trim().toLowerCase().equals(groupHashtag.trim().toLowerCase())) {
+                            matchingCount++;
+                        }
+                    }
+                }
+                if(matchingCount!= 0) {
+                    groupMatchingCount.put(groups, matchingCount);
+                }
+            }
+        }
+
+        //sắp xếp theo độ matching
+        Map<Groups, Integer> sortedMap = groupMatchingCount.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        ArrayList<Groups> result = new ArrayList<>();
+
+        Iterator<Groups> iterator = sortedMap.keySet().iterator();
+
+
+        while (iterator.hasNext()) {
+
+                result.add(iterator.next());
+
+        }
+        return groupServices.groupsResponses(result);
+    }
 }

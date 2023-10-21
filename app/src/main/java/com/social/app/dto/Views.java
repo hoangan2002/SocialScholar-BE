@@ -8,6 +8,7 @@ public class Views {
     public static class PostLikeView{}
     public static class UserView {}
     public static class UserView1 {}
+    public static class GroupsView2 {}
     public static class GroupsView {}
     public static class GroupsView1 {}
     public static class GroupsViewSuggest extends GroupsView1  {}
