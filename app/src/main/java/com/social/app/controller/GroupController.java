@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.social.app.dto.DocumentDTO;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.Views;
 import com.social.app.entity.ResponseObject;
@@ -377,5 +378,9 @@ public class GroupController {
             );
         }
     }
-
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<GroupDTO> search(@RequestParam("key") String keyword) {
+        return groupServices.groupsResponses(groupServices.fullTextSearch(keyword));
+    }
 }

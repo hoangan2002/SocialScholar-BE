@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/doc")
@@ -328,5 +329,9 @@ public class DocumentController {
         String encodstring = storageService.getCover(filename);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
     }
-
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> search(@RequestParam("key") String keyword) {
+        return documentService.ListDocumentDTO(documentService.fullTextSearch(keyword));
+    }
 }

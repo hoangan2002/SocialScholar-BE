@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class DocumentService {
@@ -111,5 +112,8 @@ public class DocumentService {
     public String deleteDocumentById(long id){
         documentRepository.deleteById(id);
         return "success";
+    }
+    public ArrayList<Document> fullTextSearch(String keyword){
+        return documentRepository.fullTextSearch(keyword);
     }
 }

@@ -187,5 +187,7 @@ public class PostServices {
         });
         return posts;
     }
-
+    public ArrayList<Post> fullTextSearch(String keyword){
+        return postRepository.fullTextSearch(keyword);
+    }
 }

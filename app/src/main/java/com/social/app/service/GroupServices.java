@@ -120,5 +120,7 @@ public class GroupServices {
     }
 
     public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
-
+    public ArrayList<Groups> fullTextSearch(String keyword){
+        return groupRepository.fullTextSearch(keyword);
+    }
 }
