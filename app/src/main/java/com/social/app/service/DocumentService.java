@@ -132,9 +132,11 @@ public class DocumentService {
 
     public boolean docIsRatedBefore(long docId, String userName){
         User user = userRepository.findUserByUserName(userName);
-        if (ratingRepository.findByUser(user)!=null){
-            Rating rating = ratingRepository.findByUser(user);
-            if (rating.getDocument().getDocumentId() == docId) return true;
+        if (!ratingRepository.findByUser(user).isEmpty()){
+            ArrayList<Rating> ratings = ratingRepository.findByUser(user);
+            for (Rating rating: ratings) {
+                if (rating.getDocument().getDocumentId() == docId) return true;
+            }
         }
         return false;
     }
