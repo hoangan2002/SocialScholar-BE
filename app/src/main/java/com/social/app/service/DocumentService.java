@@ -1,16 +1,17 @@
 package com.social.app.service;
 
 import com.social.app.dto.DocumentDTO;
+import com.social.app.dto.RatingDTO;
 import com.social.app.dto.UserDTO;
-import com.social.app.model.Bill;
-import com.social.app.model.Document;
-import com.social.app.model.Groups;
-import com.social.app.model.User;
+import com.social.app.model.*;
 import com.social.app.repository.BillRepository;
 import com.social.app.repository.DocumentRepository;
+import com.social.app.repository.RatingRepository;
 import com.social.app.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,8 @@ public class DocumentService {
     BillRepository billRepository;
     @Autowired
     ModelMapper modelMapper;
+    @Autowired
+    RatingRepository ratingRepository;
 
     public DocumentDTO MapDocumentDTO(Document document){
         DocumentDTO documentDTO = modelMapper.map(document,DocumentDTO.class);
@@ -111,5 +114,30 @@ public class DocumentService {
     public String deleteDocumentById(long id){
         documentRepository.deleteById(id);
         return "success";
+    }
+
+    public RatingDTO rateDocument(long docId, String userName,  int stars){
+        Rating rating = new Rating();
+        // set info to rating
+        rating.setDocument(findDocumentbyId(docId));
+        rating.setUser(userRepository.findUserByUserName(userName));
+        rating.setStars(stars);
+        // set current time to comment
+        Date date = new Date();
+        Timestamp datetime = new Timestamp(date.getTime());
+        rating.setTime(datetime);
+        // convert rating to ratingDTO then rating
+        return modelMapper.map(ratingRepository.save(rating), RatingDTO.class);
+    }
+
+    public boolean docIsRatedBefore(long docId, String userName){
+        User user = userRepository.findUserByUserName(userName);
+        if (!ratingRepository.findByUser(user).isEmpty()){
+            ArrayList<Rating> ratings = ratingRepository.findByUser(user);
+            for (Rating rating: ratings) {
+                if (rating.getDocument().getDocumentId() == docId) return true;
+            }
+        }
+        return false;
     }
 }

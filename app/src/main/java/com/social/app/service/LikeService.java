@@ -1,6 +1,7 @@
 package com.social.app.service;
 
 import com.social.app.dto.CommentDTO;
+import com.social.app.dto.PostDTO;
 import com.social.app.model.*;
 import com.social.app.repository.CommentLikeRepository;
 import com.social.app.repository.CommentRepository;
@@ -31,6 +32,9 @@ public class LikeService {
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UserService userService;
 
     public PostLike createPostLike(Post post, User user, byte status){
         PostLike postLike = new PostLike();
@@ -147,5 +151,18 @@ public class LikeService {
             totalLike += commentLike.getStatus();
         }
         return totalLike;
+    }
+
+    public ArrayList<PostDTO> getPostByUserLike(int userId){
+        // Get user by id
+        User user = userService.loadUserById(userId);
+        // Get post like by user
+        ArrayList<PostLike> postLikes = postLikeRepository.findByUser(user);
+        // Get list post by list post like
+        ArrayList<PostDTO> postDTOs = new ArrayList<>();
+        for (PostLike postLike: postLikes) {
+            postDTOs.add(modelMapper.map(postLike.getPost(), PostDTO.class));
+        }
+        return postDTOs;
     }
 }
