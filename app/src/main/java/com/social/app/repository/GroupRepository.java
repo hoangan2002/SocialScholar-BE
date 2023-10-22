@@ -12,6 +12,7 @@ public interface GroupRepository  extends JpaRepository<Groups, Long> {
     Groups findByGroupName(String groupName);
     Groups save(Groups groups);
 
+    int countByCategory(Category category);
     ArrayList<Groups> findAll();
 
     @Override

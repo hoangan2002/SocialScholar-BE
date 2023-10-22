@@ -13,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 @RestController
-@RequestMapping("api/category")
+@RequestMapping("/api/category")
 public class CategoryController {
     @Autowired
     CategoryService categoryService;
@@ -42,6 +44,12 @@ public class CategoryController {
     @GetMapping("/getHintTag/{categoryId}")
     public ArrayList<HintTagDTO> getHintTagsByCategoryId(@PathVariable("categoryId") int categoryId){
         return categoryService.getHintTagsByCategoryId(categoryId);
+    }
+
+    // Activity for admin
+    @GetMapping("/group-count")
+    public HashMap<CategoryDTO, Integer> getGroupCount(){
+        return groupServices.getGroupCount();
     }
 
 }
