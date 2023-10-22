@@ -16,12 +16,15 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.renderer.ImageRenderer;
 import com.social.app.repository.PostRepository;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
@@ -223,11 +228,39 @@ public class ImageStorageService implements IStorageService{
         return encodedfile;
     }
 
+    public String getCover(String src) throws IOException {
+        try{
+        String srcFile = getUploadsPath()+src; // Pdf files are read from this folder
+        String desFile = getUploadsPath()+"cover-"+src.replace(".pdf",".png"); // converted images from pdf document are saved here
+
+        File sourceFile = new File(srcFile);
+        File destinationFile = new File(desFile);
+
+        if (!destinationFile.exists()) {
+            PDDocument document = PDDocument.load(srcFile);
+            PDPage page =(PDPage) document.getDocumentCatalog().getAllPages().get(0);
+
+            BufferedImage image = page.convertToImage();
+            ImageIO.write(image, "png", destinationFile);
+            document.close();
+
+            System.out.println("Converted Images are saved at -> "+ destinationFile.getAbsolutePath());
+            return encodeFileToBase64Binary(destinationFile);
+        } else {
+            return encodeFileToBase64Binary(destinationFile);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+
+    }
+        return null;
+    }
+
     public Resource loadAsResource(File file){
         try{
 
             Path path = Path.of(file.getAbsolutePath());
-            System.out.println(path+"              AAAAAAAAAAAAAAAAAAAAAA");
             Resource resource = new UrlResource(path.toUri());
             if(resource.exists()|| resource.isReadable()){
                 return resource;
@@ -273,8 +306,8 @@ public class ImageStorageService implements IStorageService{
         int pages = srcDocument.getNumberOfPages();
 
         IPdfPageExtraCopier copier = new PdfPageFormCopier();
-        if (pages>12){
-            srcDocument.copyPagesTo(1,12,pdfDocument,copier);
+        if (pages>5){
+            srcDocument.copyPagesTo(1,5,pdfDocument,copier);
 
         }
         else
