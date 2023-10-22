@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 @Service
@@ -26,5 +27,13 @@ public class TokenPaymentHistoryServices {
 
     public TokenPaymentHistory findPaymentId(String id){
         return tokenPaymentRepository.findByPaymentId(id);
+    }
+
+    public int countPaymentSuccess(){
+        ArrayList<TokenPaymentHistory> all = tokenPaymentRepository.findAll();
+        for(TokenPaymentHistory t: all){
+            if(t.getStatus()!=1) all.remove(t);
+        }
+        return all.size();
     }
 }
