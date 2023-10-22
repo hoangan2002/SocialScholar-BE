@@ -18,7 +18,7 @@ public class PostReport {
     private long reportId;
     private String description;
     private Date time;
-
+    private boolean isChecked;
     @JsonBackReference(value = "postReport_type")
     @ManyToOne
     @JoinColumn(name="type_Id")

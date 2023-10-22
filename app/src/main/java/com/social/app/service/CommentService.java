@@ -1,8 +1,11 @@
 package com.social.app.service;
 
 import com.social.app.dto.CommentDTO;
+import com.social.app.dto.PostDTO;
 import com.social.app.model.Comment;
 import com.social.app.model.Post;
+import com.social.app.model.PostLike;
+import com.social.app.model.User;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostRepository;
 import org.modelmapper.ModelMapper;
@@ -127,5 +130,18 @@ public class CommentService {
     public Post getPostByCommentId(long commentId){
         Comment comment = commentRepository.findByCommentId(commentId);
         return comment.getPostId();
+    }
+
+    public ArrayList<PostDTO> getPostByUserComment(int userId){
+        // Get user by id
+        User user = userService.loadUserById(userId);
+        // Get comment by user
+        ArrayList<Comment> comments = commentRepository.findByUser(user);
+        // Get list post by list comments
+        ArrayList<PostDTO> postDTOs = new ArrayList<>();
+        for (Comment comment: comments) {
+            postDTOs.add(modelMapper.map(comment.getPostId(), PostDTO.class));
+        }
+        return postDTOs;
     }
 }

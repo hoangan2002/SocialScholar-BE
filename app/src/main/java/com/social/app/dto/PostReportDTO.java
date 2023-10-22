@@ -23,7 +23,7 @@ public class PostReportDTO {
     private PostReportType postReportType;
     private User user;
     private Post post;
-
+    private boolean isChecked;
     @JsonView(Views.PostReportView.class)
     public long getReportId() {
         return reportId;
@@ -47,5 +47,9 @@ public class PostReportDTO {
     @JsonView(Views.PostReportView.class)
     public long getPost() {
         return post.getPostId();
+    }
+    @JsonView(Views.PostReportView.class)
+    public boolean getIsChecked() {
+        return isChecked;
     }
 }

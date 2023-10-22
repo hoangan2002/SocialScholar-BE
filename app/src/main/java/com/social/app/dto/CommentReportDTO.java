@@ -18,6 +18,7 @@ public class CommentReportDTO {
     private CommentReportType commentReportType;
     private User user;
     private Comment comment;
+    private boolean isChecked;
 
     @JsonView(Views.CommentReportView.class)
     public long getReportId() {
@@ -42,5 +43,9 @@ public class CommentReportDTO {
     @JsonView(Views.CommentReportView.class)
     public long getComment() {
         return comment.getCommentId();
+    }
+    @JsonView(Views.CommentReportView.class)
+    public boolean getIsChecked() {
+        return isChecked;
     }
 }
