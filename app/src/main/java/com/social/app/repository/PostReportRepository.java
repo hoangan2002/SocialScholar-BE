@@ -10,4 +10,5 @@ import java.util.ArrayList;
 @Repository
 public interface PostReportRepository extends JpaRepository<PostReport, Long> {
     public ArrayList<PostReport> findByPost(Post post);
+    ArrayList<PostReport> findAll();
 }

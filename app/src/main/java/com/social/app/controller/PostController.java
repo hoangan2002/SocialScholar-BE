@@ -493,4 +493,39 @@ public class PostController {
                 new ResponseObject("Success", "Found", commentService.getPostByUserComment(user.getUserId()))
         );
     }
+
+    @GetMapping("/count-post-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countPostReport() {
+        long result = reportService.countPostReports();
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
+
+    @GetMapping("/count-comment-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countCommentReport() {
+        long result = reportService.countCommentReports();
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
+
+    @GetMapping("/count-all-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countAllReport() {
+        long cmt = reportService.countCommentReports();
+        long post =  reportService.countPostReports();
+        long result = cmt+post;
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
 }
