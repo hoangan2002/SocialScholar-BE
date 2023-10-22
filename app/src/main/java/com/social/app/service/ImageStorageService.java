@@ -10,12 +10,15 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
+import com.itextpdf.kernel.pdf.colorspace.PdfColorSpace;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.properties.AreaBreakType;
 import com.itextpdf.layout.renderer.ImageRenderer;
 import com.social.app.repository.PostRepository;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
@@ -35,6 +38,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -50,6 +54,8 @@ import java.io.FileOutputStream;
 
 import static com.itextpdf.layout.properties.TextAlignment.CENTER;
 import static com.itextpdf.layout.properties.VerticalAlignment.TOP;
+import static java.awt.Color.BLACK;
+import static java.awt.Color.CYAN;
 import static java.lang.Math.PI;
 
 @Service
@@ -229,6 +235,9 @@ public class ImageStorageService implements IStorageService{
     }
 
     public String getCover(String src) throws IOException {
+        if(isDocx(src)){
+            src = DocxToPDF(src);
+        }
         try{
         String srcFile = getUploadsPath()+src; // Pdf files are read from this folder
         String desFile = getUploadsPath()+"cover-"+src.replace(".pdf",".png"); // converted images from pdf document are saved here
@@ -271,27 +280,31 @@ public class ImageStorageService implements IStorageService{
         }
     }
 
+    public String DocxToPDF(String path){
+        String pdfName = path.replace(".docx",".pdf");
+        File docxFile = new File(path);
+        File pdfFile = new File(pdfName);
+
+        if(!pdfFile.exists()){
+            try(InputStream inputStream = new FileInputStream(getUploadsPath()+path);
+                OutputStream outputStream = new FileOutputStream(getUploadsPath()+pdfName)) {
+                XWPFDocument document = new XWPFDocument(inputStream);
+                PdfOptions options = PdfOptions.create();
+                // Convert .docx file to .pdf file
+                PdfConverter.getInstance().convert(document, outputStream, options);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return pdfName;
+    }
+
     public ByteArrayInputStream PreviewDocument(String path) throws IOException {
 
         if(isDocx(path)){
-            String pdfName = path.replace(".docx",".pdf");
-            File docxFile = new File(path);
-            File pdfFile = new File(pdfName);
-
-            if(!pdfFile.exists()){
-                try(InputStream inputStream = new FileInputStream(getUploadsPath()+path);
-                    OutputStream outputStream = new FileOutputStream(getUploadsPath()+pdfName)) {
-                    XWPFDocument document = new XWPFDocument(inputStream);
-                    PdfOptions options = PdfOptions.create();
-                    // Convert .docx file to .pdf file
-                    PdfConverter.getInstance().convert(document, outputStream, options);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            path = pdfName;
+            path = DocxToPDF(path);
         }
 
         // Rut gon doc
@@ -304,7 +317,6 @@ public class ImageStorageService implements IStorageService{
 
         PdfPageFormCopier formCopier = new PdfPageFormCopier();
         int pages = srcDocument.getNumberOfPages();
-
         IPdfPageExtraCopier copier = new PdfPageFormCopier();
         if (pages>5){
             srcDocument.copyPagesTo(1,5,pdfDocument,copier);
@@ -312,6 +324,7 @@ public class ImageStorageService implements IStorageService{
         }
         else
             srcDocument.copyPagesTo(1,pages,pdfDocument,copier);
+
 
 
         // Tao chu watermark
