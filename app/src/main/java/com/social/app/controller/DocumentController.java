@@ -1,5 +1,8 @@
 package com.social.app.controller;
 
+import com.itextpdf.commons.utils.Base64;
+import com.social.app.dto.DocumentDTO;
+import com.social.app.dto.RatingDTO;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Document;
@@ -7,6 +10,7 @@ import com.social.app.model.Groups;
 import com.social.app.model.User;
 import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -18,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,9 +32,6 @@ import java.util.ArrayList;
 public class DocumentController {
     @Autowired
     DocumentService documentService;
-
-    @Autowired
-    ResponseConvertService responseConvertService;
 
     @Autowired
     UserService userService;
@@ -77,37 +79,47 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc đã duyệt
     @GetMapping("/documents")
-    public ArrayList<DocumentResponse> retrieveAllApprovedDocument(){
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> retrieveAllApprovedDocument(){
         ArrayList<Document> result = documentService.allApprovedDocuments();
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
-    public ArrayList<DocumentResponse> retrieveAllUnApprovedDocument(){
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // Tat ca doc dc duyet cua user
     @GetMapping("/my-documents")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ArrayList<DocumentResponse> UserApprovedCreatedDocuments(){
+    public ArrayList<DocumentDTO> UserApprovedCreatedDocuments(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByUsername(authentication.getName());
         ArrayList<Document> result = documentService.UserApprovedCreatedDocuments(user);
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
+    }
+    // Tat ca doc user da mua
+    @GetMapping("/bought-documents")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> BoughtDocuments(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        ArrayList<Document> result = documentService.BoughtDocuments(user);
+        return documentService.ListDocumentDTO(result);
     }
 
     // Tat ca doc duoc duyet cua group
     @GetMapping("group-documents/{groupId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ArrayList<DocumentResponse> GroupApprovedDocuments(@PathVariable("groupId") long id){
+    public ArrayList<DocumentDTO> GroupApprovedDocuments(@PathVariable("groupId") long id){
         Groups groups = groupServices.loadGroupById(id);
         if (groups==null) throw new RuntimeException("Group is not exist");
         ArrayList<Document> result = documentService.GroupApprovedDocuments(groups);
-        return responseConvertService.documentResponseArrayList(result);
+        return documentService.ListDocumentDTO(result);
     }
     //                                                                                                                --
     // -----------------------------------------------------------------------------------------------------------------
@@ -164,6 +176,7 @@ public class DocumentController {
                     new ResponseObject(e.getMessage(), "failed", ""));
         }
     }
+
 
     @GetMapping("/download/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -280,28 +293,63 @@ public class DocumentController {
                     new ResponseObject(exception.getMessage(), "failed", ""));
         }
     }
-    @GetMapping("/test/{docId}")
-    public ResponseEntity<?> getAvatarUri(@PathVariable("docId") long docId) throws IOException {
+    @GetMapping("/preview/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<?> Test(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
 
-        Resource resource = null;
         String filename = documentDB.getUrl();
-        File file = new File(storageService.getUploadsPath()+filename);
-        resource = storageService.loadAsResource(file);
 
-        if (resource == null) {
+        ByteArrayInputStream bis = storageService.PreviewDocument(filename);
+
+        if (bis == null) {
             return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
         }
 
-        String contentType = "application/octet-stream";
-        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
 
         return ResponseEntity.status(HttpStatus.OK)
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
-                .body( resource);
+                .body( new InputStreamResource(bis));
     }
+    @GetMapping("/preview/cover/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+
+        String filename = documentDB.getUrl();
+        String encodstring = storageService.getCover(filename);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+    }
+
+    @PostMapping("/rate/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> rateDocument(@PathVariable long docId, @RequestParam int stars){
+        // Get username by authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        // Check if username rated before
+        if (documentService.docIsRatedBefore(docId, username))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User already rate this document", "failed", ""));
+        // Get document by id
+        Document documentDB = documentService.findDocumentbyId(docId);
+        // Throw error if null
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        // Rate document
+        RatingDTO ratingDTO = documentService.rateDocument(docId, username, stars);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("Rate document successfully", "OK", ratingDTO));
+    }
+
 }

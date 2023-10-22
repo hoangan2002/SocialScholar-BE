@@ -187,29 +187,5 @@ public class PostServices {
         });
         return posts;
     }
-    public ArrayList<Post> retriveUserPostFromDB(int userId){
-        ArrayList<Post> result = postRepository.findAllByUserUserId(userId);
-        return result;
-    }
 
-    public ArrayList<Post> getAllPostByLikeUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
-        posts.sort(((o1, o2) -> Integer.compare(o2.getLikes().size(), o1.getLikes().size())));
-        return posts;
-    }
-    public ArrayList<Post> getAllPostByCommentUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
-        Collections.sort(posts, ((o1, o2) -> Integer.compare(o2.getComments().size(), o1.getComments().size())));
-        return posts;
-    }
-    public ArrayList<Post> getAllPostByTimeUser(int userid) {
-        ArrayList<Post> posts = retriveUserPostFromDB(userid);
-        Collections.sort(posts, new Comparator<Post>() {
-            @Override
-            public int compare(Post o1, Post o2) {
-                return o2.getTime().compareTo(o1.getTime());
-            }
-        });
-        return posts;
-    }
 }

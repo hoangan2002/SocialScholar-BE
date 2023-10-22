@@ -24,7 +24,7 @@ public class CommentDTO {
     private String content;
     private Timestamp time;
     private long commentParentId;
-    private Post post;
+    private Post postId;
     private User user;
     private String author;
     private ArrayList<CommentDTO> commentChildren;
@@ -46,8 +46,8 @@ public class CommentDTO {
         return commentParentId;
     }
     @JsonView(Views.CommentView.class)
-    public long getPost() {
-        return post.getPostId();
+    public long getPostId() {
+        return postId.getPostId();
     }
     @JsonView(Views.CommentView.class)
     public int getUser() {

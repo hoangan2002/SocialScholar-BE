@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Timestamp;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -38,7 +37,7 @@ public class Post {
     @JoinColumn(name="group_Id")
     private Groups group;
 
-    @OneToMany(mappedBy = "post",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "postId",cascade = CascadeType.REMOVE)
     @JsonManagedReference(value = "post_comment")
     private List<Comment> comments;
 
@@ -60,4 +59,6 @@ public class Post {
         return like;
     }
 
+    public int likeNumbers(){return likes.size();}
+    public int cmtNumbers(){return  comments.size();}
 }

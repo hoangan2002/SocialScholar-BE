@@ -44,7 +44,7 @@ public class Document {
     @OneToMany(mappedBy = "document")
     private List<Bill> bills;
 
-
+    @JsonManagedReference(value = "rating_document")
     @OneToMany(mappedBy = "document")
     private List<Rating> ratings;
 }

@@ -48,7 +48,8 @@ public class PostController {
     @Autowired
     ResponseConvertService responseConvertService;
 
-
+    @Autowired
+    CommentService commentService;
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
@@ -381,7 +382,7 @@ public class PostController {
     }
 
     @PostMapping("/donate/{postid}")
-    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam long coins){
+    public ResponseEntity<ResponseObject> donate(@PathVariable long postid,@RequestParam("coins")int coins){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         User user = userService.loadUserById(userid);
@@ -404,6 +405,37 @@ public class PostController {
     public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTO(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
         return postServices.ArrayListPostDTO(result);
+    }
+    // Lay 30 bai viet cho home page
+    @GetMapping("/getPostDTO-homepage")
+    public ArrayList<com.social.app.dto.PostDTO> getRandomPostHomePage(){
+        ArrayList<Post> allPosts = postServices.retrivePostFromDB();
+       // Sap xep theo thoi gian uu tien 3
+        Collections.sort(allPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.getTime().compareTo(x.getTime());
+            }
+        });
+        ArrayList<Post> returnPosts = new ArrayList<>();
+        for(int i = 0; i<30; i++){
+            if(i==allPosts.size()) break;
+            returnPosts.add(allPosts.get(i));
+        }
+
+        // Sap xep theo tong tuong tac uu tien 2
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return (y.cmtNumbers()+y.likeNumbers()) - (x.cmtNumbers()+x.likeNumbers());
+            }
+        });
+        // Sap xep theo tong likes uu tien nhat
+        Collections.sort(returnPosts, new Comparator<Post>() {
+            public int compare(Post x, Post y) {
+                return y.likeNumbers() - x.likeNumbers();
+            }
+        });
+
+        return postServices.ArrayListPostDTO(returnPosts);
     }
 
     @GetMapping("/getPostDTObylike")
@@ -437,21 +469,28 @@ public class PostController {
             );
         }
     }
-    @GetMapping("/getPostDTObylike-user/{userid}")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByLike(@PathVariable int userid){
-        ArrayList<Post> result = postServices.getAllPostByLikeUser(userid);
-        return postServices.ArrayListPostDTO(result);
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserLike")
+    public ResponseEntity<ResponseObject> getPostByLike(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user like
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", likeService.getPostByUserLike(user.getUserId()))
+        );
     }
 
-    @GetMapping("/getPostDTObycomment-user/{userid}")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByComment(@PathVariable int userid){
-        ArrayList<Post> result = postServices.getAllPostByCommentUser(userid);
-        return postServices.ArrayListPostDTO(result);
-    }
-
-    @GetMapping("/getPostDTObytime-user/{userid}")
-    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPostDTOByTime(@PathVariable int userid){
-        ArrayList<Post> result = postServices.getAllPostByTimeUser(userid);
-        return postServices.ArrayListPostDTO(result);
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserComment")
+    public ResponseEntity<ResponseObject> getPostByComment(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user comment
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", commentService.getPostByUserComment(user.getUserId()))
+        );
     }
 }

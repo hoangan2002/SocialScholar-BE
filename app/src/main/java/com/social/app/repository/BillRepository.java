@@ -9,4 +9,5 @@ import java.util.ArrayList;
 
 public interface BillRepository extends JpaRepository<Bill,Long> {
     Bill findByDocumentAndUser(Document doc, User user);
+    public ArrayList<Bill> findByUser(User user);
 }
