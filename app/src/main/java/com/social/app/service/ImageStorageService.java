@@ -253,7 +253,7 @@ public class ImageStorageService implements IStorageService{
         BufferedImage image = page.convertToImage();
         ImageIO.write(image, "png", os);
         document.close();
-
+    // write to stream
         InputStream in = new ByteArrayInputStream(os.toByteArray());
         return IOUtils.toByteArray(in);
 
