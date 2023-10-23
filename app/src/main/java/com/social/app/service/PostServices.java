@@ -194,13 +194,17 @@ public class PostServices {
         return posts;
     }
 
-    public ArrayList<ReportedPostDTO> getAllReportedPost(){
+
+    public ArrayList<ReportedPostDTO> getAllReportedPost() {
         ArrayList<Post> posts = getAllPostByTime();
         ArrayList<ReportedPostDTO> reportedPostDTOS = new ArrayList<>();
-        for (Post post: posts) {
+        for (Post post : posts) {
             if (!post.getReports().isEmpty())
                 reportedPostDTOS.add(modelMapper.map(post, ReportedPostDTO.class));
         }
         return reportedPostDTOS;
+    }
+    public ArrayList<Post> fullTextSearch(String keyword){
+        return postRepository.fullTextSearch(keyword);
     }
 }

@@ -122,6 +122,10 @@ public class GroupServices {
 
     public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
 
+    public ArrayList<Groups> fullTextSearch(String keyword) {
+        return groupRepository.fullTextSearch(keyword);
+    }
+
     public HashMap<CategoryDTO, Integer> getGroupCount(){
         // Get all categories
         List<Category> categories = categoryRepository.findAll();
