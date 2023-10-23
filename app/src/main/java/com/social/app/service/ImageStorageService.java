@@ -26,6 +26,7 @@ import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import lombok.Getter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -213,7 +214,7 @@ public class ImageStorageService implements IStorageService{
     }
 
     public String getUploadsPath(){
-        return String.valueOf(Paths.get("uploads").toAbsolutePath()+File.separator);
+        return String.valueOf(Paths.get("app/src/main/resources/uploads").toAbsolutePath()+File.separator);
     }
 
     public String encodeFileToBase64Binary(File file){
@@ -234,30 +235,28 @@ public class ImageStorageService implements IStorageService{
         return encodedfile;
     }
 
-    public String getCover(String src) throws IOException {
+    public byte[] getCover(String src) throws IOException {
         if(isDocx(src)){
             src = DocxToPDF(src);
         }
         try{
         String srcFile = getUploadsPath()+src; // Pdf files are read from this folder
-        String desFile = getUploadsPath()+"cover-"+src.replace(".pdf",".png"); // converted images from pdf document are saved here
+      // converted images from pdf document are saved here
 
         File sourceFile = new File(srcFile);
-        File destinationFile = new File(desFile);
 
-        if (!destinationFile.exists()) {
-            PDDocument document = PDDocument.load(srcFile);
-            PDPage page =(PDPage) document.getDocumentCatalog().getAllPages().get(0);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-            BufferedImage image = page.convertToImage();
-            ImageIO.write(image, "png", destinationFile);
-            document.close();
+        PDDocument document = PDDocument.load(srcFile);
+        PDPage page =(PDPage) document.getDocumentCatalog().getAllPages().get(0);
 
-            System.out.println("Converted Images are saved at -> "+ destinationFile.getAbsolutePath());
-            return encodeFileToBase64Binary(destinationFile);
-        } else {
-            return encodeFileToBase64Binary(destinationFile);
-        }
+        BufferedImage image = page.convertToImage();
+        ImageIO.write(image, "png", os);
+        document.close();
+
+        InputStream in = new ByteArrayInputStream(os.toByteArray());
+        return IOUtils.toByteArray(in);
+
 
     } catch (Exception e) {
         e.printStackTrace();
