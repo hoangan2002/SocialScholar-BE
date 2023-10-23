@@ -94,7 +94,7 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
         return documentService.ListDocumentDTO(result);

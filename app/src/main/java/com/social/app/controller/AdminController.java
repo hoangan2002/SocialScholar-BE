@@ -24,12 +24,14 @@ public class AdminController {
     ResponseConvertService responseConvertService;
     @Autowired
     GroupServices groupServices;
-    @GetMapping("/getalluser")
+    @PostMapping("/getalluser")
     @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<UserDTO> getalluser(){
         ArrayList<User> listUser = userService.findAll();
         return  userService.userResponses(listUser);
     }
+
+
     @GetMapping("/getallgroup/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){

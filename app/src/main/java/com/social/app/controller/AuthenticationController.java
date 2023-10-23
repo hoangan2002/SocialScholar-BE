@@ -77,5 +77,20 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("/sign-in/admin")
+    public ResponseEntity<ResponseObject> authenticateAndGetTokenADMIN(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword()));
+        if (authentication.isAuthenticated()) {
+            Optional<User> user = service.findUser(authRequest.getUserName());
+            User userData = user.get();
+            System.out.println(userData.getRole());
+            if(!userData.getRole().contains("ADMIN"))  return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseObject("Login error", "Error",""));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("OK","OK", AuthenticationResponse.builder()
+                    .token(jwtService.generateToken(user))
+                    .build()));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseObject("Login error", "Error",""));
+        }
+    }
 
 }

@@ -18,7 +18,7 @@ public class TokenPaymentController {
     TokenPaymentHistoryServices tokenPaymentHistoryServices;
 
     @GetMapping("/get-sucess-payment")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countDonePayment(){
         long result = tokenPaymentHistoryServices.countSuccessPayment();
         if(result==0){
@@ -29,7 +29,7 @@ public class TokenPaymentController {
     }
 
     @GetMapping("/get-profit")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countProfit(){
         double result = tokenPaymentHistoryServices.countProfit();
         if(result==0){

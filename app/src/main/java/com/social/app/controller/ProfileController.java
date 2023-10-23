@@ -86,6 +86,21 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "OK",null));
     }
 
+    @PutMapping("/bannedOrNot")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> bannedUser(@RequestParam("userId") int userId){
+        User theUser = service.findById(userId);
+        if(theUser!=null)
+            {
+                boolean state = theUser.isLocked();
+                System.out.println("locked"+state);
+               theUser.setLocked(!state);
+               service.save(theUser);
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Oke", "OK",null));
+            }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "Fail",null));
+    }
+
     @PutMapping("/edit-password")
     @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
     public  ResponseEntity<ResponseObject> editPassword( @RequestParam("old-pass") String oldPass, @RequestParam("new-pass") String newPass){

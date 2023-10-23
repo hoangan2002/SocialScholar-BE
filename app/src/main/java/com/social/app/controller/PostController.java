@@ -506,7 +506,7 @@ public class PostController {
     }
 
     @GetMapping("/count-comment-report")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countCommentReport() {
         long result = reportService.countCommentReports();
         if (result == 0) {
@@ -517,7 +517,7 @@ public class PostController {
     }
 
     @GetMapping("/count-all-report")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countAllReport() {
         long cmt = reportService.countCommentReports();
         long post =  reportService.countPostReports();
