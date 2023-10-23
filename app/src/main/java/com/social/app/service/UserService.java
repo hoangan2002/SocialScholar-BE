@@ -284,4 +284,7 @@ public class UserService implements UserDetailsService {
         return user;
 
     }
+    public  User findFirstUser(){
+        return  repository.findFirstByOrderByUserId();
+    }
 }
