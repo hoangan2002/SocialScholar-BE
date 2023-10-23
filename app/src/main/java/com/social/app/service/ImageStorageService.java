@@ -371,7 +371,7 @@ public class ImageStorageService implements IStorageService{
 
     public ByteArrayInputStream FullDocument(String path) throws IOException{
         if(isDocx(path)){
-            path = DocxToPDF("full-"+path);
+            path = DocxToPDF(path);
         }
         PdfReader reader = new PdfReader(getUploadsPath()+path);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
