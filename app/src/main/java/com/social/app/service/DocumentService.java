@@ -116,10 +116,10 @@ public class DocumentService {
         documentRepository.deleteById(id);
         return "success";
     }
-<<<<<<< HEAD
-    public ArrayList<Document> fullTextSearch(String keyword){
+
+    public ArrayList<Document> fullTextSearch(String keyword) {
         return documentRepository.fullTextSearch(keyword);
-=======
+    }
 
     public RatingDTO rateDocument(long docId, String userName,  int stars){
         Rating rating = new Rating();
@@ -144,6 +144,5 @@ public class DocumentService {
             }
         }
         return false;
->>>>>>> 252ed28d3f7acb0b6916ad9117fea27d12a3c820
     }
 }

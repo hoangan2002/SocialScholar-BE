@@ -368,4 +368,23 @@ public class ImageStorageService implements IStorageService{
         document.close();
         return new ByteArrayInputStream(out.toByteArray());
     }
+
+    public ByteArrayInputStream FullDocument(String path) throws IOException{
+        if(isDocx(path)){
+            path = DocxToPDF("full-"+path);
+        }
+        PdfReader reader = new PdfReader(getUploadsPath()+path);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(out);
+        PdfDocument srcDocument = new PdfDocument(reader);
+        PdfDocument pdfDocument = new PdfDocument(writer);
+        Document document = new Document(pdfDocument);
+
+        PdfPageFormCopier formCopier = new PdfPageFormCopier();
+        int pages = srcDocument.getNumberOfPages();
+        IPdfPageExtraCopier copier = new PdfPageFormCopier();
+        srcDocument.copyPagesTo(1,pages,pdfDocument,copier);
+        document.close();
+        return new ByteArrayInputStream(out.toByteArray());
+    }
 }

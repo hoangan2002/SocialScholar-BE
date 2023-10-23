@@ -303,7 +303,7 @@ public class DocumentController {
     }
     @GetMapping("/preview/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<?> Test(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<?> getPreviewDocument(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -337,13 +337,13 @@ public class DocumentController {
         String encodstring = storageService.getCover(filename);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
     }
-<<<<<<< HEAD
+
     @GetMapping("/search")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> search(@RequestParam("key") String keyword) {
         return documentService.ListDocumentDTO(documentService.fullTextSearch(keyword));
     }
-=======
+
 
     @PostMapping("/rate/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -366,6 +366,28 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ResponseObject("Rate document successfully", "OK", ratingDTO));
     }
+    @GetMapping("/full/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<?> getFullDocument(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
 
->>>>>>> 252ed28d3f7acb0b6916ad9117fea27d12a3c820
+        String filename = documentDB.getUrl();
+
+        ByteArrayInputStream bis = storageService.FullDocument(filename);
+
+        if (bis == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( new InputStreamResource(bis));
+    }
 }

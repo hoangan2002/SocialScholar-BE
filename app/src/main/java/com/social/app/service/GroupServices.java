@@ -121,10 +121,10 @@ public class GroupServices {
     }
 
     public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
-<<<<<<< HEAD
-    public ArrayList<Groups> fullTextSearch(String keyword){
+
+    public ArrayList<Groups> fullTextSearch(String keyword) {
         return groupRepository.fullTextSearch(keyword);
-=======
+    }
 
     public HashMap<CategoryDTO, Integer> getGroupCount(){
         // Get all categories
@@ -136,6 +136,5 @@ public class GroupServices {
             result.put(modelMapper.map(category, CategoryDTO.class), groupRepository.countByCategory(category));
         }
         return result;
->>>>>>> 252ed28d3f7acb0b6916ad9117fea27d12a3c820
     }
 }

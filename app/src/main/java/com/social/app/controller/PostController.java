@@ -466,12 +466,12 @@ public class PostController {
             );
         }
     }
-<<<<<<< HEAD
+
     @GetMapping("/search")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<com.social.app.dto.PostDTO> search(@RequestParam("key") String keyword) {
         return postServices.ArrayListPostDTO(postServices.fullTextSearch(keyword));
-=======
+    }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPostByUserLike")
@@ -530,6 +530,5 @@ public class PostController {
                     new ResponseObject("Empty", "No data", ""));
         } else return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Count Success", result));
->>>>>>> 252ed28d3f7acb0b6916ad9117fea27d12a3c820
     }
 }
