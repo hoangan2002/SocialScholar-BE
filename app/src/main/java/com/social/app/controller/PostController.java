@@ -5,7 +5,6 @@ import com.social.app.dto.PostReportTypeDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
-import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import com.social.app.request.PostDTO;
 import com.social.app.service.*;
@@ -17,9 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
@@ -468,6 +465,12 @@ public class PostController {
                     new ResponseObject("Success", "Done!", postServices.ArrayListPostDTO(result))
             );
         }
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<com.social.app.dto.PostDTO> search(@RequestParam("key") String keyword) {
+        return postServices.ArrayListPostDTO(postServices.fullTextSearch(keyword));
     }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
