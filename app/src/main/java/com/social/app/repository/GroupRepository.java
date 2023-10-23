@@ -3,6 +3,8 @@ package com.social.app.repository;
 import com.social.app.model.Category;
 import com.social.app.model.Groups;
 import com.social.app.model.Post;
+import com.social.app.model.User;
+import org.apache.tomcat.util.http.parser.Host;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.ArrayList;
@@ -23,5 +25,6 @@ public interface GroupRepository  extends JpaRepository<Groups, Long> {
 
 
     ArrayList<Groups> findByCategory(Category category);
-
+    public void deleteByHosts(User hosts);
+    public ArrayList<Groups> findByHosts(User hosts);
 }

@@ -15,5 +15,6 @@ public class Views {
     public static class PostView {}
     public static class DocumentView {}
     public static class RatingView{}
-
+    public static class ReportedPostView{}
+    public static class ReportedCommentView{}
 }

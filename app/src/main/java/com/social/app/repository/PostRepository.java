@@ -14,5 +14,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     void deleteById(long id);
     Post findByPostId(long postId);
     ArrayList<Post> findAllByGroupGroupId(long groupId);
-
+    public void deleteByUser(User user);
 }
