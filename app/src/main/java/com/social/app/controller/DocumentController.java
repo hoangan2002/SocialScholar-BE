@@ -13,10 +13,7 @@ import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/doc")
@@ -302,7 +300,7 @@ public class DocumentController {
     }
     @GetMapping("/preview/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<?> Test(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<?> getPreviewDocument(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -326,16 +324,25 @@ public class DocumentController {
     }
     @GetMapping("/preview/cover/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<ResponseObject> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<byte[]> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ResponseObject("The document is not exist", "failed", ""));
+            return null;
 
         String filename = documentDB.getUrl();
-        String encodstring = storageService.getCover(filename);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
+        byte[] media = storageService.getCover(filename);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(media, headers, HttpStatus.OK);
+        return responseEntity;
     }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> search(@RequestParam("key") String keyword) {
+        return documentService.ListDocumentDTO(documentService.fullTextSearch(keyword));
+    }
+
 
     @PostMapping("/rate/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -358,5 +365,28 @@ public class DocumentController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ResponseObject("Rate document successfully", "OK", ratingDTO));
     }
+    @GetMapping("/full/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<?> getFullDocument(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
 
+        String filename = documentDB.getUrl();
+
+        ByteArrayInputStream bis = storageService.FullDocument(filename);
+
+        if (bis == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( new InputStreamResource(bis));
+    }
 }
