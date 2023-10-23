@@ -133,7 +133,8 @@ public class GroupServices {
         HashMap<CategoryDTO, Integer> result = new HashMap<>();
         // For each category, count number of groups of that category then put in result hashmap
         for (Category category: categories) {
-            result.put(modelMapper.map(category, CategoryDTO.class), groupRepository.countByCategory(category));
+            if (groupRepository.countByCategory(category) > 0)
+                result.put(modelMapper.map(category, CategoryDTO.class), groupRepository.countByCategory(category));
         }
         return result;
     }
