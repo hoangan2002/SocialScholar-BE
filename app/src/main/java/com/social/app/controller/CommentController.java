@@ -1,8 +1,6 @@
 package com.social.app.controller;
 
-import com.social.app.dto.CommentDTO;
-import com.social.app.dto.CommentReportDTO;
-import com.social.app.dto.CommentReportTypeDTO;
+import com.social.app.dto.*;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.request.CommentRequest;
@@ -35,17 +33,17 @@ public class CommentController {
     @Autowired
     private ReportService reportService;
 
+
+
     @PostMapping("/{postID}/comments")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-
-    ResponseEntity<ResponseObject> createComment(@RequestBody CommentDTO comment,
-
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    ResponseEntity<ResponseObject> createNewComment(@RequestBody CommentDTO commentDTO,
                                                  @PathVariable long postID){
         // Get userId by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
-
+        String username = userService.findUserByUsername(authentication.getName()).getUserName();
         try {
+
             // Get post from postId
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
@@ -54,7 +52,7 @@ public class CommentController {
 
             if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // create comment
-            CommentDTO newComment = this.commentService.createComment(comment, postID, username);
+            CommentDTO newComment = this.commentService.createComment(commentDTO, postID, username);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject("Successfully", "Create comment successfully", newComment));
         }

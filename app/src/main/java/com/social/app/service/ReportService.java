@@ -117,4 +117,22 @@ public class ReportService {
         }
         return postReportDTOs;
     }
+
+    public long countPostReports(){
+        List<PostReport> postReports = postReportRepository.findAll();
+        ArrayList<PostReportDTO> postReportDTOs = new ArrayList<>();
+        for (PostReport postReport: postReports) {
+            postReportDTOs.add(modelMapper.map(postReport, PostReportDTO.class));
+        }
+        return postReportDTOs.size();
+    }
+
+    public long countCommentReports(){
+        List<CommentReport> commentReports = commentReportRepository.findAll();
+        ArrayList<CommentReportDTO> commentReportDTOs = new ArrayList<>();
+        for (CommentReport commentReport: commentReports) {
+            commentReportDTOs.add(modelMapper.map(commentReport, CommentReportDTO.class));
+        }
+        return commentReportDTOs.size();
+    }
 }

@@ -2,10 +2,10 @@ package com.social.app.controller;
 
 import com.social.app.dto.PostReportDTO;
 import com.social.app.dto.PostReportTypeDTO;
+import com.social.app.dto.ReportedPostDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
-import com.social.app.repository.PostRepository;
 import com.social.app.repository.UserRepository;
 import com.social.app.request.PostDTO;
 import com.social.app.service.*;
@@ -17,9 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
 import java.util.*;
 
 @RestController
@@ -48,7 +46,8 @@ public class PostController {
     @Autowired
     ResponseConvertService responseConvertService;
 
-
+    @Autowired
+    CommentService commentService;
     private final String FOLDER_PATH="/Users/nguyenluongtai/Downloads/social-scholar--backend/uploads/";
 
     //______________________________________Make_post____________________________________________________//
@@ -468,4 +467,71 @@ public class PostController {
             );
         }
     }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<com.social.app.dto.PostDTO> search(@RequestParam("key") String keyword) {
+        return postServices.ArrayListPostDTO(postServices.fullTextSearch(keyword));
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserLike")
+    public ResponseEntity<ResponseObject> getPostByLike(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user like
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", likeService.getPostByUserLike(user.getUserId()))
+        );
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/getPostByUserComment")
+    public ResponseEntity<ResponseObject> getPostByComment(){
+        // Get user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findUserByUsername(authentication.getName());
+        // Get post by user comment
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Success", "Found", commentService.getPostByUserComment(user.getUserId()))
+        );
+    }
+
+    @GetMapping("/count-post-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countPostReport() {
+        long result = reportService.countPostReports();
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
+
+    @GetMapping("/count-comment-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countCommentReport() {
+        long result = reportService.countCommentReports();
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
+
+    @GetMapping("/count-all-report")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseObject> countAllReport() {
+        long cmt = reportService.countCommentReports();
+        long post =  reportService.countPostReports();
+        long result = cmt+post;
+        if (result == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Empty", "No data", ""));
+        } else return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Count Success", result));
+    }
+
+
 }

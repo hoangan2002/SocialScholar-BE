@@ -4,8 +4,10 @@ import com.social.app.model.Document;
 import com.social.app.model.Groups;
 import com.social.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface DocumentRepository extends JpaRepository<Document,Long> {
     Document save(Document document);
@@ -16,5 +18,11 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
 
      Document findByDocumentId(long documentId);
      void deleteById(long id);
+
+    public void deleteByAuthor(User author);
+
+
+    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1 WITH QUERY EXPANSION)", nativeQuery = true)
+    ArrayList<Document> fullTextSearch(String keyword);
 
 }

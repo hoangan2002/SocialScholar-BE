@@ -21,6 +21,7 @@ public class CommentReport {
     private long reportId;
     private String description;
     private Date time;
+    private boolean isChecked;
 
     @JsonBackReference(value = "commentReport_type")
     @ManyToOne

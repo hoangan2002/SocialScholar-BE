@@ -4,10 +4,7 @@ import com.social.app.config.SecurityConfig;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
-import com.social.app.repository.CommentRepository;
-import com.social.app.repository.GroupRepository;
-import com.social.app.repository.JoinRepository;
-import com.social.app.repository.UserRepository;
+import com.social.app.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,13 +27,32 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private CommentRepository commentRepository;
-
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+    @Autowired
+    private CommentReportRepository commentReportRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private PostLikeRepository postLikeRepository;
+    @Autowired
+    private PostReportRepository postReportRepository;
     @Autowired
     private JoinRepository joinRepository;
-
+    @Autowired
+    private BillRepository billRepository;
+    @Autowired
+    private DocumentRepository documentRepository;
+    @Autowired
+    private RatingRepository ratingRepository;
+    @Autowired
+    private ExchangeRequestRepository exchangeRequestRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private TokenPaymentRepository tokenPaymentRepository;
     @Autowired
     private PasswordEncoder encoder;
-
     @Autowired
     private SecurityConfig securityConfig;
     @Autowired
@@ -282,7 +298,43 @@ public class UserService implements UserDetailsService {
             save(user);
         }
         return user;
+    }
 
+    @Transactional
+    public void deleteUser(String username){
+        User user = findUserByUsername(username);
+        if (user==null) throw new RuntimeException("Not found user");
+        // 1. delete in join table
+        joinRepository.deleteByUser(user);
+        // 2. delete in bill table
+        billRepository.deleteByUser(user);
+        // 3. delete in postLike table
+        postLikeRepository.deleteByUser(user);
+        // 4. delete in postReport table
+        postReportRepository.deleteByUser(user);
+        // 5. delete in post table
+        postRepository.deleteByUser(user);
+        // 6. delete in commentLike table
+        commentLikeRepository.deleteByUser(user);
+        // 7. delete in commentReport table
+        commentReportRepository.deleteByUser(user);
+        // 8. delete in comment table
+        commentRepository.deleteByUser(user);
+        // 9. delete in rating table
+        ratingRepository.deleteByUser(user);
+        // 10. delete in exchangeRequest table
+        exchangeRequestRepository.deleteByUser(user);
+        // 11. delete in tokenPayment table
+        tokenPaymentRepository.deleteByUser(user);
+        // 12. delete in document table
+        documentRepository.deleteByAuthor(user);
+        // 13. delete hostId in groups
+        ArrayList<Groups> groups = groupRepository.findByHosts(user);
+        for (Groups group: groups) {
+            group.setHosts(null);
+        }
+        // final delete in user table
+        repository.deleteById(user.getUserId());
     }
     public  User findFirstUser(){
         return  repository.findFirstByOrderByUserId();

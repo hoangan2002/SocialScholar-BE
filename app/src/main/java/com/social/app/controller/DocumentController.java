@@ -2,6 +2,8 @@ package com.social.app.controller;
 
 import com.itextpdf.commons.utils.Base64;
 import com.social.app.dto.DocumentDTO;
+import com.social.app.entity.DocumentRequest;
+import com.social.app.dto.RatingDTO;
 import com.social.app.entity.DocumentResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Document;
@@ -11,10 +13,7 @@ import com.social.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/doc")
@@ -41,11 +41,12 @@ public class DocumentController {
     @Autowired
     BillService billService;
 
-    @PostMapping("/document")
+
+    @PostMapping("/document/{groupid}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<ResponseObject> createDocument(@RequestPart Document document,
+    public ResponseEntity<ResponseObject> createDocument(@RequestPart DocumentRequest documentData,
                                                       @RequestParam("file")MultipartFile file,
-                                                      @RequestParam("groupid") int groupid)
+                                                      @PathVariable ("groupid") int groupid)
     {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = userService.findUserByUsername(authentication.getName());
@@ -56,6 +57,11 @@ public class DocumentController {
             );
         try {
             if(userService.loadUserById(userid)!=null){
+                Document document = new Document();
+                document.setDescription(documentData.getDescription());
+                document.setDocumentName(documentData.getDocumentName());
+                document.setCost(documentData.getCost());
+                document.setTime(documentData.getTime());
                 document.setGroup(groupServices.loadGroupById(groupid));
                 document.setAuthor(userService.loadUserById(userid));
                 String url = storageService.storeDoc(file);
@@ -78,7 +84,7 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc đã duyệt
     @GetMapping("/documents")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> retrieveAllApprovedDocument(){
         ArrayList<Document> result = documentService.allApprovedDocuments();
         return documentService.ListDocumentDTO(result);
@@ -102,7 +108,7 @@ public class DocumentController {
         return documentService.ListDocumentDTO(result);
     }
     // Tat ca doc user da mua
-    @GetMapping("/bought-documents")
+    @PostMapping("/bought-documents")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> BoughtDocuments(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -112,7 +118,7 @@ public class DocumentController {
     }
 
     // Tat ca doc duoc duyet cua group
-    @GetMapping("group-documents/{groupId}")
+    @PostMapping("group-documents/{groupId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> GroupApprovedDocuments(@PathVariable("groupId") long id){
         Groups groups = groupServices.loadGroupById(id);
@@ -123,7 +129,7 @@ public class DocumentController {
     //                                                                                                                --
     // -----------------------------------------------------------------------------------------------------------------
 
-    @DeleteMapping("/document/{docId}")
+    @DeleteMapping("/delete-document/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public  ResponseEntity<ResponseObject> userDeleteDocument(@PathVariable("docId") long docId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -177,7 +183,7 @@ public class DocumentController {
     }
 
 
-    @GetMapping("/download/{docId}")
+    @PostMapping("/download/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<?> downloadDocument(@PathVariable("docId") long docId) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -243,7 +249,7 @@ public class DocumentController {
 
     // Admin duyet doc oke
     @PutMapping("/approve/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public  ResponseEntity<ResponseObject> ApproveDocument(@PathVariable("docId") long docId){
         try{
             Document document = documentService.findDocumentbyId(docId);
@@ -294,7 +300,7 @@ public class DocumentController {
     }
     @GetMapping("/preview/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<?> Test(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<?> getPreviewDocument(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
@@ -318,15 +324,69 @@ public class DocumentController {
     }
     @GetMapping("/preview/cover/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<ResponseObject> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+    public ResponseEntity<byte[]> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return null;
+
+        String filename = documentDB.getUrl();
+        byte[] media = storageService.getCover(filename);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(media, headers, HttpStatus.OK);
+        return responseEntity;
+    }
+
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> search(@RequestParam("key") String keyword) {
+        return documentService.ListDocumentDTO(documentService.fullTextSearch(keyword));
+    }
+
+
+    @PostMapping("/rate/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> rateDocument(@PathVariable long docId, @RequestParam int stars){
+        // Get username by authentication
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        // Check if username rated before
+        if (documentService.docIsRatedBefore(docId, username))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User already rate this document", "failed", ""));
+        // Get document by id
+        Document documentDB = documentService.findDocumentbyId(docId);
+        // Throw error if null
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        // Rate document
+        RatingDTO ratingDTO = documentService.rateDocument(docId, username, stars);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("Rate document successfully", "OK", ratingDTO));
+    }
+    @GetMapping("/full/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<?> getFullDocument(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
 
         String filename = documentDB.getUrl();
-        String encodstring = storageService.getCover(filename);
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",encodstring));
-    }
 
+        ByteArrayInputStream bis = storageService.FullDocument(filename);
+
+        if (bis == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( new InputStreamResource(bis));
+    }
 }

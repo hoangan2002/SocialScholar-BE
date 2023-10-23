@@ -1,5 +1,6 @@
 package com.social.app.service;
 
+import com.social.app.dto.CategoryDTO;
 import com.social.app.model.Groups;
 import com.social.app.model.JoinManagement;
 import com.social.app.model.Post;
@@ -7,6 +8,7 @@ import com.social.app.model.User;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
+import com.social.app.repository.CategoryRepository;
 import com.social.app.repository.GroupRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import org.modelmapper.ModelMapper;
 @Service
@@ -28,7 +28,8 @@ public class GroupServices {
     UserService userService;
     @Autowired
     ModelMapper modelMapper;
-
+    @Autowired
+    CategoryRepository categoryRepository;
 
     public Groups loadGroupById(long gid) {
         return groupRepository.findByGroupId(gid);
@@ -121,4 +122,20 @@ public class GroupServices {
 
     public ArrayList<Groups> findByCategory(Category category){return groupRepository.findByCategory(category);}
 
+    public ArrayList<Groups> fullTextSearch(String keyword) {
+        return groupRepository.fullTextSearch(keyword);
+    }
+
+    public HashMap<CategoryDTO, Integer> getGroupCount(){
+        // Get all categories
+        List<Category> categories = categoryRepository.findAll();
+        // Initialize result hashmap
+        HashMap<CategoryDTO, Integer> result = new HashMap<>();
+        // For each category, count number of groups of that category then put in result hashmap
+        for (Category category: categories) {
+            if (groupRepository.countByCategory(category) > 0)
+                result.put(modelMapper.map(category, CategoryDTO.class), groupRepository.countByCategory(category));
+        }
+        return result;
+    }
 }

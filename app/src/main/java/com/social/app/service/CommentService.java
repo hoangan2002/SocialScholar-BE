@@ -1,8 +1,13 @@
 package com.social.app.service;
 
 import com.social.app.dto.CommentDTO;
+import com.social.app.dto.PostDTO;
+import com.social.app.dto.ReportedCommentDTO;
+import com.social.app.dto.ReportedPostDTO;
 import com.social.app.model.Comment;
 import com.social.app.model.Post;
+import com.social.app.model.PostLike;
+import com.social.app.model.User;
 import com.social.app.repository.CommentRepository;
 import com.social.app.repository.PostRepository;
 import org.modelmapper.ModelMapper;
@@ -12,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CommentService {
@@ -60,6 +66,10 @@ public class CommentService {
             commentDTOS.add(commentDTO);
         }
         return commentDTOS;
+    }
+
+    public List<Comment> getAllComments(){
+        return commentRepository.findAll();
     }
 
     // Function set comment dto children for comment dto parent
@@ -127,5 +137,28 @@ public class CommentService {
     public Post getPostByCommentId(long commentId){
         Comment comment = commentRepository.findByCommentId(commentId);
         return comment.getPostId();
+    }
+
+    public ArrayList<PostDTO> getPostByUserComment(int userId){
+        // Get user by id
+        User user = userService.loadUserById(userId);
+        // Get comment by user
+        ArrayList<Comment> comments = commentRepository.findByUser(user);
+        // Get list post by list comments
+        ArrayList<PostDTO> postDTOs = new ArrayList<>();
+        for (Comment comment: comments) {
+            postDTOs.add(modelMapper.map(comment.getPostId(), PostDTO.class));
+        }
+        return postDTOs;
+    }
+
+    public ArrayList<ReportedCommentDTO> getAllReportedComment(){
+        List<Comment> comments = getAllComments();
+        ArrayList<ReportedCommentDTO> reportedCommentDTOS = new ArrayList<>();
+        for (Comment comment: comments) {
+            if (!comment.getReports().isEmpty())
+                reportedCommentDTOS.add(modelMapper.map(comment, ReportedCommentDTO.class));
+        }
+        return reportedCommentDTOS;
     }
 }

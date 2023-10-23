@@ -1,6 +1,7 @@
 package com.social.app.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
+import com.social.app.dto.DocumentDTO;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.dto.Views;
@@ -398,14 +399,18 @@ public class GroupController {
         }
     }
 
+    @GetMapping("/search")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<GroupDTO> search(@RequestParam("key") String keyword) {
+        return groupServices.groupsResponses(groupServices.fullTextSearch(keyword));
+    }
     // thuật toán search: hashtags=>groups
     @GetMapping("/search-by-hashtag/{hashtags}")
     @JsonView(Views.GroupsView.class)
-    public  ArrayList<GroupDTO> searchGroupsByHashTag(@PathVariable String hashtags){
+    public  ArrayList<GroupDTO> searchGroupsByHashTag(@PathVariable String hashtags) {
         ArrayList<Groups> listGroups = groupServices.findAll();
         //Lấy ra các group có matching
-
-        Map<Groups, Integer> groupMatchingCount = new HashMap<>();
+       Map<Groups, Integer> groupMatchingCount = new HashMap<>();
 
         for (Groups groups:listGroups) {
             if(groups.getTags()!=null){

@@ -13,9 +13,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 @RestController
-@RequestMapping("api/category")
+@RequestMapping("/api/category")
 public class CategoryController {
     @Autowired
     CategoryService categoryService;
@@ -43,5 +45,6 @@ public class CategoryController {
     public ArrayList<HintTagDTO> getHintTagsByCategoryId(@PathVariable("categoryId") int categoryId){
         return categoryService.getHintTagsByCategoryId(categoryId);
     }
+
 
 }
