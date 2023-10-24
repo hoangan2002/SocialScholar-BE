@@ -43,4 +43,13 @@ public class AdminController {
         }
        return  groupServices.groupsResponses(groups);
     }
+
+    @GetMapping("/count-users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public long countDonePayment(){
+        long result = userService.countUser();
+        if(result==0){
+            return 0;
+        }else  return result;
+    }
 }

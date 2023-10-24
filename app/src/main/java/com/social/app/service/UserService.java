@@ -284,4 +284,10 @@ public class UserService implements UserDetailsService {
         return user;
 
     }
+
+    public long countUser(){
+        ArrayList<User> users = repository.findAll();
+        long count =users.size();
+        return count;
+    }
 }

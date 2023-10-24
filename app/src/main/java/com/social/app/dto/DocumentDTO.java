@@ -27,6 +27,7 @@ public class DocumentDTO {
     private Timestamp time;
     private Groups group;
     private User author;
+    private String message;
     private List<RatingDTO> ratings;
     private List<Bill> bills;
     @JsonView(Views.DocumentView.class)
@@ -43,6 +44,8 @@ public class DocumentDTO {
     public String getGroup(){ return group.getGroupName(); }
     @JsonView(Views.DocumentView.class)
     public String getAuthor(){ return author.getUserName(); }
+    @JsonView(Views.DocumentView.class)
+    public String getMessage(){ return message; }
 //    @JsonView(Views.UserView.class)
 //    public int[] getRatings(){
 //        int[] userRates = new int[ratings.size()];
