@@ -336,4 +336,7 @@ public class UserService implements UserDetailsService {
         // final delete in user table
         repository.deleteById(user.getUserId());
     }
+    public  User findFirstUser(){
+        return  repository.findFirstByOrderByUserId();
+    }
 }
