@@ -10,4 +10,5 @@ import java.util.ArrayList;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     public ArrayList<Rating> findByUser(User user);
+    public void deleteByUser(User user);
 }

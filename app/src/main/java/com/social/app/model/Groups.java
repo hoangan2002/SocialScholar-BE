@@ -63,7 +63,11 @@ public class Groups {
     @OneToMany(mappedBy = "group")
     private  List<JoinManagement> joins;
 
+    @JsonManagedReference(value = "document_groups")
     @OneToMany(mappedBy = "group")
     private  List<Document> documents;
 
+    @JsonManagedReference(value = "group_noti")
+    @OneToMany(mappedBy = "group")
+    private List<Notification> notifications;
 }

@@ -126,15 +126,21 @@ public class GroupServices {
         return groupRepository.fullTextSearch(keyword);
     }
 
-    public HashMap<CategoryDTO, Integer> getGroupCount(){
+    public ArrayList<CategoryDTO> getGroupCount(){
         // Get all categories
         List<Category> categories = categoryRepository.findAll();
         // Initialize result hashmap
-        HashMap<CategoryDTO, Integer> result = new HashMap<>();
+        ArrayList result = new ArrayList<>();
         // For each category, count number of groups of that category then put in result hashmap
         for (Category category: categories) {
-            result.put(modelMapper.map(category, CategoryDTO.class), groupRepository.countByCategory(category));
+            if (groupRepository.countByCategory(category) > 0)
+                result.add(modelMapper.map(category, CategoryDTO.class));
         }
         return result;
+    }
+
+    public int calculateGroupCount(int categoryId){
+        Category category = categoryRepository.findById(categoryId).get();
+        return groupRepository.countByCategory(category);
     }
 }

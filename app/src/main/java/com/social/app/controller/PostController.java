@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.social.app.dto.PostReportDTO;
 import com.social.app.dto.PostReportTypeDTO;
+import com.social.app.dto.ReportedPostDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
@@ -531,4 +532,6 @@ public class PostController {
         } else return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Count Success", result));
     }
+
+
 }

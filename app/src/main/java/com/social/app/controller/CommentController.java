@@ -1,8 +1,6 @@
 package com.social.app.controller;
 
-import com.social.app.dto.CommentDTO;
-import com.social.app.dto.CommentReportDTO;
-import com.social.app.dto.CommentReportTypeDTO;
+import com.social.app.dto.*;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
 import com.social.app.request.CommentRequest;
