@@ -80,6 +80,9 @@ public class PostServices {
         ArrayList<Post> result = postRepository.findAllByGroupGroupId(groupId);
         return result;
     }
+    public Post findFirstPost(){
+        return  postRepository.findFirstByOrderByPostId();
+    }
 
     public ArrayList<Post> deletePostDB(long postID){
         postRepository.deleteById(postID);
