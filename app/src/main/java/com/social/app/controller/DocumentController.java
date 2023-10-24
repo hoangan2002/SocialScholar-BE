@@ -368,11 +368,38 @@ public class DocumentController {
     @GetMapping("/full/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<?> getFullDocument(@PathVariable("docId") long docId) throws IOException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User customer = userService.findUserByUsername(authentication.getName());
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
+        if (billService.findByDocumentAndUser(documentDB,customer)==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("User didn't buy this document yet", "failed", ""));
+        String filename = documentDB.getUrl();
 
+        ByteArrayInputStream bis = storageService.FullDocument(filename);
+
+        if (bis == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( new InputStreamResource(bis));
+    }
+    @GetMapping("/admin/full/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> getFullDocumentAdmin(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
         String filename = documentDB.getUrl();
 
         ByteArrayInputStream bis = storageService.FullDocument(filename);
