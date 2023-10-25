@@ -22,11 +22,16 @@ import java.util.List;
 @NoArgsConstructor
 public class ReportedPostDTO {
     private long postId;
+    private String titles;
     private List<PostReport> reports;
 
     @JsonView(Views.ReportedPostView.class)
     public long getPostId() {
         return this.postId;
+    }
+    @JsonView(Views.ReportedPostView.class)
+    public String getTitles(){
+        return this.titles;
     }
     @JsonView(Views.ReportedPostView.class)
     public List<ReportForPostDTO> getReports() {
