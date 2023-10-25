@@ -20,9 +20,4 @@ public class CategoryDTO {
     public String getCategoryName(){ return categoryName; }
     @JsonView(Views.DocumentView.class)
     public String getDescription(){ return description; }
-    @JsonView(Views.DocumentView.class)
-    public int getGroupCount(){
-        GroupServices groupServices = new GroupServices();
-        return groupServices.calculateGroupCount(this.categoryId);
-    }
 }

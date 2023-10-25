@@ -129,12 +129,17 @@ public class GroupServices {
     public ArrayList<CategoryDTO> getGroupCount(){
         // Get all categories
         List<Category> categories = categoryRepository.findAll();
+        System.out.println("catethis"+categories.get(0));
         // Initialize result hashmap
         ArrayList result = new ArrayList<>();
         // For each category, count number of groups of that category then put in result hashmap
         for (Category category: categories) {
             if (groupRepository.countByCategory(category) > 0)
-                result.add(modelMapper.map(category, CategoryDTO.class));
+            {
+                CategoryDTO categoryDTO = modelMapper.map(category, CategoryDTO.class);
+                categoryDTO.setGroupCount(calculateGroupCount(category.getCategoryId()));
+                result.add(categoryDTO);
+            }
         }
         return result;
     }
