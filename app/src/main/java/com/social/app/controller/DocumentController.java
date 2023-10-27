@@ -416,4 +416,20 @@ public class DocumentController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body( new InputStreamResource(bis));
     }
+
+    @GetMapping("/preview/pages/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getPages(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+
+        String filename = documentDB.getUrl();
+
+        int pages = storageService.getPages(filename);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ResponseObject("", "OK", pages));
+    }
 }
