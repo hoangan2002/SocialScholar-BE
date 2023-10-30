@@ -47,6 +47,7 @@ public class Groups {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="host_Id")
+    @JsonBackReference(value = "group_user")
     private User hosts;
 
     @ManyToOne

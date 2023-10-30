@@ -1,5 +1,7 @@
 package com.social.app.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +30,7 @@ public class TokenPaymentHistory {
 
     @ManyToOne
     @JoinColumn(name="userId")
+    @JsonBackReference(value = "payment_user")
     private User user;
 
 
