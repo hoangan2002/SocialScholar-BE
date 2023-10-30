@@ -304,7 +304,7 @@ public class UserService implements UserDetailsService {
     public void deleteUser(String username){
         User user = findUserByUsername(username);
         if (user==null) throw new RuntimeException("Not found user");
-        // 1. delete in join table
+        /*// 1. delete in join table
         joinRepository.deleteByUser(user);
         // 2. delete in bill table
         billRepository.deleteByUser(user);
@@ -327,7 +327,7 @@ public class UserService implements UserDetailsService {
         // 11. delete in tokenPayment table
         tokenPaymentRepository.deleteByUser(user);
         // 12. delete in document table
-        documentRepository.deleteByAuthor(user);
+        documentRepository.deleteByAuthor(user);*/
         // 13. delete hostId in groups
         ArrayList<Groups> groups = groupRepository.findByHosts(user);
         for (Groups group: groups) {
