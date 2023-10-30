@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Bean;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -32,6 +33,7 @@ public class User {
     private long coin;
     private int activityPoint;
     private boolean isLocked;
+    private Date timeCreate;
 
     @JsonManagedReference(value = "join_user")
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)

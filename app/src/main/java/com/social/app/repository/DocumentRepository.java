@@ -12,6 +12,7 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document,Long> {
     Document save(Document document);
     ArrayList<Document> findAllByIsApprovedIsTrue();
+    Document findFirstOrderByIsApprovedIsTrue();
     ArrayList<Document> findAllByIsApprovedIsFalse();
     ArrayList<Document> findByAuthorAndIsApprovedIsTrue(User user);
     ArrayList<Document> findByGroupAndIsApprovedIsTrue(Groups groups);
