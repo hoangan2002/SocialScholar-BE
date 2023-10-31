@@ -25,6 +25,6 @@ public interface GroupRepository  extends JpaRepository<Groups, Long> {
 
 
     ArrayList<Groups> findByCategory(Category category);
-    @Query(value = "SELECT * FROM groups_ WHERE MATCH (Groups_Name,tags) AGAINST (?1 WITH QUERY EXPANSION)", nativeQuery = true)
+    @Query(value = "SELECT * FROM groups_ WHERE MATCH (Groups_Name,tags) AGAINST (?1) > 0 ORDER BY MATCH (Groups_Name,tags) AGAINST (?1) DESC", nativeQuery = true)
     ArrayList<Groups> fullTextSearch(String keyword);
 }

@@ -331,29 +331,28 @@ public class ImageStorageService implements IStorageService{
         }
         else
             srcDocument.copyPagesTo(1,pages,pdfDocument,copier);
+        // Tao chu watermark
+        PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+        Text text = new Text("Schoolar School");
+        text.setFont(font);
+        text.setFontSize(100);
+        text.setOpacity(0.7f);
+        Paragraph paragraph = new Paragraph(text);
+        // Tao do nghieng va opacity
+        PdfPage pdfPage = document.getPdfDocument().getPage(1);
+        PageSize pageSize = (PageSize) pdfPage.getPageSizeWithRotation();
+        float x = (pageSize.getLeft() + pageSize.getRight()) / 2;
+        float y = (pageSize.getTop() + pageSize.getBottom()) / 2;
+        float xOffset = 100f / 2;
+        float verticalOffset = 100f / 4;
+        float rotationInRadians = (float) (PI / 180 * 60f);
 
+        // Add watermark
+        for(int i=1; i<= pdfDocument.getNumberOfPages();i++) {
+            document.showTextAligned(paragraph, x - xOffset, y + verticalOffset,
+                    i, CENTER, TOP, rotationInRadians);
+        }
         if (pages<=5){
-            // Tao chu watermark
-            PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
-            Text text = new Text("Schoolar School");
-            text.setFont(font);
-            text.setFontSize(100);
-            text.setOpacity(0.7f);
-            Paragraph paragraph = new Paragraph(text);
-            // Tao do nghieng va opacity
-            PdfPage pdfPage = document.getPdfDocument().getPage(1);
-            PageSize pageSize = (PageSize) pdfPage.getPageSizeWithRotation();
-            float x = (pageSize.getLeft() + pageSize.getRight()) / 2;
-            float y = (pageSize.getTop() + pageSize.getBottom()) / 2;
-            float xOffset = 100f / 2;
-            float verticalOffset = 100f / 4;
-            float rotationInRadians = (float) (PI / 180 * 60f);
-
-            // Add watermark
-            for(int i=1; i<= pdfDocument.getNumberOfPages();i++) {
-                document.showTextAligned(paragraph, x - xOffset, y + verticalOffset,
-                        i, CENTER, TOP, rotationInRadians);
-            }
 
             // Add img
             ImageData imageData = ImageDataFactory.create(getUploadsPath()+"Logo.jpg");
