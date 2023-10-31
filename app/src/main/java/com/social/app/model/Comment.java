@@ -38,11 +38,11 @@ public class Comment {
     private User user;
 
     @JsonManagedReference(value = "comment_report")
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
     private List<CommentReport> reports;
 
     @JsonManagedReference(value = "comment_like")
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE)
     private List<CommentLike> likes;
 
 }

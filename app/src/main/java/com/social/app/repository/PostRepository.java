@@ -16,11 +16,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     void deleteById(long id);
     Post findByPostId(long postId);
     ArrayList<Post> findAllByGroupGroupId(long groupId);
-
     public void deleteByUser(User user);
     Post findFirstByOrderByPostId();
 
-    @Query(value = "SELECT * FROM post WHERE MATCH (titles) AGAINST (?1 WITH QUERY EXPANSION)", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE MATCH (titles) AGAINST (?1)> 0 ORDER BY MATCH (titles) AGAINST (?1) DESC", nativeQuery = true)
     ArrayList<Post> fullTextSearch(String keyword);
 
 }

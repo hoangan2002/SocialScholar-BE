@@ -22,8 +22,7 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
 
     public void deleteByAuthor(User author);
 
-
-    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1 WITH QUERY EXPANSION)", nativeQuery = true)
+    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1) > 0 AND isApproved = 1 ORDER BY MATCH (documentName) AGAINST (?1) DESC", nativeQuery = true)
     ArrayList<Document> fullTextSearch(String keyword);
-
+//  AGAINST (?1 WITH QUERY EXPANSION)
 }
