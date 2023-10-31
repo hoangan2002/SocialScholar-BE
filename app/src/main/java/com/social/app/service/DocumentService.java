@@ -145,4 +145,7 @@ public class DocumentService {
         }
         return false;
     }
+    public Document findFirstbyIsApprovelTrue(){
+        return  documentRepository.findFirstOrderByIsApprovedIsTrue();
+    }
 }

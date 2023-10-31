@@ -2,6 +2,8 @@ package com.social.app.service;
 
 import com.social.app.dto.CommentDTO;
 import com.social.app.dto.PostDTO;
+import com.social.app.dto.ReportedCommentDTO;
+import com.social.app.dto.ReportedPostDTO;
 import com.social.app.model.Comment;
 import com.social.app.model.Post;
 import com.social.app.model.PostLike;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CommentService {
@@ -63,6 +66,10 @@ public class CommentService {
             commentDTOS.add(commentDTO);
         }
         return commentDTOS;
+    }
+
+    public List<Comment> getAllComments(){
+        return commentRepository.findAll();
     }
 
     // Function set comment dto children for comment dto parent
@@ -143,5 +150,15 @@ public class CommentService {
             postDTOs.add(modelMapper.map(comment.getPostId(), PostDTO.class));
         }
         return postDTOs;
+    }
+
+    public ArrayList<ReportedCommentDTO> getAllReportedComment(){
+        List<Comment> comments = getAllComments();
+        ArrayList<ReportedCommentDTO> reportedCommentDTOS = new ArrayList<>();
+        for (Comment comment: comments) {
+            if (!comment.getReports().isEmpty())
+                reportedCommentDTOS.add(modelMapper.map(comment, ReportedCommentDTO.class));
+        }
+        return reportedCommentDTOS;
     }
 }

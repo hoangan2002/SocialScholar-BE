@@ -46,10 +46,5 @@ public class CategoryController {
         return categoryService.getHintTagsByCategoryId(categoryId);
     }
 
-    // Activity for admin
-    @GetMapping("/group-count")
-    public HashMap<CategoryDTO, Integer> getGroupCount(){
-        return groupServices.getGroupCount();
-    }
 
 }

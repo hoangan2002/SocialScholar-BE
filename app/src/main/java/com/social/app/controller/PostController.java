@@ -2,6 +2,7 @@ package com.social.app.controller;
 
 import com.social.app.dto.PostReportDTO;
 import com.social.app.dto.PostReportTypeDTO;
+import com.social.app.dto.ReportedPostDTO;
 import com.social.app.entity.PostResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.*;
@@ -530,5 +531,35 @@ public class PostController {
                     new ResponseObject("Empty", "No data", ""));
         } else return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK", "Count Success", result));
+    }
+
+    @PostMapping("/save/{postId}")
+    public ResponseEntity<ResponseObject> savePost(@PathVariable long postId) {
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        User current = userService.findUserByUsername(userName);
+        int userId = current != null ?current.getUserId():-1;
+        // check if post is not found, return
+        if (postServices.loadPostById(postId)==null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("Failed","Can't find post","")
+            );
+
+        Post post = postServices.loadPostById(postId);
+        // Check if user is not in group, user can not dislike post
+        if(!userService.isGroupMember( post.getGroup().getGroupId()))
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject("Failed","User must be in group","")
+            );
+        // Delete post save if user saved before
+        if(postServices.deleteIfSavedBefore(userName, postId))
+            return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Unsave post successfully","OK","")
+            );
+        // Save the post
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("Save post successfully","OK",postServices.savePost(userName,postId))
+        );
     }
 }

@@ -12,12 +12,15 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document,Long> {
     Document save(Document document);
     ArrayList<Document> findAllByIsApprovedIsTrue();
+    Document findFirstOrderByIsApprovedIsTrue();
     ArrayList<Document> findAllByIsApprovedIsFalse();
     ArrayList<Document> findByAuthorAndIsApprovedIsTrue(User user);
     ArrayList<Document> findByGroupAndIsApprovedIsTrue(Groups groups);
 
      Document findByDocumentId(long documentId);
      void deleteById(long id);
+
+    public void deleteByAuthor(User author);
 
     @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1) > 0 AND isApproved = 1 ORDER BY MATCH (documentName) AGAINST (?1) DESC", nativeQuery = true)
     ArrayList<Document> fullTextSearch(String keyword);

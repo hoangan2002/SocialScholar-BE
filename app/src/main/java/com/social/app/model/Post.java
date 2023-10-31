@@ -51,6 +51,9 @@ public class Post {
     @JsonManagedReference(value = "post_like")
     private List<PostLike> likes;
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    @JsonBackReference(value = "postSave_post")
+    private List<PostSave> postSaves;
     public int countLike(){
         int like = 0;
         for(PostLike pl : this.getLikes()){

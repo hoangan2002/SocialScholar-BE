@@ -47,6 +47,7 @@ public class Groups {
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="host_Id")
+    @JsonBackReference(value = "group_user")
     private User hosts;
 
     @ManyToOne
@@ -63,7 +64,11 @@ public class Groups {
     @OneToMany(mappedBy = "group")
     private  List<JoinManagement> joins;
 
+    @JsonManagedReference(value = "document_groups")
     @OneToMany(mappedBy = "group")
     private  List<Document> documents;
 
+    @JsonManagedReference(value = "group_noti")
+    @OneToMany(mappedBy = "group")
+    private List<Notification> notifications;
 }

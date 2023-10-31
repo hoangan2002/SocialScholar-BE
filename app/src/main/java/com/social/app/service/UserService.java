@@ -4,10 +4,7 @@ import com.social.app.config.SecurityConfig;
 import com.social.app.dto.GroupDTO;
 import com.social.app.dto.UserDTO;
 import com.social.app.model.*;
-import com.social.app.repository.CommentRepository;
-import com.social.app.repository.GroupRepository;
-import com.social.app.repository.JoinRepository;
-import com.social.app.repository.UserRepository;
+import com.social.app.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,13 +27,32 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private CommentRepository commentRepository;
-
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+    @Autowired
+    private CommentReportRepository commentReportRepository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private PostLikeRepository postLikeRepository;
+    @Autowired
+    private PostReportRepository postReportRepository;
     @Autowired
     private JoinRepository joinRepository;
-
+    @Autowired
+    private BillRepository billRepository;
+    @Autowired
+    private DocumentRepository documentRepository;
+    @Autowired
+    private RatingRepository ratingRepository;
+    @Autowired
+    private ExchangeRequestRepository exchangeRequestRepository;
+    @Autowired
+    private GroupRepository groupRepository;
+    @Autowired
+    private TokenPaymentRepository tokenPaymentRepository;
     @Autowired
     private PasswordEncoder encoder;
-
     @Autowired
     private SecurityConfig securityConfig;
     @Autowired
@@ -282,6 +298,21 @@ public class UserService implements UserDetailsService {
             save(user);
         }
         return user;
+    }
 
+    @Transactional
+    public void deleteUser(String username){
+        User user = findUserByUsername(username);
+        if (user==null) throw new RuntimeException("Not found user");
+        // delete hostId in groups
+        ArrayList<Groups> groups = groupRepository.findByHosts(user);
+        for (Groups group: groups) {
+            group.setHosts(null);
+        }
+        // final delete in user table
+        repository.deleteById(user.getUserId());
+    }
+    public  User findFirstUser(){
+        return  repository.findFirstByOrderByUserId();
     }
 }
