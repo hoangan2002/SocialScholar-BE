@@ -4,6 +4,7 @@ import com.social.app.entity.AuthRequest;
 import com.social.app.entity.AuthenticationResponse;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.User;
+import com.social.app.service.EmailSenderService;
 import com.social.app.service.JwtService;
 import com.social.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class AuthenticationController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    EmailSenderService emailSenderService;
 
     @GetMapping("/welcome")
     public String welcome() {
@@ -41,8 +44,14 @@ public class AuthenticationController {
     @PostMapping("/sign-up")
     public ResponseEntity<ResponseObject> register(@RequestBody User userInfo) {
         System.out.println(userInfo);
-       if(service.isExits(userInfo)) return  ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User had been exits", "ERROR",null));
-       return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Register success", "OK",service.addUser(userInfo)));
+        Optional<User> optionalUser = Optional.ofNullable(userInfo);
+
+        if(service.isExits(userInfo)) {return  ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("User had been exits", "ERROR",null));}
+       else {
+           service.addUser(userInfo);
+           return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Register success", "OK",jwtService.generateToken(optionalUser)));
+       }
+
     }
     @GetMapping("/profile")
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -76,6 +85,17 @@ public class AuthenticationController {
            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseObject("Login error", "Error",""));
         }
     }
+    @GetMapping("/verify-email")
+    public ResponseEntity<ResponseObject> verifyEmail(@RequestParam String email) {
+            if(service.findByEmail(email).isPresent()) {
+                return
+                        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseObject("Email Have Been Register Before", "Error",""));
+            } else {
+                emailSenderService.sendEmailVerify((email));
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Email Have Been Send", "OK",""));
+            }
 
+
+    }
 
 }
