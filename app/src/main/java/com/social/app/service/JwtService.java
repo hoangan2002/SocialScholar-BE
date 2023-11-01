@@ -48,6 +48,14 @@ public class JwtService {
 
         return createToken(claims, passwordReset.getEmail());
     }
+    public String generateTokenEmail(String email) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("email", email);
+
+
+        return createToken(claims, email);
+    }
 
     //email
     private String createTokenOTP(Map<String, Object> claims, String email) {

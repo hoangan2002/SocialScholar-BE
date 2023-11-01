@@ -57,7 +57,7 @@ public class PostDTO {
     }
 
     @JsonView(Views.PostView.class)
-    public String getGroup() {
+    public String getGroupName() {
         return group.getGroupName();}
 
     @JsonView(Views.PostView.class)
