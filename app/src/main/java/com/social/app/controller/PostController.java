@@ -166,15 +166,15 @@ public class PostController {
     //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPosts")
-    public ArrayList<PostResponse> retrieveAllPost(){
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
-        return responseConvertService.postResponseArrayList(result);
+        return postServices.ArrayListPostDTO(result);
     }
     //______________________________________Get GROUP POSTS____________________________________________________//
     @GetMapping("/getPosts/{groupId}")
-    public ArrayList<PostResponse> retrievePostsFromGroup(@PathVariable("groupId")long grId){
+    public ArrayList<com.social.app.dto.PostDTO> retrievePostsFromGroup(@PathVariable("groupId")long grId){
         ArrayList<Post> result = postServices.retriveGroupPostFromDB(grId);
-        return responseConvertService.postResponseArrayList(result);
+        return postServices.ArrayListPostDTO(result);
     }
     //______________________________________Get a Single_post____________________________________________________//
     @GetMapping("/getPost/{postId}")
@@ -469,7 +469,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<com.social.app.dto.PostDTO> search(@RequestParam("key") String keyword) {
         return postServices.ArrayListPostDTO(postServices.fullTextSearch(keyword));
     }

@@ -12,8 +12,10 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document,Long> {
     Document save(Document document);
     ArrayList<Document> findAllByIsApprovedIsTrue();
+    Document findFirstOrderByIsApprovedIsTrue();
     ArrayList<Document> findAllByIsApprovedIsFalse();
     ArrayList<Document> findByAuthorAndIsApprovedIsTrue(User user);
+    ArrayList<Document> findByAuthorAndIsApprovedIsFalse(User user);
     ArrayList<Document> findByGroupAndIsApprovedIsTrue(Groups groups);
 
      Document findByDocumentId(long documentId);
@@ -22,7 +24,7 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
     public void deleteByAuthor(User author);
 
 
-    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1 WITH QUERY EXPANSION)", nativeQuery = true)
+    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1)", nativeQuery = true)
     ArrayList<Document> fullTextSearch(String keyword);
 
 }

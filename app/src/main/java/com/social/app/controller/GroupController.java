@@ -1,10 +1,7 @@
 package com.social.app.controller;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.social.app.dto.DocumentDTO;
-import com.social.app.dto.GroupDTO;
-import com.social.app.dto.UserDTO;
-import com.social.app.dto.Views;
+import com.social.app.dto.*;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.Category;
 import com.social.app.model.Groups;
@@ -35,6 +32,8 @@ import java.util.stream.Collectors;
 public class GroupController {
     @Autowired
     GroupServices groupServices;
+    @Autowired
+    CategoryService categoryService;
     @Autowired
     UserService userService;
     @Autowired
@@ -74,6 +73,8 @@ public class GroupController {
                 newGroup.setGroupName(group.getGroupName());
                 newGroup.setDescription(group.getDescription());
                 userService.setRoleHost(user);
+                Category category = categoryService.findCategoryById(group.getCategoryId());
+                newGroup.setCategory(category);
 //                Category category = new Category(9,"Xã Hội");
 //                newGroup.setCategory(category);
                 newGroup.setTags(group.getTags());
@@ -83,7 +84,7 @@ public class GroupController {
                 groupServices.createGroup(newGroup);
                 joinService.saveJoin(new JoinManagement(newGroup,user,Calendar.getInstance().getTime()));
 
-                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Create Group Success", "OK", null));
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Create Group Success", "OK", newGroup));
             }
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseObject("Create Group Fail", "ERROR",null));
         } catch (RuntimeException exception){
@@ -363,6 +364,14 @@ public class GroupController {
         }
         return  groupServices.groupsResponses(groups);
     }
+
+    //count group da tham gia
+
+    @GetMapping("/count-group/{userId}")
+    public int countAllGroupJoin(@PathVariable int userId){
+        User user= userService.loadUserById(userId);
+        return   user.getJoins().size();
+    }
     //Lấy tất cả group
     @GetMapping("/getAllGroup")
     public ArrayList<GroupDTO> getAllGroup(){
@@ -400,7 +409,7 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<GroupDTO> search(@RequestParam("key") String keyword) {
         return groupServices.groupsResponses(groupServices.fullTextSearch(keyword));
     }

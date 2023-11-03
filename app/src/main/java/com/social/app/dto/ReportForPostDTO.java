@@ -32,12 +32,20 @@ public class ReportForPostDTO {
         return time;
     }
     @JsonView(Views.PostReportView.class)
-    public int getPostReportType() {
-        return postReportType.getId();
+    public String getPostReportType() {
+        return postReportType.getName();
     }
     @JsonView(Views.PostReportView.class)
     public int getUser() {
         return user.getUserId();
+    }
+    @JsonView(Views.PostReportView.class)
+    public String getUserName() {
+        return user.getUserName();
+    }
+    @JsonView(Views.PostReportView.class)
+    public String getUserAvatar() {
+        return user.getAvatarURL();
     }
     @JsonView(Views.PostReportView.class)
     public boolean getIsChecked() {

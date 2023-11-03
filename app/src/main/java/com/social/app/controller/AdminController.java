@@ -10,9 +10,7 @@ import com.social.app.dto.*;
 import com.social.app.entity.ResponseObject;
 
 import com.social.app.entity.UserResponse;
-import com.social.app.model.Groups;
-import com.social.app.model.JoinManagement;
-import com.social.app.model.User;
+import com.social.app.model.*;
 
 import com.social.app.service.GroupServices;
 import com.social.app.service.ResponseConvertService;
@@ -39,7 +37,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("admin")
 public class AdminController {
     @Autowired
     UserService userService;
@@ -53,8 +51,11 @@ public class AdminController {
     @Autowired
     private CommentService commentService;
 
+
+    @Autowired
+    private DocumentService documentService;
     @PostMapping("/getalluser")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<UserDTO> getalluser(){
         ArrayList<User> listUser = userService.findAll();
         return  userService.userResponses(listUser);
@@ -62,7 +63,7 @@ public class AdminController {
 
 
     @GetMapping("/getallgroup/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){
        User user= userService.loadUserById(userId);
        ArrayList<Groups> groups  = new ArrayList<>();
@@ -84,7 +85,7 @@ public class AdminController {
 
     //Theo dõi số lượng người dùng mới
     @GetMapping("/statistics-user")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public CountResponse statisticsUsers() {
         ArrayList<User> users = userService.findAll();
 
@@ -125,6 +126,97 @@ public class AdminController {
         }
         counts = counts + "]";
         CountResponse countResponse = new CountResponse(dates, new Data("userAccount", counts));
+        return countResponse;
+
+    }
+    //Theo dõi số lượng post mới
+    @GetMapping("/statistics-posts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public CountResponse statisticsPosts() {
+        ArrayList<Post> posts = postServices.retrivePostFromDB();
+
+        Date startDate = postServices.findFirstPost().getTime();
+
+        Date currentDate = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(currentDate);
+        ArrayList<String> dates = new ArrayList<>();
+        String counts = "[";
+
+        while (!calendar.after(endCalendar)) {
+            Date currentDay = calendar.getTime();
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+            String formattedDate = outputFormat.format(currentDay.getTime());
+            dates.add(formattedDate);
+            int count = 0;
+            for (Post post : posts) {
+                if (post.getTime().getYear() == currentDay.getYear() &&
+                        post.getTime().getMonth() == currentDay.getMonth() &&
+                        post.getTime().getDate() == currentDay.getDate()) {
+                    count++;
+                }
+            }
+
+
+            calendar.add(Calendar.DATE, 1); // Tăng ngày lên 1
+
+            if (calendar.after(endCalendar)) {
+                counts = counts + count;
+            } else {
+                counts = counts + count + ",";
+            }
+        }
+        counts = counts + "]";
+        CountResponse countResponse = new CountResponse(dates, new Data("Post", counts));
+        return countResponse;
+
+    }
+    @GetMapping("/statistics-documents")
+    @PreAuthorize("hasRole('ADMIN')")
+    public CountResponse statisticsDocuments() {
+        ArrayList<Document> documents = documentService.allApprovedDocuments();
+
+        Date startDate = documentService.findFirstbyIsApprovelTrue().getTime();
+
+        Date currentDate = new Date();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(startDate);
+
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(currentDate);
+        ArrayList<String> dates = new ArrayList<>();
+        String counts = "[";
+
+        while (!calendar.after(endCalendar)) {
+            Date currentDay = calendar.getTime();
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy");
+            String formattedDate = outputFormat.format(currentDay.getTime());
+            dates.add(formattedDate);
+            int count = 0;
+            for (Document document : documents) {
+                if (document.getTime().getYear() == currentDay.getYear() &&
+                        document.getTime().getMonth() == currentDay.getMonth() &&
+                        document.getTime().getDate() == currentDay.getDate()) {
+                    count++;
+                }
+            }
+
+
+            calendar.add(Calendar.DATE, 1); // Tăng ngày lên 1
+
+            if (calendar.after(endCalendar)) {
+                counts = counts + count;
+            } else {
+                counts = counts + count + ",";
+            }
+        }
+        counts = counts + "]";
+        CountResponse countResponse = new CountResponse(dates, new Data("Doccument", counts));
         return countResponse;
 
     }
