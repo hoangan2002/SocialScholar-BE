@@ -381,7 +381,6 @@ public class GroupController {
 
     //Lấy tất cả user của 1 group
     @GetMapping("/getalluser/{groupId}")
-    @PreAuthorize("hasRole('ROLE_HOST')")
     @JsonView(Views.UserView1.class)
     public ArrayList<UserDTO> getAllUserByGroup(@PathVariable long groupId){
         Groups group = groupServices.loadGroupById(groupId);
