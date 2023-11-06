@@ -107,6 +107,16 @@ public class DocumentController {
         ArrayList<Document> result = documentService.UserApprovedCreatedDocuments(user);
         return documentService.ListDocumentDTO(result);
     }
+
+    // Doc cho host duyet
+    @GetMapping("/host/{groupid}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public ArrayList<DocumentDTO> HostUnAceptDocument(@PathVariable("groupId") long id){
+        Groups groups = groupServices.loadGroupById(id);
+        if (groups==null) throw new RuntimeException("Group is not exist");
+        ArrayList<Document> result = documentService.HostAceptDoc(groups);
+        return documentService.ListDocumentDTO(result);
+    }
     // Tat ca doc user da mua
     @PostMapping("/bought-documents")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -247,10 +257,38 @@ public class DocumentController {
 
     }
 
-    // Admin duyet doc oke
+    // host acp
     @PutMapping("/approve/{docId}")
-//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public  ResponseEntity<ResponseObject> ApproveDocument(@PathVariable("docId") long docId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User customer = userService.findUserByUsername(authentication.getName());
+        try{
+            Document document = documentService.findDocumentbyId(docId);
+            if (document==null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ResponseObject("The document is not exist", "failed", ""));
+            if (document.isApproved())
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("The document has already been approved", "failed", ""));
+            long groupId = document.getGroup().getGroupId();
+            if(!groupServices.isGroupHost(groupId,customer.getUserName()))
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("Not Host", "failed", ""));
+            document.setMessage("Accepted");
+            documentService.update(document);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Update successfully", "Accepted"));
+        } catch (RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject(exception.getMessage(), "failed", ""));
+        }
+
+    }
+    // Admin duyet doc oke
+    @PutMapping("/accept/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public  ResponseEntity<ResponseObject> AcceptDocument(@PathVariable("docId") long docId){
         try{
             Document document = documentService.findDocumentbyId(docId);
             if (document==null)
@@ -260,6 +298,7 @@ public class DocumentController {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                         new ResponseObject("The document has already been approved", "failed", ""));
             document.setApproved(true);
+            document.setMessage("Approved");
             documentService.update(document);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("ok", "Update successfully", "Approved"));

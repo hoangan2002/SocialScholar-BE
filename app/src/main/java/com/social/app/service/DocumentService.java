@@ -99,6 +99,14 @@ public class DocumentService {
     public ArrayList<Document> GroupApprovedDocuments(Groups groups){
         return documentRepository.findByGroupAndIsApprovedIsTrue(groups);
     }
+    public ArrayList<Document> HostAceptDoc(Groups groups){
+        ArrayList<Document> docs = new ArrayList<>();
+        for(Document d : documentRepository.findByGroupAndIsApprovedIsTrue(groups)){
+            if(d.getMessage()==null || d.getMessage().equals(""))
+                docs.add(d);
+        }
+        return docs;
+    }
     public ArrayList<Document> BoughtDocuments(User user){
         ArrayList<Bill> myBills = billRepository.findByUser(user);
         ArrayList<Document> result = new ArrayList<>();
