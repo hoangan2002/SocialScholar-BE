@@ -209,7 +209,7 @@ public class PostController {
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User current = userService.findUserByUsername(authentication.getName());
-        int userId = current != null ?current.getUserId():-1;
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -538,8 +538,10 @@ public class PostController {
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
-        User current = userService.findUserByUsername(userName);
-        int userId = current != null ?current.getUserId():-1;
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -561,5 +563,16 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("Save post successfully","OK",postServices.savePost(userName,postId))
         );
+    }
+
+    @GetMapping("/save/getAll")
+    public List<com.social.app.dto.PostDTO> getAllSavedPosts(){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return null;
+
+        // return list saved posts
+        return postServices.getSavedPosts(userName);
     }
 }

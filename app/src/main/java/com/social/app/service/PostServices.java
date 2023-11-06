@@ -240,4 +240,15 @@ public class PostServices {
         }
         return false;
     }
+
+    public List<PostDTO> getSavedPosts(String userName){
+        User user = userRepository.findUserByUserName(userName);
+        List<PostSave> postSaves = postSaveRepository.findByUser(user);
+
+        List<PostDTO> result = null;
+        for (PostSave postSave: postSaves) {
+            result.add(modelMapper.map(postSave.getPost(), PostDTO.class));
+        }
+        return result;
+    }
 }
