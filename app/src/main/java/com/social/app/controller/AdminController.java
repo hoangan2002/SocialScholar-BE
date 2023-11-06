@@ -33,6 +33,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -44,20 +45,25 @@ public class AdminController {
     ResponseConvertService responseConvertService;
     @Autowired
     GroupServices groupServices;
+
     @Autowired
     PostServices postServices;
     @Autowired
     private CommentService commentService;
+
+
     @Autowired
     private DocumentService documentService;
-    @GetMapping("/getalluser")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/getalluser")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<UserDTO> getalluser(){
         ArrayList<User> listUser = userService.findAll();
         return  userService.userResponses(listUser);
     }
+
+
     @GetMapping("/getallgroup/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ArrayList<GroupDTO> getAllGroupOfUser(@PathVariable int userId){
        User user= userService.loadUserById(userId);
        ArrayList<Groups> groups  = new ArrayList<>();
@@ -67,10 +73,19 @@ public class AdminController {
         }
        return  groupServices.groupsResponses(groups);
     }
+    @GetMapping("/count-users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public long countDonePayment() {
+        long result = userService.countUser();
+        if (result == 0) {
+            return 0;
+        } else return result;
+    }
+
 
     //Theo dõi số lượng người dùng mới
     @GetMapping("/statistics-user")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public CountResponse statisticsUsers() {
         ArrayList<User> users = userService.findAll();
 
@@ -223,13 +238,14 @@ public class AdminController {
     public ArrayList<ReportedCommentDTO> getReportedComments(){
         return commentService.getAllReportedComment();
     }
-    @GetMapping("/get-reported-posts")
-    public ArrayList<ReportedPostDTO> getReportedPosts(){
+    @GetMapping(    "/get-reported-posts")
+    public ArrayList<ReportedPostDTO> getReportedPosts()            {
         return postServices.getAllReportedPost();
     }
     @GetMapping("/get-group-count")
-    public HashMap<CategoryDTO, Integer> getGroupCount(){
+    public ArrayList<CategoryDTO> getGroupCounting(){
         return groupServices.getGroupCount();
 
     }
+
 }

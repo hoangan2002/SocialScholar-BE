@@ -23,12 +23,13 @@ public class ExchangeRequestServices {
         Timestamp datetime = new Timestamp(time);
         exchangeRequest.setTime(datetime);
         exchangeRequest.setTotalMoney(exchangeRequest.getAmountCoins()/30);
+        exchangeRequest.setStatus((byte)1);
         return exchangeRequestRepository.save(exchangeRequest);
     }
 
     public ArrayList<ExchangeRequest> retriveExchangeRequestFromDB(){
         ArrayList<ExchangeRequest> result = exchangeRequestRepository.findAll();
-        return result;
+        return result;  
     }
 
     public ExchangeRequest loadRequestById(long requestId) {
@@ -36,6 +37,15 @@ public class ExchangeRequestServices {
         if(exchangeRequest!=null)
             return exchangeRequest;
         else return null;
+    }
+
+    public ArrayList<ExchangeRequest> retriveExchangeRequestFromDBByUserId(int userId){
+        ArrayList<ExchangeRequest> result = exchangeRequestRepository.findAll();
+        ArrayList<ExchangeRequest> fillter = new ArrayList<>();
+        for (ExchangeRequest ex: result) {
+            if(ex.getUser().getUserId() == userId ) fillter.add(ex);
+        }
+        return  fillter;
     }
 
 }

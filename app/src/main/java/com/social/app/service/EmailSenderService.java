@@ -42,7 +42,7 @@ public class EmailSenderService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("antdhde160073@fpt.edu.vn");
         message.setTo(toEmail);
-        String link = "http://localhost:300/authentication/"+ jwtService.generateTokenEmail(toEmail);
+        String link = "http://localhost:3000/auth/"+ jwtService.generateTokenEmail(toEmail);
         message.setText("Your Verify Link: "+link);
         message.setSubject("Verify Email CampSchoolar");
         mailSender.send(message);

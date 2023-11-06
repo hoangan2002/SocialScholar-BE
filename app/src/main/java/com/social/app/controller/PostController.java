@@ -166,15 +166,15 @@ public class PostController {
     //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPosts")
-    public ArrayList<PostResponse> retrieveAllPost(){
+    public ArrayList<com.social.app.dto.PostDTO> retrieveAllPost(){
         ArrayList<Post> result = postServices.retrivePostFromDB();
-        return responseConvertService.postResponseArrayList(result);
+        return postServices.ArrayListPostDTO(result);
     }
     //______________________________________Get GROUP POSTS____________________________________________________//
     @GetMapping("/getPosts/{groupId}")
-    public ArrayList<PostResponse> retrievePostsFromGroup(@PathVariable("groupId")long grId){
+    public ArrayList<com.social.app.dto.PostDTO> retrievePostsFromGroup(@PathVariable("groupId")long grId){
         ArrayList<Post> result = postServices.retriveGroupPostFromDB(grId);
-        return responseConvertService.postResponseArrayList(result);
+        return postServices.ArrayListPostDTO(result);
     }
     //______________________________________Get a Single_post____________________________________________________//
     @GetMapping("/getPost/{postId}")
@@ -209,7 +209,7 @@ public class PostController {
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User current = userService.findUserByUsername(authentication.getName());
-        int userId = current != null ?current.getUserId():-1;
+        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -469,7 +469,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<com.social.app.dto.PostDTO> search(@RequestParam("key") String keyword) {
         return postServices.ArrayListPostDTO(postServices.fullTextSearch(keyword));
     }
@@ -510,7 +510,7 @@ public class PostController {
     }
 
     @GetMapping("/count-comment-report")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countCommentReport() {
         long result = reportService.countCommentReports();
         if (result == 0) {
@@ -521,7 +521,7 @@ public class PostController {
     }
 
     @GetMapping("/count-all-report")
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseObject> countAllReport() {
         long cmt = reportService.countCommentReports();
         long post =  reportService.countPostReports();
@@ -538,8 +538,10 @@ public class PostController {
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
-        User current = userService.findUserByUsername(userName);
-        int userId = current != null ?current.getUserId():-1;
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -561,5 +563,27 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("Save post successfully","OK",postServices.savePost(userName,postId))
         );
+    }
+
+    @GetMapping("/save/getAll")
+    public List<com.social.app.dto.PostDTO> getAllSavedPosts(){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return null;
+
+        // return list saved posts
+        return postServices.getSavedPosts(userName);
+    }
+
+    @GetMapping("/save/getAllAsId")
+    public List<Long> getAllSavedPostsAsId(){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return null;
+
+        // return list saved posts
+        return postServices.getSavedPostsAsId(userName);
     }
 }

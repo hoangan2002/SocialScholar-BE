@@ -92,7 +92,7 @@ public class DocumentController {
     //                                                                                                                --
     // Tat ca doc cho duyệt
     @GetMapping("/documents/waiting")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ArrayList<DocumentDTO> retrieveAllUnApprovedDocument(){
         ArrayList<Document> result = documentService.allUnApprovedDocuments();
         return documentService.ListDocumentDTO(result);
@@ -257,10 +257,34 @@ public class DocumentController {
 
     }
 
-    // host acp
+    // admin appr
     @PutMapping("/approve/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public  ResponseEntity<ResponseObject> ApproveDocument(@PathVariable("docId") long docId){
+
+        try{
+            Document document = documentService.findDocumentbyId(docId);
+            if (document==null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ResponseObject("The document is not exist", "failed", ""));
+            if (document.isApproved())
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("The document has already been approved", "failed", ""));
+            document.setApproved(true);
+            document.setMessage("Approved");
+            documentService.update(document);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Update successfully", "Approved"));
+        } catch (RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject(exception.getMessage(), "failed", ""));
+        }
+
+    }
+    // host acp
+    @PutMapping("/accept/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    public  ResponseEntity<ResponseObject> AcceptDocument(@PathVariable("docId") long docId){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User customer = userService.findUserByUsername(authentication.getName());
         try{
@@ -285,29 +309,26 @@ public class DocumentController {
         }
 
     }
-    // Admin duyet doc oke
-    @PutMapping("/accept/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public  ResponseEntity<ResponseObject> AcceptDocument(@PathVariable("docId") long docId){
-        try{
-            Document document = documentService.findDocumentbyId(docId);
-            if (document==null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new ResponseObject("The document is not exist", "failed", ""));
-            if (document.isApproved())
+
+    @PutMapping("/rejected/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> rejectDocument(@PathVariable Long docId,@RequestParam("message") String message){
+        Document doc = documentService.findDocumentbyId(docId);
+        if(doc==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        }else{
+            if (doc.isApproved()) {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                         new ResponseObject("The document has already been approved", "failed", ""));
-            document.setApproved(true);
-            document.setMessage("Approved");
-            documentService.update(document);
+            }
+            doc.setMessage(message);
+            documentService.update(doc);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new ResponseObject("ok", "Update successfully", "Approved"));
-        } catch (RuntimeException exception){
-            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                    new ResponseObject(exception.getMessage(), "failed", ""));
+                    new ResponseObject("Successfull", "Done", ""));
         }
-
     }
+
 
     // Admin xoa doc
     @DeleteMapping ("/delete/{docId}")
@@ -338,7 +359,7 @@ public class DocumentController {
         }
     }
     @GetMapping("/preview/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<?> getPreviewDocument(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
@@ -361,20 +382,20 @@ public class DocumentController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
                 .body( new InputStreamResource(bis));
     }
-    @GetMapping("/preview/cover/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
-    public ResponseEntity<byte[]> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
-        Document documentDB = documentService.findDocumentbyId(docId);
-        if (documentDB==null)
-            return null;
+        @GetMapping("/preview/cover/{docId}")
+        @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+        public ResponseEntity<byte[]> getDocumentCover(@PathVariable("docId") long docId) throws IOException {
+            Document documentDB = documentService.findDocumentbyId(docId);
+            if (documentDB==null)
+                return null;
 
-        String filename = documentDB.getUrl();
-        byte[] media = storageService.getCover(filename);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setCacheControl(CacheControl.noCache().getHeaderValue());
-        ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(media, headers, HttpStatus.OK);
-        return responseEntity;
-    }
+            String filename = documentDB.getUrl();
+            byte[] media = storageService.getCover(filename);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setCacheControl(CacheControl.noCache().getHeaderValue());
+            ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(media, headers, HttpStatus.OK);
+            return responseEntity;
+        }
 
     @GetMapping("/search")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -405,7 +426,7 @@ public class DocumentController {
                 new ResponseObject("Rate document successfully", "OK", ratingDTO));
     }
     @GetMapping("/full/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<?> getFullDocument(@PathVariable("docId") long docId) throws IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User customer = userService.findUserByUsername(authentication.getName());

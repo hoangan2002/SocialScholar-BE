@@ -47,5 +47,7 @@ public class TokenPaymentHistoryServices {
         return profit;
     }
 
-
+    public ArrayList<TokenPaymentHistory> userPaymentHistory(int userId){
+        return tokenPaymentRepository.findAllByUserUserId(userId);
+    }
 }

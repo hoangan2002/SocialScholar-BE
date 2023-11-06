@@ -12,5 +12,6 @@ public interface TokenPaymentRepository extends JpaRepository<TokenPaymentHistor
 
     TokenPaymentHistory findByPaymentId(String paymentId);
     ArrayList<TokenPaymentHistory> findAll();
+    ArrayList<TokenPaymentHistory> findAllByUserUserId(int userId);
     public void deleteByUser(User user);
 }

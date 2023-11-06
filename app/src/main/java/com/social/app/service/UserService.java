@@ -312,6 +312,14 @@ public class UserService implements UserDetailsService {
         // final delete in user table
         repository.deleteById(user.getUserId());
     }
+
+
+    public long countUser() {
+        ArrayList<User> users = repository.findAll();
+        long count = users.size();
+        return count;
+
+    }
     public  User findFirstUser(){
         return  repository.findFirstByOrderByUserId();
     }
