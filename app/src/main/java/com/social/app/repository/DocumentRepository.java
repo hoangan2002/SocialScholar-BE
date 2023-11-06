@@ -17,6 +17,7 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
     ArrayList<Document> findByAuthorAndIsApprovedIsTrue(User user);
     ArrayList<Document> findByAuthorAndIsApprovedIsFalse(User user);
     ArrayList<Document> findByGroupAndIsApprovedIsTrue(Groups groups);
+    ArrayList<Document> findByGroupAndIsApprovedIsFalse(Groups groups);
 
     ArrayList<Document> findAllByAuthor(User author);
      Document findByDocumentId(long documentId);
