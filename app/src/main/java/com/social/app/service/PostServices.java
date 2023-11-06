@@ -245,7 +245,7 @@ public class PostServices {
         User user = userRepository.findUserByUserName(userName);
         List<PostSave> postSaves = postSaveRepository.findByUser(user);
 
-        List<PostDTO> result = null;
+        List<PostDTO> result = new ArrayList<>();
         for (PostSave postSave: postSaves) {
             result.add(modelMapper.map(postSave.getPost(), PostDTO.class));
         }
@@ -256,7 +256,7 @@ public class PostServices {
         User user = userRepository.findUserByUserName(userName);
         List<PostSave> postSaves = postSaveRepository.findByUser(user);
 
-        List<Long> result = null;
+        List<Long> result = new ArrayList<>();
         for (PostSave postSave: postSaves) {
             result.add(postSave.getPost().getPostId());
         }
