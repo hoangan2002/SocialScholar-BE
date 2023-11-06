@@ -43,7 +43,7 @@ public class SecurityConfig{
         return
                 http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/poster/**","/api/comment-services/**","paypal/**","/myProfile/**","/api/category/**","/group/**","/doc/**").permitAll()
+                .requestMatchers("/auth/welcome", "/auth/sign-up", "/auth/sign-in","/registration/**","/oauth2/authorization/google,","/forgot/**","api/poster/**","/api/comment-services/**","paypal/**","/myProfile/**","/api/category/**","/group/**","/doc/**","/auth/verify-email").permitAll()
                 .and()
                         .authorizeHttpRequests().requestMatchers("/auth/profile/**", "admin/**").authenticated()
 
