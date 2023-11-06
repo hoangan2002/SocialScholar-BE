@@ -36,6 +36,7 @@ public class User {
     private boolean isLocked;
     private Date timeCreate;
 
+
     @JsonManagedReference(value = "join_user")
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     List<JoinManagement> joins;
@@ -81,6 +82,7 @@ public class User {
     List<Groups> groups;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+
     @JsonManagedReference(value = "payment_user")
     List<TokenPaymentHistory> tokenPaymentHistories;
 

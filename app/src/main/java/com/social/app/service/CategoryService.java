@@ -32,6 +32,8 @@ public class CategoryService {
     }
     public CategoryDTO findByCategoryName(String name){ return  modelMapper.map(categoryRepository.findByCategoryName(name), CategoryDTO.class);}
 
+    public Category findCategoryById(int id){ return  categoryRepository.findCategoriesByCategoryId(id);}
+
     public ArrayList<HintTagDTO> getHintTagsByCategoryId(int categoryId){
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found!"));
         ArrayList<HintTag> hintTags = hintTagRepository.findByCategory(category);

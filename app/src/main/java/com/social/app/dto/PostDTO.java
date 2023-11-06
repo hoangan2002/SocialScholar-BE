@@ -27,10 +27,14 @@ public class PostDTO {
     private String titles;
     private String imageURL;
     private User user;
+    private String author;
     private int authorPoints;
+    private long groupId;
     private Groups group;
     private List<CommentDTO> comments;
     private List<PostLikeDTO> likes;
+    private List<PostReportDTO> reports;
+    private List<PostReportDTO> report;
     @JsonView(Views.PostView.class)
     public int getAuthorPoints() {
         return user.getActivityPoint();
@@ -42,13 +46,29 @@ public class PostDTO {
     }
 
     @JsonView(Views.PostView.class)
+    public long getGroupId() {
+        return group.getGroupId();
+    }
+
+
+    @JsonView(Views.PostView.class)
     public String getContent() {
         return content;
     }
 
     @JsonView(Views.PostView.class)
+    public String getAuthor() {
+        return user.getUserName();
+    }
+
+    @JsonView(Views.PostView.class)
     public Timestamp getTime() {
         return time;
+    }
+
+    @JsonView(Views.PostView.class)
+    public Groups group() {
+        return null;
     }
 
     @JsonView(Views.PostView.class)
@@ -68,7 +88,10 @@ public class PostDTO {
     public String getUser() {return user.getUserName();}
     @JsonView(Views.PostView.class)
     public List<PostLikeDTO> getLikes() {return likes;}
-
+    @JsonView(Views.PostView.class)
+    public List<PostReportDTO> getReports() {return reports;}
+    @JsonView(Views.PostView.class)
+    public List<PostReportDTO> getReport() {return reports;}
     @JsonView(Views.PostView.class)
     public List<CommentDTO> getComments() {return comments;}
 

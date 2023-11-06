@@ -10,21 +10,15 @@ import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
-import com.itextpdf.kernel.pdf.colorspace.PdfColorSpace;
-import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.layout.Canvas;
 import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.AreaBreak;
 import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
-import com.itextpdf.layout.properties.AreaBreakType;
-import com.itextpdf.layout.renderer.ImageRenderer;
 import com.social.app.repository.PostRepository;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfConverter;
 import fr.opensagres.poi.xwpf.converter.pdf.PdfOptions;
 import lombok.Getter;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -39,7 +33,6 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -55,14 +48,13 @@ import java.io.FileOutputStream;
 
 import static com.itextpdf.layout.properties.TextAlignment.CENTER;
 import static com.itextpdf.layout.properties.VerticalAlignment.TOP;
-import static java.awt.Color.BLACK;
-import static java.awt.Color.CYAN;
 import static java.lang.Math.PI;
 
 @Service
 public class ImageStorageService implements IStorageService{
     @Getter
-    private final Path storageFolder = Paths.get("uploads");
+    private final Path storageFolder = Paths.get("app", "src", "main", "resources", "uploads");
+
     //constructor
 
     @Autowired

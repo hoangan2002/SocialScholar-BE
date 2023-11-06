@@ -29,6 +29,7 @@ public class Document {
     private int cost;
     private boolean isApproved;
     private Timestamp time;
+    private String message;
 
     @JsonBackReference(value = "document_groups")
     @ManyToOne(fetch = FetchType.EAGER)

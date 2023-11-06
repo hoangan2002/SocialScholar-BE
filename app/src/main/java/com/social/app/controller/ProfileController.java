@@ -3,6 +3,7 @@ package com.social.app.controller;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.User;
 import com.social.app.service.ImageStorageService;
+import com.social.app.service.UserSalerReportServices;
 import com.social.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -29,6 +30,8 @@ public class ProfileController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    UserSalerReportServices userSalerReportServices;
 
     @Autowired
     private UserService service;
@@ -84,6 +87,21 @@ public class ProfileController {
                     return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",result.getPhone()));
                 }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "OK",null));
+    }
+
+    @PutMapping("/bannedOrNot")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ResponseObject> bannedUser(@RequestParam("userId") int userId){
+        User theUser = service.findById(userId);
+        if(theUser!=null)
+            {
+                boolean state = theUser.isLocked();
+                System.out.println("locked"+state);
+               theUser.setLocked(!state);
+               service.save(theUser);
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Oke", "OK",null));
+            }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject("Edit Fail", "Fail",null));
     }
 
     @PutMapping("/edit-password")
@@ -181,6 +199,14 @@ public class ProfileController {
         System.out.println("data la"+authentication.getName());
         User theUser = service.findUserByUsername(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
+    }
+
+    @GetMapping("/get-sale-report")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getSaleReport(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = service.findUserByUsername(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",userSalerReportServices.saleReport(theUser.getUserId())));
     }
 
 }
