@@ -1,14 +1,13 @@
 package com.social.app.service;
 
 import com.social.app.dto.PostDTO;
+import com.social.app.dto.PostSaveDTO;
 import com.social.app.dto.ReportedPostDTO;
 import com.social.app.model.Post;
 import com.social.app.model.PostLike;
+import com.social.app.model.PostSave;
 import com.social.app.model.User;
-import com.social.app.repository.PostLikeRepository;
-import com.social.app.repository.PostReportRepository;
-import com.social.app.repository.PostRepository;
-import com.social.app.repository.UserRepository;
+import com.social.app.repository.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,6 +42,9 @@ public class PostServices {
 
     @Autowired
     PostReportRepository postReportRepository;
+
+    @Autowired
+    PostSaveRepository postSaveRepository;
 
     @Autowired
     ModelMapper modelMapper;
@@ -209,5 +211,33 @@ public class PostServices {
     }
     public ArrayList<Post> fullTextSearch(String keyword){
         return postRepository.fullTextSearch(keyword);
+    }
+
+    public PostSaveDTO savePost(String userName, long postId){
+        User user = userRepository.findUserByUserName(userName);
+        Post post = postRepository.findByPostId(postId);
+        // Get current time
+        Date date = new Date();
+        Timestamp datetime = new Timestamp(date.getTime());
+        // Initialize post save
+        PostSave postSave = new PostSave();
+        postSave.setUser(user);
+        postSave.setPost(post);
+        postSave.setTime(datetime);
+        postSave = postSaveRepository.save(postSave);
+        return modelMapper.map(postSave, PostSaveDTO.class);
+    }
+
+    public boolean deleteIfSavedBefore(String userName, long postId){
+        Post post = postRepository.findByPostId(postId);
+        List<PostSave> postSaves = postSaveRepository.findByPost(post);
+        for (PostSave postSave: postSaves) {
+            if(postSave.getUser().getUserName().equals(userName))
+            {
+                postSaveRepository.delete(postSave);
+                return true;
+            }
+        }
+        return false;
     }
 }

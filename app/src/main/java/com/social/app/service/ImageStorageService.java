@@ -292,6 +292,15 @@ public class ImageStorageService implements IStorageService{
         return pdfName;
     }
 
+    public int getPages(String path) throws IOException {
+        if(isDocx(path)){
+            path = DocxToPDF(path);
+        }
+        PdfReader reader = new PdfReader(getUploadsPath()+path);
+        PdfDocument srcDocument = new PdfDocument(reader);
+        return srcDocument.getNumberOfPages();
+    }
+
     public ByteArrayInputStream PreviewDocument(String path) throws IOException {
 
         if(isDocx(path)){
@@ -311,13 +320,9 @@ public class ImageStorageService implements IStorageService{
         IPdfPageExtraCopier copier = new PdfPageFormCopier();
         if (pages>5){
             srcDocument.copyPagesTo(1,5,pdfDocument,copier);
-
         }
         else
             srcDocument.copyPagesTo(1,pages,pdfDocument,copier);
-
-
-
         // Tao chu watermark
         PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
         Text text = new Text("Schoolar School");
@@ -339,23 +344,27 @@ public class ImageStorageService implements IStorageService{
             document.showTextAligned(paragraph, x - xOffset, y + verticalOffset,
                     i, CENTER, TOP, rotationInRadians);
         }
+        if (pages<=5){
 
-        // Add img
-        ImageData imageData = ImageDataFactory.create(getUploadsPath()+"Logo.jpg");
-        Image image = new Image(imageData);
-        image.setFixedPosition(7,0);
-        image.setOpacity(0.9f);
+            // Add img
+            ImageData imageData = ImageDataFactory.create(getUploadsPath()+"Logo.jpg");
+            Image image = new Image(imageData);
+            image.setFixedPosition(7,0);
+            image.setOpacity(0.9f);
 //        image.setWidth(pdfDocument.getDefaultPageSize().getWidth());
 //        image.setHeight(pdfDocument.getDefaultPageSize().getHeight());
-        image.scaleAbsolute(pdfDocument.getDefaultPageSize().getWidth(),pdfDocument.getDefaultPageSize().getHeight());
-        for(int i=2; i<= pdfDocument.getNumberOfPages();i++){
-            PdfPage page = document.getPdfDocument().getPage(i);
-            PdfCanvas aboveCanvas = new PdfCanvas(page.newContentStreamAfter(),
-                    page.getResources(), pdfDocument);
-            Rectangle area = page.getPageSize();
-            new Canvas(aboveCanvas, area)
-                    .add(image);
+            image.scaleAbsolute(pdfDocument.getDefaultPageSize().getWidth(),pdfDocument.getDefaultPageSize().getHeight());
+            for(int i=2; i<= pdfDocument.getNumberOfPages();i++){
+                PdfPage page = document.getPdfDocument().getPage(i);
+                PdfCanvas aboveCanvas = new PdfCanvas(page.newContentStreamAfter(),
+                        page.getResources(), pdfDocument);
+                Rectangle area = page.getPageSize();
+                new Canvas(aboveCanvas, area)
+                        .add(image);
+            }
         }
+
+
         document.close();
         return new ByteArrayInputStream(out.toByteArray());
     }

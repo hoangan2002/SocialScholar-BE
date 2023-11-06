@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+
 @RestController
 @RequestMapping("/exchange-request")
 public class ExchangeRequestController {
@@ -22,6 +24,14 @@ public class ExchangeRequestController {
 
     @Autowired
     ExchangeRequestServices exchangeRequestServices;
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+    @GetMapping("/status-request")
+    public ArrayList<ExchangeRequest> getListStatus() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        int userid = userService.findUserByUsername(authentication.getName()).getUserId();
+        return exchangeRequestServices.retriveExchangeRequestFromDBByUserId(userid);
+    }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/make-request")

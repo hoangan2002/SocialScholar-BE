@@ -18,13 +18,13 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
     ArrayList<Document> findByAuthorAndIsApprovedIsFalse(User user);
     ArrayList<Document> findByGroupAndIsApprovedIsTrue(Groups groups);
 
+    ArrayList<Document> findAllByAuthor(User author);
      Document findByDocumentId(long documentId);
      void deleteById(long id);
 
     public void deleteByAuthor(User author);
 
-
-    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1)", nativeQuery = true)
+    @Query(value = "SELECT * FROM document WHERE MATCH (documentName) AGAINST (?1) > 0 AND isApproved = 1 ORDER BY MATCH (documentName) AGAINST (?1) DESC", nativeQuery = true)
     ArrayList<Document> fullTextSearch(String keyword);
-
+//  AGAINST (?1 WITH QUERY EXPANSION)
 }

@@ -44,7 +44,7 @@ public class TokenPaymentController {
     }
 
     @GetMapping("/get-payment-history/{userid}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
+//    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     public ResponseEntity<ResponseObject> getUserPaymentHistory(@PathVariable int userid){
         ArrayList<TokenPaymentHistory> result = tokenPaymentHistoryServices.userPaymentHistory(userid);
         if(result.size()==0) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(

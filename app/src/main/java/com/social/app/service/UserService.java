@@ -304,31 +304,7 @@ public class UserService implements UserDetailsService {
     public void deleteUser(String username){
         User user = findUserByUsername(username);
         if (user==null) throw new RuntimeException("Not found user");
-        // 1. delete in join table
-        joinRepository.deleteByUser(user);
-        // 2. delete in bill table
-        billRepository.deleteByUser(user);
-        // 3. delete in postLike table
-        postLikeRepository.deleteByUser(user);
-        // 4. delete in postReport table
-        postReportRepository.deleteByUser(user);
-        // 5. delete in post table
-        postRepository.deleteByUser(user);
-        // 6. delete in commentLike table
-        commentLikeRepository.deleteByUser(user);
-        // 7. delete in commentReport table
-        commentReportRepository.deleteByUser(user);
-        // 8. delete in comment table
-        commentRepository.deleteByUser(user);
-        // 9. delete in rating table
-        ratingRepository.deleteByUser(user);
-        // 10. delete in exchangeRequest table
-        exchangeRequestRepository.deleteByUser(user);
-        // 11. delete in tokenPayment table
-        tokenPaymentRepository.deleteByUser(user);
-        // 12. delete in document table
-        documentRepository.deleteByAuthor(user);
-        // 13. delete hostId in groups
+        // delete hostId in groups
         ArrayList<Groups> groups = groupRepository.findByHosts(user);
         for (Groups group: groups) {
             group.setHosts(null);

@@ -39,4 +39,13 @@ public class ExchangeRequestServices {
         else return null;
     }
 
+    public ArrayList<ExchangeRequest> retriveExchangeRequestFromDBByUserId(int userId){
+        ArrayList<ExchangeRequest> result = exchangeRequestRepository.findAll();
+        ArrayList<ExchangeRequest> fillter = new ArrayList<>();
+        for (ExchangeRequest ex: result) {
+            if(ex.getUser().getUserId() == userId ) fillter.add(ex);
+        }
+        return  fillter;
+    }
+
 }

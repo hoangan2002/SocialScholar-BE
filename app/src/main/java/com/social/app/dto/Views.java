@@ -18,4 +18,6 @@ public class Views {
     public static class RatingView{}
     public static class ReportedPostView{}
     public static class ReportedCommentView{}
+    public static class PostSaveView{}
+    public static class BillView {}
 }

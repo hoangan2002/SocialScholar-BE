@@ -3,6 +3,7 @@ package com.social.app.controller;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.User;
 import com.social.app.service.ImageStorageService;
+import com.social.app.service.UserSalerReportServices;
 import com.social.app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -29,6 +30,8 @@ public class ProfileController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    UserSalerReportServices userSalerReportServices;
 
     @Autowired
     private UserService service;
@@ -196,6 +199,14 @@ public class ProfileController {
         System.out.println("data la"+authentication.getName());
         User theUser = service.findUserByUsername(authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",theUser.getCoin()));
+    }
+
+    @GetMapping("/get-sale-report")
+    @PreAuthorize("isAuthenticated() and hasAuthority('ROLE_USER')")
+    public ResponseEntity<ResponseObject> getSaleReport(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User theUser = service.findUserByUsername(authentication.getName());
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseObject( "Successful", "OK",userSalerReportServices.saleReport(theUser.getUserId())));
     }
 
 }

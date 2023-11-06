@@ -11,6 +11,8 @@ import java.util.Date;
 @Getter
 @Setter
 @Table(name = "Bill")
+@AllArgsConstructor
+@NoArgsConstructor
 public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
