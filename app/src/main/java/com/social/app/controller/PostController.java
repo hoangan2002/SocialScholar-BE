@@ -575,4 +575,15 @@ public class PostController {
         // return list saved posts
         return postServices.getSavedPosts(userName);
     }
+
+    @GetMapping("/save/getAllAsId")
+    public List<Long> getAllSavedPostsAsId(){
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return null;
+
+        // return list saved posts
+        return postServices.getSavedPostsAsId(userName);
+    }
 }

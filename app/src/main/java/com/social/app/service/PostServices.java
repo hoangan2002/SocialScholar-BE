@@ -251,4 +251,15 @@ public class PostServices {
         }
         return result;
     }
+
+    public List<Long> getSavedPostsAsId(String userName){
+        User user = userRepository.findUserByUserName(userName);
+        List<PostSave> postSaves = postSaveRepository.findByUser(user);
+
+        List<Long> result = null;
+        for (PostSave postSave: postSaves) {
+            result.add(postSave.getPost().getPostId());
+        }
+        return result;
+    }
 }
