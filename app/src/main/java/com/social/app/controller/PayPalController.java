@@ -36,7 +36,6 @@ public class PayPalController {
         String auth = client_id + ":" + app_secret;
         return Base64.getEncoder().encodeToString(auth.getBytes());
     }
-
     public String generateAccessToken() {
         String auth = this.getAuth(
                 "AfjeUBEZZPAGm0u1Wlz6t6V_W4Xkq0KpzZc4UeyOqfh3aVCkYCUlOwGnxhlkeHqhHg3q6IrjP_qMl2yC",
@@ -68,7 +67,6 @@ public class PayPalController {
             return "Unavailable to get ACCESS TOKEN, STATUS CODE " + response.getStatusCode();
         }
     }
-
     @RequestMapping(value="/api/orders/{orderId}/capture", method = RequestMethod.POST)
     @CrossOrigin
     public Object capturePayment(@PathVariable("orderId") String orderId) {
@@ -89,7 +87,6 @@ public class PayPalController {
                 entity,
                 Object.class
         );
-
         if (response.getStatusCode() == HttpStatus.CREATED) {
             LOGGER.log(Level.INFO, "ORDER CREATED");
             TokenPaymentHistory tokenPaymentHistory = tokenPaymentHistoryServices.findPaymentId(orderId);
