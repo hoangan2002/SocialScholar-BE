@@ -30,6 +30,7 @@ public class DocumentDTO {
     private String message;
     private List<RatingDTO> ratings;
     private List<Bill> bills;
+
     @JsonView(Views.DocumentView.class)
     public long getDocumentId(){ return documentId; }
     @JsonView(Views.DocumentView.class)
