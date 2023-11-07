@@ -30,7 +30,6 @@ public class DocumentDTO {
     private String message;
     private List<RatingDTO> ratings;
     private List<Bill> bills;
-    private String message;
     @JsonView(Views.DocumentView.class)
     public long getDocumentId(){ return documentId; }
     @JsonView(Views.DocumentView.class)
@@ -41,8 +40,6 @@ public class DocumentDTO {
     public int getCost(){ return cost; }
     @JsonView(Views.DocumentView.class)
     public Timestamp getTime(){ return time; }
-    @JsonView(Views.DocumentView.class)
-    public String getMessage(){ return message; }
     @JsonView(Views.DocumentView.class)
     public String getGroup(){ return group.getGroupName(); }
     @JsonView(Views.DocumentView.class)
