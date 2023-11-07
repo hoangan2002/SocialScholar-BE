@@ -153,4 +153,12 @@ public class DocumentService {
     public Document findFirstbyIsApprovelTrue(){
         return  documentRepository.findFirstOrderByIsApprovedIsTrue();
     }
+    public ArrayList<Document> HostAceptDoc(Groups groups){
+        ArrayList<Document> docs = new ArrayList<>();
+        for(Document d : documentRepository.findByGroupAndIsApprovedIsTrue(groups)){
+            if(d.getMessage()==null || d.getMessage().equals(""))
+                docs.add(d);
+        }
+        return docs;
+    }
 }
