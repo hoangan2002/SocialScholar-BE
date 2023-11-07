@@ -486,6 +486,7 @@ public class PostController {
         );
     }
 
+
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPostByUserComment")
     public ResponseEntity<ResponseObject> getPostByComment(){
