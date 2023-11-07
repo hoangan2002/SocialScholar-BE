@@ -42,6 +42,7 @@ public class UserSalerReportServices {
                 revenue =revenue + b.getDocument().getCost();
             }
             userSalerReport.setDocumentName(d.getDocumentName());
+            userSalerReport.setTime(d.getTime());
             userSalerReport.setDocumentId(d.getDocumentId());
             userSalerReport.setRevenue(revenue);
             revenue =0;

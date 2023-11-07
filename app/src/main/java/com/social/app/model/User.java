@@ -78,7 +78,7 @@ public class User {
     List<Post> posts;
 
     @OneToMany(mappedBy = "hosts")
-    @JsonBackReference(value = "user-group")
+    @JsonManagedReference(value = "group_user")
     List<Groups> groups;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)

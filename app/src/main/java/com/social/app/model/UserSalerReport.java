@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 @AllArgsConstructor
@@ -18,6 +20,7 @@ public class UserSalerReport {
     private long documentId;
     private ArrayList<BillDTO> billReport;
     private double revenue;
+    private Timestamp time;
 
 
 }
