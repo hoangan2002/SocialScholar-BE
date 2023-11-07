@@ -21,6 +21,7 @@ public class BillDTO {
     private Document document;
     private User user;
     private double price;
+    
 
     @JsonView(Views.BillView.class)
     public long getBillId() {

@@ -99,6 +99,15 @@ public class AuthenticationController {
     }
 
 
+    @GetMapping("/refreshToken")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public String getNewToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = service.findUserByUsername(authentication.getName());
+        return jwtService.generateToken(Optional.of(user));
+    }
+
+
 
     @PostMapping("/sign-in")
     public ResponseEntity<ResponseObject> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
