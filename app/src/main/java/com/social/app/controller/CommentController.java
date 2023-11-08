@@ -39,20 +39,26 @@ public class CommentController {
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     ResponseEntity<ResponseObject> createNewComment(@RequestBody CommentDTO commentDTO,
                                                  @PathVariable long postID){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = userService.findUserByUsername(authentication.getName()).getUserName();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
         try {
 
             // Get post from postId
             Post post = postServices.loadPostById(postID);
             // Check if user is not in group, user can not create comment
 
-            if(!userService.isGroupMember(username, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
+            if(!userService.isGroupMember(userName, post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
 
             if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // create comment
-            CommentDTO newComment = this.commentService.createComment(commentDTO, postID, username);
+            CommentDTO newComment = this.commentService.createComment(commentDTO, postID, userName);
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     new ResponseObject("Successfully", "Create comment successfully", newComment));
         }
@@ -66,9 +72,15 @@ public class CommentController {
     @PostMapping("/delete/{commentID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> deleteComment(@PathVariable long commentID){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         try {
             // Get comment from commentId
@@ -95,9 +107,15 @@ public class CommentController {
     @PutMapping("/edit/{commentID}")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     ResponseEntity<ResponseObject> editComment(@PathVariable long commentID, @RequestPart Comment newComment){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         try {
             // Get comment from commentId
@@ -119,8 +137,13 @@ public class CommentController {
     public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId){
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findUserByUsername(authentication.getName());
-        int userId = user.getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
@@ -158,8 +181,13 @@ public class CommentController {
     public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId){
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userService.findUserByUsername(authentication.getName());
-        int userId = user.getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
@@ -197,11 +225,16 @@ public class CommentController {
 
     @PostMapping("/reply-comments/{commentParentId}")
     ResponseEntity<ResponseObject> replyComment(@RequestPart Comment commentReply,
-                                                 @RequestParam("userid") int userid,
                                                  @PathVariable long commentParentId){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         try {
             // Get commentParent from commentParentId
@@ -210,7 +243,7 @@ public class CommentController {
             Post post = commentService.getPostByCommentId(commentParentId);
             if(!userService.isGroupMember( post.getGroup().getGroupId())) throw new RuntimeException("Must be group member");
             // set user for comment
-            commentReply.setUser(userService.loadUserById(userid));
+            commentReply.setUser(userService.loadUserById(userId));
             // create comment
             CommentDTO newComment = this.commentService.createCommentReply(commentReply, commentParentId);
             return ResponseEntity.status(HttpStatus.OK).body(
@@ -226,9 +259,15 @@ public class CommentController {
     @PostMapping("/report/{commentId}")
     public  ResponseEntity<ResponseObject> reportPost(@PathVariable long commentId, @RequestParam("typeid") int typeId,
                                                       @RequestParam("description") String description){
-        // Get userId by token
+        // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
         // check if comment is not found, return
         if (commentService.getCommentByID(commentId)== null)
@@ -247,9 +286,6 @@ public class CommentController {
         // set description to report
         CommentReport commentReport = new CommentReport();
         commentReport.setDescription(description);
-
-        // Create user
-        User user = userService.loadUserById(userId);
 
         // create postreport
         return ResponseEntity.status(HttpStatus.OK).body(

@@ -46,6 +46,10 @@ public class CommentService {
         return modelMapper.map(this.commentRepository.save(comment), CommentDTO.class) ;
     }
     public void deleteComment(long commentID){
+        ArrayList<CommentDTO> commentChildren = getAllCommentChildren(commentID);
+        for (CommentDTO commentDTO : commentChildren){
+            deleteComment(commentDTO.getCommentId());
+        }
         Comment com = this.commentRepository.findById(commentID).orElseThrow(()->new RuntimeException("Post not exits !"));
         this.commentRepository.delete(com);
     }
