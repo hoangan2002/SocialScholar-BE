@@ -81,7 +81,17 @@ public class DocumentController {
                 new ResponseObject("Create Error", "Failed", ""));
     }
     // -------------------------------------------- DOCUMENT LIST ------------------------------------------------------
+    //
     //                                                                                                                --
+    // Doc cho host duyet
+    @GetMapping("/host/{groupId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_HOST')")
+    public ArrayList<DocumentDTO> HostUnAceptDocument(@PathVariable("groupId") long id){
+        Groups groups = groupServices.loadGroupById(id);
+        if (groups==null) throw new RuntimeException("Group is not exist");
+        ArrayList<Document> result = documentService.HostAceptDoc(groups);
+        return documentService.ListDocumentDTO(result);
+    }
     // Tat ca doc đã duyệt
     @GetMapping("/documents")
 //    @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
@@ -247,6 +257,34 @@ public class DocumentController {
 
     }
 
+    // host acp
+    @PutMapping("/accept/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_HOST')") 
+    public  ResponseEntity<ResponseObject> AcceptDocument(@PathVariable("docId") long docId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User customer = userService.findUserByUsername(authentication.getName());
+        try{
+            Document document = documentService.findDocumentbyId(docId);
+            if (document==null)
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ResponseObject("The document is not exist", "failed", ""));
+            if (document.isApproved())
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("The document has already been approved", "failed", ""));
+            long groupId = document.getGroup().getGroupId();
+            if(!groupServices.isGroupHost(groupId,customer.getUserName()))
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new ResponseObject("Not Host", "failed", ""));
+            document.setMessage("Accept");
+            documentService.update(document);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("ok", "Update successfully", "Accepted"));
+        } catch (RuntimeException exception){
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                    new ResponseObject(exception.getMessage(), "failed", ""));
+        }
+
+    }
     // Admin duyet doc oke
     @PutMapping("/approve/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
@@ -272,7 +310,7 @@ public class DocumentController {
     }
 
     @PutMapping("/rejected/{docId}")
-    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_HOST')")
     public ResponseEntity<ResponseObject> rejectDocument(@PathVariable Long docId,@RequestParam("message") String message){
         Document doc = documentService.findDocumentbyId(docId);
         if(doc==null){
@@ -417,6 +455,30 @@ public class DocumentController {
     @GetMapping("/admin/full/{docId}")
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> getFullDocumentAdmin(@PathVariable("docId") long docId) throws IOException {
+        Document documentDB = documentService.findDocumentbyId(docId);
+        if (documentDB==null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ResponseObject("The document is not exist", "failed", ""));
+        String filename = documentDB.getUrl();
+
+        ByteArrayInputStream bis = storageService.FullDocument(filename);
+
+        if (bis == null) {
+            return new ResponseEntity<>("File not found", HttpStatus.NOT_FOUND);
+        }
+
+        String contentType = "application/pdf";
+        String headerValue = "inline; filename=migration.pdf";
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body( new InputStreamResource(bis));
+    }
+
+    @GetMapping("/host/full/{docId}")
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_HOST')")
+    public ResponseEntity<?> getFullDocumentHost(@PathVariable("docId") long docId) throws IOException {
         Document documentDB = documentService.findDocumentbyId(docId);
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(

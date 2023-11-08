@@ -12,6 +12,8 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
     ArrayList<Post> findAll();
+
+    ArrayList<Post> findAllByUserUserId(int userId);
     Post save(Post post);
     void deleteById(long id);
     Post findByPostId(long postId);

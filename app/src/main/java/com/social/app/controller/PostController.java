@@ -70,6 +70,7 @@ public class PostController {
                     post.setGroup(groupServices.loadGroupById(body.getGroupId()));
                     post.setTime(body.getTime());
                     post.setContent(body.getContent());
+                    userService.plusPoint(userid,20);
 
 //                    if (file != null && !file[0].isEmpty()) {
 //                        String imagePath="";
@@ -204,6 +205,32 @@ public class PostController {
         );
     }
 
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PostMapping("/deletePost/{postId}")
+    public  ResponseEntity<ResponseObject> adminDeletePost(@PathVariable("postId")long postId){
+        List<PostReport> posts = postServices.loadPostById(postId).getReports();
+        for (PostReport report: posts
+             ) {
+            userService.plusPoint(report.getUser().getUserId(),20);
+        }
+        postServices.deletePostDB(postId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Delete Succesfully","")
+        );
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PostMapping("/deleteReport/{postId}")
+    public  ResponseEntity<ResponseObject> deleteReport(@PathVariable("postId")long postId){
+        Post post = postServices.loadPostById(postId);
+        post.setReports(null);
+        postServices.editPostDB(post);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Delete Succesfully","")
+        );
+    }
+
+
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
         // Get user by token
@@ -336,6 +363,15 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Report post successfully",reportService.createPostReport(post, user, postReport, typeId))
         );
+    }
+
+    @GetMapping("/{userId}")
+    public ArrayList<com.social.app.dto.PostDTO> getAllPostByUserId(@PathVariable int userId){
+        // Get user
+
+        var list = postServices.getAllPostByUserId(userId);
+        // Get post by user comment
+        return postServices.ArrayListPostDTO(list);
     }
 
     @GetMapping("/all-reports/{postId}")
@@ -496,6 +532,7 @@ public class PostController {
                 new ResponseObject("Success", "Found", likeService.getPostByUserLike(user.getUserId()))
         );
     }
+
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @GetMapping("/getPostByUserComment")

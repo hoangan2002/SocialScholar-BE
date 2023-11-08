@@ -93,6 +93,11 @@ public class PostServices {
         return result;
     }
 
+    public ArrayList<Post> getAllPostByUserId(int userId){
+        ArrayList<Post> result = postRepository.findAllByUserUserId(userId);
+        return result;
+    }
+
     public Post editPostDB(Post posts){
         return postRepository.findById(posts.getPostId())
                 .map(post -> {

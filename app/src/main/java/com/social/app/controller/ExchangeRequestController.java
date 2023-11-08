@@ -1,5 +1,6 @@
 package com.social.app.controller;
 
+import com.social.app.dto.ExchangeDTO;
 import com.social.app.entity.ResponseObject;
 import com.social.app.model.ExchangeRequest;
 import com.social.app.model.User;
@@ -35,7 +36,7 @@ public class ExchangeRequestController {
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_USER')")
     @PostMapping("/make-request")
-    public ResponseEntity<ResponseObject> makeRequest(@RequestPart ExchangeRequest requests){
+    public ResponseEntity<ResponseObject> makeRequest(@RequestBody ExchangeDTO requests){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         int userid = userService.findUserByUsername(authentication.getName()).getUserId();
         if(requests.getAmountCoins() > userService.loadUserById(userid).getCoin()){
@@ -53,10 +54,10 @@ public class ExchangeRequestController {
             user.setCoin(user.getCoin()-requests.getAmountCoins());
             userService.save(user);
 
-            exchangeRequest.setStatus((byte)0);
+            exchangeRequest.setStatus((byte)1);
             exchangeRequest.setAmountCoins(requests.getAmountCoins());
             exchangeRequest.setTotalMoney(requests.getTotalMoney());
-            exchangeRequestServices.submitRequest(exchangeRequest);
+            exchangeRequestServices.submitRequestNon(exchangeRequest);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Submit success",exchangeRequest)
             );
