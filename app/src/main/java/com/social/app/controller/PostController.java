@@ -327,6 +327,15 @@ public class PostController {
         );
     }
 
+    @GetMapping("/{userId}")
+    public ArrayList<com.social.app.dto.PostDTO> getAllPostByUserId(@PathVariable int userId){
+        // Get user
+
+        var list = postServices.getAllPostByUserId(userId);
+        // Get post by user comment
+        return postServices.ArrayListPostDTO(list);
+    }
+
     @GetMapping("/all-reports/{postId}")
     public ArrayList<PostReport> getAllReportsByPostId(@PathVariable long postId){
         return reportService.getAllPostReportsByPostId(postId);
