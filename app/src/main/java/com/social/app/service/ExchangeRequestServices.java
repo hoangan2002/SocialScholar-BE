@@ -27,6 +27,16 @@ public class ExchangeRequestServices {
         return exchangeRequestRepository.save(exchangeRequest);
     }
 
+    public ExchangeRequest submitRequestNon(ExchangeRequest exchangeRequest){
+        Date date = new Date();
+        long time = date.getTime();
+        Timestamp datetime = new Timestamp(time);
+        exchangeRequest.setTime(datetime);
+        exchangeRequest.setTotalMoney(exchangeRequest.getAmountCoins()/30);
+        exchangeRequest.setStatus((byte)0);
+        return exchangeRequestRepository.save(exchangeRequest);
+    }
+
     public ArrayList<ExchangeRequest> retriveExchangeRequestFromDB(){
         ArrayList<ExchangeRequest> result = exchangeRequestRepository.findAll();
         return result;  

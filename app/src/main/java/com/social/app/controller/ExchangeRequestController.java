@@ -54,10 +54,10 @@ public class ExchangeRequestController {
             user.setCoin(user.getCoin()-requests.getAmountCoins());
             userService.save(user);
 
-            exchangeRequest.setStatus((byte) 0);
+            exchangeRequest.setStatus((byte)1);
             exchangeRequest.setAmountCoins(requests.getAmountCoins());
             exchangeRequest.setTotalMoney(requests.getTotalMoney());
-            exchangeRequestServices.submitRequest(exchangeRequest);
+            exchangeRequestServices.submitRequestNon(exchangeRequest);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Submit success",exchangeRequest)
             );
