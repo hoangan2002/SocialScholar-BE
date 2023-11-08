@@ -204,6 +204,25 @@ public class PostController {
         );
     }
 
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PostMapping("/deletepost/{postId}")
+    public  ResponseEntity<ResponseObject> adminDeletePost(@PathVariable("postId")long postId){
+        postServices.deletePostDB(postId);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Delete Succesfully","")
+        );
+    }
+
+    @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
+    @PostMapping("/deleteReport/{reportID}")
+    public  ResponseEntity<ResponseObject> deleteReport(@PathVariable("reportID")long reportID){
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK","Delete Succesfully","")
+        );
+    }
+
+
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
         // Get user by token
