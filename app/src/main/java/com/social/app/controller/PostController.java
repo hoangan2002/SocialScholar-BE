@@ -233,6 +233,7 @@ public class PostController {
 
     @PostMapping("/dislike/{postId}")
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
+        boolean isAddedPoint = true;
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
@@ -258,6 +259,7 @@ public class PostController {
 
         // check if user already dislike, delete postlike and return
         if(likeService.postIsDisliked(postId,userId)){
+            isAddedPoint =false;
             likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Like post successfully",""));
@@ -265,8 +267,13 @@ public class PostController {
 
         // check if user already like, delete postlike
         if(likeService.postIsLiked(postId,userId)){
+            isAddedPoint =false;
             likeService.deletePostLike(postId,userId);
         }
+
+        // if user get enough condition, add point to user
+        if(isAddedPoint)
+            userService.plusPoint(userId,5);
 
         // else create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -276,6 +283,7 @@ public class PostController {
 
     @PostMapping("/like/{postId}")
     public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId){
+        boolean isAddedPoint = true;
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
@@ -300,6 +308,7 @@ public class PostController {
 
         // check if user already like, delete postlike and return
         if(likeService.postIsLiked(postId,userId)){
+            isAddedPoint = false;
             likeService.deletePostLike(postId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Like post successfully",""));
@@ -307,8 +316,13 @@ public class PostController {
 
         // check if user already dislike, delete postlike
         if(likeService.postIsDisliked(postId,userId)){
+            isAddedPoint = false;
             likeService.deletePostLike(postId,userId);
         }
+
+        // if user get enough condition, add point to user
+        if(isAddedPoint)
+            userService.plusPoint(userId,5);
 
         // create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
