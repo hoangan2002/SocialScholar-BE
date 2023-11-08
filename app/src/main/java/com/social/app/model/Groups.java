@@ -49,7 +49,7 @@ public class Groups {
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="host_Id")
-    @JsonBackReference(value = "group_user")
+    @JsonManagedReference(value = "group_user")
     private User hosts;
 
     @ManyToOne

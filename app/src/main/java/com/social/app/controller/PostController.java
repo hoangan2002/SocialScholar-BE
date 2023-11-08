@@ -235,8 +235,14 @@ public class PostController {
     public  ResponseEntity<ResponseObject> dislikePost(@PathVariable("postId")long postId){
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User current = userService.findUserByUsername(authentication.getName());
-        int userId = userService.findUserByUsername(authentication.getName()).getUserId();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
+
         // check if post is not found, return
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -264,7 +270,7 @@ public class PostController {
 
         // else create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, current, (byte)-1))
+                new ResponseObject("OK","Dislike post successfully",likeService.createPostLike(post, user, (byte)-1))
         );
     }
 
@@ -272,11 +278,14 @@ public class PostController {
     public  ResponseEntity<ResponseObject> likePost(@PathVariable("postId")long postId){
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User current = userService.findUserByUsername(authentication.getName());
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
+        // Create user
+        User user = userService.loadUserById(userId);
 
-        // check if post is not found, return
-        int userId = current != null ?current.getUserId():-1;
-        System.out.println(userId); 
         if (postServices.loadPostById(postId)==null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ResponseObject("Failed","Can't find post","")
@@ -303,7 +312,7 @@ public class PostController {
 
         // create postlike
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, current, (byte)1))
+                new ResponseObject("OK","Like post successfully",likeService.createPostLike(post, user, (byte)1))
         );
     }
 
@@ -326,13 +335,15 @@ public class PostController {
     }
 
     @PostMapping("/report/{postId}")
-    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long postId, @RequestParam("userid")int userId,
+    public  ResponseEntity<ResponseObject> reportPost(@PathVariable long postId,
                                                       @RequestParam("typeid") int typeId, @RequestParam("description") String description){
-        // check if post is not found, return
-        if (postServices.loadPostById(postId)==null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    new ResponseObject("Failed","Can't find post","")
-            );
+        // Get user by token
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
+        if(userName.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("Failed","Can't find user","")
+        );
+        int userId = userService.findUserByUsername(userName).getUserId();
 
         Post post = postServices.loadPostById(postId);
         // Check if user is not in group, user can not report post

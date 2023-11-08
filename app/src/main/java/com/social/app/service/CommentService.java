@@ -46,6 +46,10 @@ public class CommentService {
         return modelMapper.map(this.commentRepository.save(comment), CommentDTO.class) ;
     }
     public void deleteComment(long commentID){
+        ArrayList<CommentDTO> commentChildren = getAllCommentChildren(commentID);
+        for (CommentDTO commentDTO : commentChildren){
+            deleteComment(commentDTO.getCommentId());
+        }
         Comment com = this.commentRepository.findById(commentID).orElseThrow(()->new RuntimeException("Post not exits !"));
         this.commentRepository.delete(com);
     }
@@ -109,9 +113,10 @@ public class CommentService {
         // set info to comment
         commentReply.setPostId(commentParent.getPostId());
             // check if it's parent has grandparent, make it up level
-        if (commentRepository.findByCommentId(commentParent.getCommentParentId()).getCommentParentId() != 0)
-        commentReply.setCommentParentId(commentParent.getCommentParentId());
-
+        if (commentParent.getCommentParentId() !=0 &&
+        commentRepository.findByCommentId(commentParent.getCommentParentId()).getCommentParentId() != 0)
+                commentReply.setCommentParentId(commentParent.getCommentParentId());
+        else commentReply.setCommentParentId(commentParentId);
 
         // set current time to comment
         Date date = new Date();

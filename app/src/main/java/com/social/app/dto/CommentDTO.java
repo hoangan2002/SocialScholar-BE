@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.social.app.model.*;
 import com.social.app.repository.CommentRepository;
+import com.social.app.service.CommentService;
 import jakarta.persistence.*;
 import lombok.*;
 import org.modelmapper.ModelMapper;
@@ -59,6 +60,8 @@ public class CommentDTO {
     }
     @JsonView(Views.CommentView.class)
     public ArrayList<CommentDTO> getCommentChildren() {
+/*        CommentService commentService = new CommentService();
+        this.commentChildren = commentService.getAllCommentChildren(this.commentId);*/
         return this.commentChildren;
     }
     @JsonView(Views.CommentView.class)
