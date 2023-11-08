@@ -419,6 +419,8 @@ public class DocumentController {
         if (documentDB==null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ResponseObject("The document is not exist", "failed", ""));
+        // Add point to user
+        userService.plusPoint(userService.loadUserByUserName(username).getUserId(),100);
         // Rate document
         RatingDTO ratingDTO = documentService.rateDocument(docId, username, stars);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(

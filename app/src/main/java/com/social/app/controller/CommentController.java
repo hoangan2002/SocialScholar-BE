@@ -135,6 +135,8 @@ public class CommentController {
 
     @PostMapping("/dislike/{commentId}")
     public  ResponseEntity<ResponseObject> dislikeComment(@PathVariable long commentId){
+        boolean isAddedPoint = true;
+
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
@@ -161,6 +163,7 @@ public class CommentController {
 
         // check if user already dislike, delete commentlike and return
         if(likeService.commentIsDisliked(commentId,userId)){
+            isAddedPoint = false;
             likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Dislike comment successfully",""));
@@ -168,8 +171,13 @@ public class CommentController {
 
         // check if user already like, delete commentlike
         if(likeService.commentIsLiked(commentId,userId)){
+            isAddedPoint = false;
             likeService.deleteCommentLike(commentId,userId);
         }
+
+        // if user get enough condition, add point to user
+        if(isAddedPoint)
+            userService.plusPoint(userId,5);
 
         // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -179,6 +187,7 @@ public class CommentController {
 
     @PostMapping("/like/{commentId}")
     public  ResponseEntity<ResponseObject> likePost(@PathVariable long commentId){
+        boolean isAddedPoint = true;
         // Get user by token
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userName = authentication.getName();
@@ -202,6 +211,7 @@ public class CommentController {
 
         // check if user already like, delete commentlike and return
         if(likeService.commentIsLiked(commentId,userId)){
+            isAddedPoint = false;
             likeService.deleteCommentLike(commentId, userId);
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ResponseObject("OK","Like comment successfully",""));
@@ -209,8 +219,13 @@ public class CommentController {
 
         // check if user already dislike, delete commentlike
         if(likeService.commentIsDisliked(commentId,userId)){
+            isAddedPoint = false;
             likeService.deleteCommentLike(commentId,userId);
         }
+
+        // if user get enough condition, add point to user
+        if(isAddedPoint)
+            userService.plusPoint(userId,5);
 
         // else create commentlike
         return ResponseEntity.status(HttpStatus.OK).body(
