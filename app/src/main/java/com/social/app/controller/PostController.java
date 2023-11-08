@@ -70,6 +70,7 @@ public class PostController {
                     post.setGroup(groupServices.loadGroupById(body.getGroupId()));
                     post.setTime(body.getTime());
                     post.setContent(body.getContent());
+                    userService.plusPoint(userid,20);
 
 //                    if (file != null && !file[0].isEmpty()) {
 //                        String imagePath="";
@@ -205,8 +206,13 @@ public class PostController {
     }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
-    @PostMapping("/deletepost/{postId}")
+    @PostMapping("/deletePost/{postId}")
     public  ResponseEntity<ResponseObject> adminDeletePost(@PathVariable("postId")long postId){
+        List<PostReport> posts = postServices.loadPostById(postId).getReports();
+        for (PostReport report: posts
+             ) {
+            userService.plusPoint(report.getUser().getUserId(),20);
+        }
         postServices.deletePostDB(postId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Delete Succesfully","")
@@ -214,9 +220,11 @@ public class PostController {
     }
 
     @PreAuthorize("isAuthenticated() and hasRole('ROLE_ADMIN')")
-    @PostMapping("/deleteReport/{reportID}")
-    public  ResponseEntity<ResponseObject> deleteReport(@PathVariable("reportID")long reportID){
-
+    @PostMapping("/deleteReport/{postId}")
+    public  ResponseEntity<ResponseObject> deleteReport(@PathVariable("postId")long postId){
+        Post post = postServices.loadPostById(postId);
+        post.setReports(null);
+        postServices.editPostDB(post);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("OK","Delete Succesfully","")
         );
